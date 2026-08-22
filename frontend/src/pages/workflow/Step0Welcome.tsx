@@ -11,10 +11,17 @@ interface StageData {
   key: string
   num: string
   title: string
-  subtitle: string
+  subtitleHtml: {
+    prefix?: string
+    bold1: string
+    mid?: string
+    bold2: string
+    suffix?: string
+  }
   icon: string
   tags: string[]
   badge?: string
+  statusMsg: string
   detailedTitle: string
   detailedDesc: string
   techStack: string[]
@@ -35,9 +42,14 @@ export function Step0Welcome({ onEnterPravah }: Step0WelcomeProps) {
       key: 'connect',
       num: '01',
       title: 'CONNECT',
-      subtitle: 'Unifies blood-bank inventory, demand & network data.',
+      subtitleHtml: {
+        bold1: 'Unifies',
+        mid: ' blood-bank ',
+        bold2: 'inventory, demand & network data.',
+      },
       icon: 'hub',
       tags: ['Inventory', 'Demand', 'Network'],
+      statusMsg: '● Synchronizing real-time blood-network intelligence across 4,390 hubs...',
       detailedTitle: '01 · Unified Data Ingestion & Spatial Network',
       detailedDesc:
         'PRAVAH continuously aggregates real-time inventory levels, component-level blood bags, patient demand histories, cold-chain temperatures, and regional transport graphs across 4,390 facilities into a unified clinical state.',
@@ -50,9 +62,15 @@ export function Step0Welcome({ onEnterPravah }: Step0WelcomeProps) {
       key: 'predict',
       num: '02',
       title: 'PREDICT',
-      subtitle: 'AI detects shortages, expiry & cold-chain risks.',
+      subtitleHtml: {
+        prefix: 'AI detects ',
+        bold1: 'shortages, expiry',
+        mid: ' & ',
+        bold2: 'cold-chain risks.',
+      },
       icon: 'psychology',
       tags: ['Shortage', 'Expiry', 'Cold Chain'],
+      statusMsg: '● Detecting emerging supply shortages, expiry risk & cold-chain thermal spikes...',
       detailedTitle: '02 · Gradient Boosted Inference & Thermal Anomaly Detection',
       detailedDesc:
         'LightGBM & HistGradientBoosting models forecast 24h/72h clinical demand, while unit-level ML classifies impending expiry risk and Isolation Forest detects thermal excursions before spoilage occurs.',
@@ -65,10 +83,16 @@ export function Step0Welcome({ onEnterPravah }: Step0WelcomeProps) {
       key: 'optimize',
       num: '03',
       title: 'OPTIMIZE',
-      subtitle: 'ML + LP find the best source, route & multi-stop plan.',
+      subtitleHtml: {
+        prefix: 'ML + LP find the ',
+        bold1: 'best source, route',
+        mid: ' & ',
+        bold2: 'multi-stop plan.',
+      },
       icon: 'alt_route',
       badge: 'ML + LP',
       tags: ['Source', 'Route', 'Multi-Stop'],
+      statusMsg: '● Computing mathematical route & multi-stop consolidation plan (HiGHS LP)...',
       detailedTitle: '03 · Mathematical Linear Programming & Multi-Stop Consolidation',
       detailedDesc:
         'HiGHS Linear Programming (LP) solver computes globally optimal surplus-to-deficit allocations minimizing transit time, carbon footprint, and cold-chain exposure with intelligent multi-stop consolidation.',
@@ -81,9 +105,14 @@ export function Step0Welcome({ onEnterPravah }: Step0WelcomeProps) {
       key: 'act',
       num: '04',
       title: 'ACT',
-      subtitle: 'Transfers blood or mobilizes nearby donors when needed.',
+      subtitleHtml: {
+        bold1: 'Transfers blood or mobilizes nearby donors',
+        mid: ' when ',
+        bold2: 'needed.',
+      },
       icon: 'verified',
       tags: ['Transfer', 'Donor Alert', 'Human Check'],
+      statusMsg: '● Preparing human-approved clinical intervention & localized Telegram alerts...',
       detailedTitle: '04 · Clinical Authorization, Telegram Mobilization & Audit Trail',
       detailedDesc:
         'Medical Directors review and authorize dispatches with 1-click execution, mobilize nearby voluntary donors via localized Telegram broadcasts, and log every decision into a permanent, verifiable audit trail.',
@@ -93,16 +122,19 @@ export function Step0Welcome({ onEnterPravah }: Step0WelcomeProps) {
     },
   ]
 
-  // Continuous Attention-Control Loop: 2.5s per stage (10s cycle)
+  // Continuous Attention-Control Loop: Stage-weighted timing
   useEffect(() => {
     if (isPaused || selectedStage !== null) return
 
-    const interval = setInterval(() => {
-      setActiveStage((prev) => (prev + 1) % STAGES.length)
-    }, 2500)
+    // OPTIMIZE stage gets 3000ms, others get 2500ms
+    const duration = activeStage === 2 ? 3000 : 2500
 
-    return () => clearInterval(interval)
-  }, [isPaused, selectedStage, STAGES.length])
+    const timer = setTimeout(() => {
+      setActiveStage((prev) => (prev + 1) % STAGES.length)
+    }, duration)
+
+    return () => clearTimeout(timer)
+  }, [activeStage, isPaused, selectedStage, STAGES.length])
 
   // Subtle Background Network Canvas
   useEffect(() => {
@@ -123,14 +155,14 @@ export function Step0Welcome({ onEnterPravah }: Step0WelcomeProps) {
     window.addEventListener('resize', handleResize)
 
     // Generate lightweight network nodes
-    const nodeCount = 32
+    const nodeCount = 28
     const nodes = Array.from({ length: nodeCount }, () => ({
       x: Math.random() * width,
       y: Math.random() * height,
-      vx: (Math.random() - 0.5) * 0.35,
-      vy: (Math.random() - 0.5) * 0.35,
+      vx: (Math.random() - 0.5) * 0.3,
+      vy: (Math.random() - 0.5) * 0.3,
       radius: Math.random() * 2 + 1.2,
-      baseAlpha: Math.random() * 0.25 + 0.1,
+      baseAlpha: Math.random() * 0.2 + 0.08,
     }))
 
     const render = () => {
@@ -143,8 +175,8 @@ export function Step0Welcome({ onEnterPravah }: Step0WelcomeProps) {
           const dy = nodes[i].y - nodes[j].y
           const dist = Math.sqrt(dx * dx + dy * dy)
 
-          if (dist < 160) {
-            const alpha = (1 - dist / 160) * 0.08
+          if (dist < 150) {
+            const alpha = (1 - dist / 150) * 0.06
             ctx.beginPath()
             ctx.moveTo(nodes[i].x, nodes[i].y)
             ctx.lineTo(nodes[j].x, nodes[j].y)
@@ -181,21 +213,21 @@ export function Step0Welcome({ onEnterPravah }: Step0WelcomeProps) {
   }, [])
 
   return (
-    <div className="h-screen w-screen overflow-hidden bg-[#FAF7F5] text-[#1F1B19] font-sans antialiased flex flex-col justify-between p-4 sm:p-6 lg:p-7 select-none relative">
+    <div className="h-screen w-screen overflow-hidden bg-[#FAF7F5] text-[#1F1B19] font-sans antialiased flex flex-col justify-between p-4 sm:p-5 lg:p-6 select-none relative">
       {/* Background Animated Network Canvas */}
       <canvas
         ref={canvasRef}
-        className="absolute inset-0 pointer-events-none z-0 opacity-70"
+        className="absolute inset-0 pointer-events-none z-0 opacity-60"
       />
 
       {/* Subtle Ambient Vignette & Warm Glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[350px] bg-gradient-to-r from-[#7A1C28]/4 via-[#9E2A38]/3 to-transparent rounded-full blur-3xl pointer-events-none z-0" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-gradient-to-r from-[#7A1C28]/4 via-[#9E2A38]/3 to-transparent rounded-full blur-3xl pointer-events-none z-0" />
 
       {/* =========================================================================
           1. TOP HEADER (BRAND + LANGUAGE + ENTER CTA)
           ========================================================================= */}
       <header className="relative z-10 flex justify-between items-center px-2 sm:px-4 py-1 border-b border-[#E8E1DC]/70">
-        {/* Brand & Tagline */}
+        {/* Brand & Tagline - Clean without Clinical Flow badge */}
         <div className="flex items-center gap-3">
           <img
             src="/pravah-logo.png"
@@ -203,15 +235,10 @@ export function Step0Welcome({ onEnterPravah }: Step0WelcomeProps) {
             className="w-9 h-9 sm:w-10 sm:h-10 object-contain shrink-0 drop-shadow-xs"
           />
           <div>
-            <div className="flex items-center gap-2">
-              <h1 className="font-serif text-lg sm:text-xl font-bold tracking-tight text-[#1F1B19] leading-none">
-                PRAVAH
-              </h1>
-              <span className="px-2 py-0.5 bg-[#FCECEE] text-[#7A1C28] text-[9px] font-bold uppercase tracking-wider rounded-sm font-mono border border-[#F5D5D9]">
-                Clinical Flow
-              </span>
-            </div>
-            <p className="text-[10.5px] text-[#7A1C28] font-bold italic tracking-wide mt-0.5">
+            <h1 className="font-serif text-lg sm:text-xl font-bold tracking-tight text-[#1F1B19] leading-none">
+              PRAVAH
+            </h1>
+            <p className="text-[11px] text-[#7A1C28] font-bold italic tracking-wide mt-0.5">
               The Lifeline in Motion
             </p>
           </div>
@@ -236,15 +263,15 @@ export function Step0Welcome({ onEnterPravah }: Step0WelcomeProps) {
       {/* =========================================================================
           2. MAIN HEADLINE & VALUE PROPOSITION
           ========================================================================= */}
-      <section className="relative z-10 text-center max-w-4xl mx-auto space-y-1.5 my-auto pt-1">
-        <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/80 backdrop-blur-xs rounded-full border border-[#E8E1DC] shadow-2xs">
+      <section className="relative z-10 text-center max-w-4xl mx-auto space-y-1 my-auto pt-0.5">
+        <div className="inline-flex items-center gap-2 px-3 py-0.5 bg-white/85 backdrop-blur-xs rounded-full border border-[#E8E1DC] shadow-2xs">
           <span className="w-2 h-2 rounded-full bg-[#16A34A] animate-pulse" />
           <span className="text-[10px] font-bold text-[#5A5451] uppercase tracking-widest font-mono">
             {t('common.tagline')} · NATIONAL CLINICAL INTELLIGENCE
           </span>
         </div>
 
-        <h2 className="font-serif text-3xl sm:text-4xl lg:text-[44px] font-bold text-[#1F1B19] tracking-tight leading-tight">
+        <h2 className="font-serif text-3xl sm:text-4xl lg:text-[42px] font-bold text-[#1F1B19] tracking-tight leading-tight">
           From Blood Data to Life-Saving Action.
         </h2>
 
@@ -254,25 +281,24 @@ export function Step0Welcome({ onEnterPravah }: Step0WelcomeProps) {
       </section>
 
       {/* =========================================================================
-          3. 4-STAGE HORIZONTAL INTERACTIVE WORKFLOW PIPELINE
+          3. 4-STAGE HORIZONTAL WORKFLOW (STRONG ACTIVE HIGHLIGHT & LIFT)
           ========================================================================= */}
       <section
-        className="relative z-10 w-full max-w-6xl mx-auto my-auto"
-        onMouseEnter={() => setIsPaused(true)}
+        className="relative z-10 w-full max-w-[1240px] mx-auto my-auto px-2"
         onMouseLeave={() => setIsPaused(false)}
       >
         {/* Animated Blood-Flow Connecting Pathway between cards */}
-        <div className="hidden lg:block absolute top-[44px] left-[10%] right-[10%] h-[2px] bg-[#E8E1DC] pointer-events-none z-0">
+        <div className="hidden lg:block absolute top-[48px] left-[8%] right-[8%] h-[2.5px] bg-[#E8E1DC]/80 pointer-events-none z-0">
           <div
             className="h-full bg-gradient-to-r from-transparent via-[#7A1C28] to-transparent transition-all duration-700 relative"
             style={{
-              width: '33.3%',
+              width: '25%',
               transform: `translateX(${activeStage * 100}%)`,
             }}
           >
             {/* Moving Blood Flow Particle */}
-            <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-[#7A1C28] shadow-md shadow-[#7A1C28]/60 animate-ping" />
-            <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[#7A1C28]" />
+            <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-[#7A1C28] shadow-lg shadow-[#7A1C28]/80 animate-ping" />
+            <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-[#7A1C28]" />
           </div>
         </div>
 
@@ -283,22 +309,24 @@ export function Step0Welcome({ onEnterPravah }: Step0WelcomeProps) {
             return (
               <div
                 key={stage.id}
+                onMouseEnter={() => {
+                  setIsPaused(true)
+                  setActiveStage(idx)
+                }}
                 onClick={() => setSelectedStage(stage)}
-                className={`relative rounded-3xl p-5 sm:p-6 transition-all duration-400 cursor-pointer flex flex-col justify-between border select-none group ${
+                className={`relative rounded-3xl p-5 sm:p-6 transition-all duration-500 cursor-pointer flex flex-col justify-between border select-none group ${
                   isActive
-                    ? 'bg-white border-[#7A1C28] ring-2 ring-[#7A1C28]/15 shadow-xl shadow-[#7A1C28]/10 scale-[1.025] z-20'
-                    : 'bg-white/85 backdrop-blur-xs border-[#E8E1DC] hover:border-[#7A1C28]/50 hover:bg-white shadow-2xs opacity-85 hover:opacity-100 hover:scale-[1.01] z-10'
+                    ? 'bg-white border-2 border-[#7A1C28] ring-4 ring-[#7A1C28]/15 shadow-2xl shadow-[#7A1C28]/20 scale-[1.08] -translate-y-2 z-30 opacity-100'
+                    : 'bg-white/70 backdrop-blur-xs border-[#E8E1DC] hover:border-[#7A1C28]/50 hover:bg-white shadow-2xs opacity-55 hover:opacity-90 scale-[0.96] z-10 saturate-80'
                 }`}
               >
-                {/* Active Stage Cycle Progress Line */}
-                {isActive && !isPaused && (
-                  <div className="absolute top-0 left-6 right-6 h-[2.5px] bg-[#7A1C28] rounded-full overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-[#9E2A38] to-[#7A1C28] animate-[pulse_2.5s_ease-in-out_infinite]" />
-                  </div>
+                {/* Active Stage Spotlight Glow */}
+                {isActive && (
+                  <div className="absolute -inset-3 bg-radial from-[#7A1C28]/12 via-transparent to-transparent rounded-3xl blur-xl -z-10 pointer-events-none" />
                 )}
 
-                {/* Top Number & Icon Row */}
-                <div className="space-y-3">
+                {/* Top Number, Active Pill & Icon Row */}
+                <div className="space-y-2.5">
                   <div className="flex justify-between items-center">
                     <span
                       className={`text-[11px] font-bold font-mono tracking-widest ${
@@ -308,16 +336,30 @@ export function Step0Welcome({ onEnterPravah }: Step0WelcomeProps) {
                       {stage.num}
                     </span>
 
+                    {/* Active State Indicator Pill */}
+                    {isActive && (
+                      <div className="flex items-center gap-1.5 px-2 py-0.5 bg-[#FCECEE] rounded-full border border-[#F5D5D9] text-[#7A1C28] text-[9px] font-bold font-mono uppercase tracking-wider animate-pulse">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#7A1C28] animate-ping" />
+                        <span>ACTIVE</span>
+                      </div>
+                    )}
+
                     <div className="flex items-center gap-1.5">
                       {stage.badge && (
-                        <span className="px-2 py-0.5 bg-[#FCECEE] text-[#7A1C28] text-[9px] font-bold rounded-sm uppercase tracking-wider font-mono border border-[#F5D5D9]">
+                        <span
+                          className={`px-2 py-0.5 rounded-sm text-[9px] font-bold uppercase tracking-wider font-mono border transition-all ${
+                            isActive
+                              ? 'bg-[#7A1C28] text-white border-[#7A1C28] shadow-xs scale-105'
+                              : 'bg-[#FCECEE] text-[#7A1C28] border-[#F5D5D9]'
+                          }`}
+                        >
                           {stage.badge}
                         </span>
                       )}
                       <span
-                        className={`material-symbols-outlined text-[20px] transition-transform duration-300 ${
+                        className={`material-symbols-outlined text-[22px] transition-all duration-300 ${
                           isActive
-                            ? 'text-[#7A1C28] scale-110'
+                            ? 'text-[#7A1C28] scale-115 rotate-3'
                             : 'text-[#7A7471] group-hover:text-[#7A1C28]'
                         }`}
                       >
@@ -326,37 +368,62 @@ export function Step0Welcome({ onEnterPravah }: Step0WelcomeProps) {
                     </div>
                   </div>
 
-                  {/* Stage Title & Description */}
+                  {/* Stage Title (Significantly Stronger & Animated when active) */}
                   <div>
                     <h3
-                      className={`font-serif text-xl sm:text-2xl font-bold tracking-tight ${
-                        isActive ? 'text-[#7A1C28]' : 'text-[#1F1B19]'
+                      className={`font-serif tracking-tight transition-all duration-300 ${
+                        isActive
+                          ? 'text-2xl sm:text-[28px] font-extrabold text-[#7A1C28] drop-shadow-2xs translate-y-0 opacity-100'
+                          : 'text-lg sm:text-xl font-bold text-[#3A3533]'
                       }`}
                     >
                       {stage.title}
                     </h3>
-                    <p className="text-[11px] text-[#5A5451] mt-1 leading-snug">
-                      {stage.subtitle}
+                    <p
+                      className={`text-[11px] mt-1 leading-snug transition-colors ${
+                        isActive ? 'text-[#3F3936]' : 'text-[#6A6461]'
+                      }`}
+                    >
+                      {stage.subtitleHtml.prefix}
+                      <strong className={isActive ? 'text-[#1F1B19] font-bold' : ''}>
+                        {stage.subtitleHtml.bold1}
+                      </strong>
+                      {stage.subtitleHtml.mid}
+                      <strong className={isActive ? 'text-[#7A1C28] font-bold' : ''}>
+                        {stage.subtitleHtml.bold2}
+                      </strong>
+                      {stage.subtitleHtml.suffix}
                     </p>
                   </div>
                 </div>
 
-                {/* Interactive Dynamic Visuals for each stage */}
-                <div className="my-3 py-2.5 px-3 bg-[#FAF7F5] rounded-2xl border border-[#EFE9E5] space-y-2">
+                {/* Interactive Dynamic Micro-Animations for each stage */}
+                <div
+                  className={`my-3 py-2.5 px-3 rounded-2xl border transition-all duration-300 ${
+                    isActive
+                      ? 'bg-[#FFF8F8] border-[#F5D5D9] shadow-2xs'
+                      : 'bg-[#FAF7F5] border-[#EFE9E5]'
+                  }`}
+                >
                   {stage.id === 0 && (
                     /* Stage 1: CONNECT Dynamic Flow */
                     <div className="space-y-1.5 text-[10px] font-mono">
                       <div className="flex items-center justify-between text-[#7A7471]">
-                        <span>INGESTION FLOW</span>
-                        <span className="text-[#16A34A] font-bold">● LIVE</span>
+                        <span className="font-bold">INGESTION FLOW</span>
+                        <span className="text-[#16A34A] font-bold flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#16A34A] animate-ping" />
+                          LIVE
+                        </span>
                       </div>
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex items-center gap-2">
                         <span
-                          className={`w-2 h-2 rounded-full ${
+                          className={`w-2.5 h-2.5 rounded-full shrink-0 ${
                             isActive ? 'bg-[#7A1C28] animate-ping' : 'bg-[#D5CBC5]'
                           }`}
                         />
-                        <span className="text-[#1F1B19] font-bold">4,390 Hubs Synced</span>
+                        <span className="text-[#1F1B19] font-bold text-[11px]">
+                          4,390 Hubs Synced
+                        </span>
                       </div>
                     </div>
                   )}
@@ -365,34 +432,54 @@ export function Step0Welcome({ onEnterPravah }: Step0WelcomeProps) {
                     /* Stage 2: PREDICT Dynamic Flow */
                     <div className="space-y-1.5 text-[10px] font-mono">
                       <div className="flex items-center justify-between text-[#7A7471]">
-                        <span>AI RISK SENTINEL</span>
-                        <span className="text-[#D97706] font-bold">GBDT R²=0.76</span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
+                        <span className="font-bold">AI RISK SENTINEL</span>
                         <span
-                          className={`w-2 h-2 rounded-full ${
+                          className={`font-bold px-1.5 py-0.2 rounded-sm text-[9px] ${
+                            isActive
+                              ? 'bg-[#FEF3C7] text-[#D97706] border border-[#FDE68A]'
+                              : 'text-[#D97706]'
+                          }`}
+                        >
+                          GBDT R²=0.76
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`w-2.5 h-2.5 rounded-full shrink-0 ${
                             isActive ? 'bg-[#DC2626] animate-pulse' : 'bg-[#D5CBC5]'
                           }`}
                         />
-                        <span className="text-[#1F1B19] font-bold">0 Expiries Detected</span>
+                        <span className="text-[#1F1B19] font-bold text-[11px]">
+                          0 Expiries Detected
+                        </span>
                       </div>
                     </div>
                   )}
 
                   {stage.id === 2 && (
-                    /* Stage 3: OPTIMIZE Dynamic Flow */
+                    /* Stage 3: OPTIMIZE Dynamic Flow (Special Solver Convergence) */
                     <div className="space-y-1.5 text-[10px] font-mono">
                       <div className="flex items-center justify-between text-[#7A7471]">
-                        <span>SOLVER NETWORK</span>
-                        <span className="text-[#2563EB] font-bold">HiGHS LP</span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
+                        <span className="font-bold">SOLVER NETWORK</span>
                         <span
-                          className={`w-2 h-2 rounded-full ${
+                          className={`font-bold px-1.5 py-0.2 rounded-sm text-[9px] ${
+                            isActive
+                              ? 'bg-[#EFF6FF] text-[#2563EB] border border-[#DBEAFE]'
+                              : 'text-[#2563EB]'
+                          }`}
+                        >
+                          HiGHS LP
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`w-2.5 h-2.5 rounded-full shrink-0 ${
                             isActive ? 'bg-[#2563EB] animate-ping' : 'bg-[#D5CBC5]'
                           }`}
                         />
-                        <span className="text-[#1F1B19] font-bold">745 Optimal Routes</span>
+                        <span className="text-[#1F1B19] font-bold text-[11px]">
+                          {isActive ? '● BEST ROUTE CONVERGED' : '745 Optimal Routes'}
+                        </span>
                       </div>
                     </div>
                   )}
@@ -401,30 +488,34 @@ export function Step0Welcome({ onEnterPravah }: Step0WelcomeProps) {
                     /* Stage 4: ACT Dynamic Flow */
                     <div className="space-y-1.5 text-[10px] font-mono">
                       <div className="flex items-center justify-between text-[#7A7471]">
-                        <span>DISPATCH & DONORS</span>
-                        <span className="text-[#16A34A] font-bold">VERIFIED</span>
+                        <span className="font-bold">DISPATCH & DONORS</span>
+                        <span className="text-[#16A34A] font-bold text-[9px] bg-[#E8F8EE] px-1.5 py-0.2 rounded-sm border border-[#BBF7D0]">
+                          VERIFIED
+                        </span>
                       </div>
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex items-center gap-2">
                         <span
-                          className={`w-2 h-2 rounded-full ${
+                          className={`w-2.5 h-2.5 rounded-full shrink-0 ${
                             isActive ? 'bg-[#16A34A] animate-pulse' : 'bg-[#D5CBC5]'
                           }`}
                         />
-                        <span className="text-[#1F1B19] font-bold">1-Click Authorized</span>
+                        <span className="text-[#1F1B19] font-bold text-[11px]">
+                          1-Click Authorized
+                        </span>
                       </div>
                     </div>
                   )}
                 </div>
 
-                {/* Sub-Items Tags */}
+                {/* Sub-Items Feature Tags */}
                 <div className="flex items-center gap-1.5 flex-wrap pt-1 border-t border-[#EFE9E5]">
                   {stage.tags.map((tag) => (
                     <span
                       key={tag}
-                      className={`text-[9.5px] font-bold px-2 py-0.5 rounded-md transition-colors ${
+                      className={`text-[9.5px] font-bold px-2 py-0.5 rounded-md transition-all duration-300 ${
                         isActive
-                          ? 'bg-[#FCECEE] text-[#7A1C28]'
-                          : 'bg-[#F2ECE8] text-[#5A5451] group-hover:bg-[#FCECEE] group-hover:text-[#7A1C28]'
+                          ? 'bg-[#FCECEE] text-[#7A1C28] border border-[#F5D5D9] scale-102'
+                          : 'bg-[#F2ECE8] text-[#5A5451]'
                       }`}
                     >
                       {tag}
@@ -433,13 +524,25 @@ export function Step0Welcome({ onEnterPravah }: Step0WelcomeProps) {
                 </div>
 
                 {/* Click for detail hint */}
-                <div className="mt-3 flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-[#7A1C28] opacity-0 group-hover:opacity-100 transition-opacity">
-                  <span>Learn details</span>
+                <div
+                  className={`mt-2 flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-[#7A1C28] transition-opacity duration-300 ${
+                    isActive ? 'opacity-100' : 'opacity-0'
+                  }`}
+                >
+                  <span>Click for algorithmic depth</span>
                   <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
                 </div>
               </div>
             )
           })}
+        </div>
+
+        {/* Dynamic Real-Time Intelligence Status Line */}
+        <div className="mt-4 flex items-center justify-center">
+          <div className="inline-flex items-center gap-2.5 px-4 py-1.5 bg-white/90 backdrop-blur-xs rounded-full border border-[#E8E1DC] shadow-2xs text-[11px] font-mono text-[#1F1B19]">
+            <span className="w-2 h-2 rounded-full bg-[#7A1C28] animate-ping shrink-0" />
+            <span className="font-semibold">{STAGES[activeStage].statusMsg}</span>
+          </div>
         </div>
       </section>
 
@@ -483,12 +586,16 @@ export function Step0Welcome({ onEnterPravah }: Step0WelcomeProps) {
       </section>
 
       {/* =========================================================================
-          5. BOTTOM TRUST BAR & CTA
+          5. BOTTOM TRUST BAR WITH DYNAMIC RELEVANCE EMPHASIS
           ========================================================================= */}
       <footer className="relative z-10 flex flex-col sm:flex-row justify-between items-center gap-3 pt-2 pb-1 border-t border-[#E8E1DC]/70 text-xs">
-        {/* Trust Tokens */}
+        {/* Trust Tokens with Stage-Specific Emphasis */}
         <div className="flex items-center gap-4 sm:gap-6 text-[#5A5451] font-bold uppercase tracking-widest text-[10px] font-mono">
-          <div className="flex items-center gap-1.5">
+          <div
+            className={`flex items-center gap-1.5 transition-all duration-300 ${
+              activeStage === 3 ? 'text-[#16A34A] scale-105 font-extrabold' : ''
+            }`}
+          >
             <span className="material-symbols-outlined text-[15px] text-[#16A34A]">
               verified_user
             </span>
@@ -497,7 +604,13 @@ export function Step0Welcome({ onEnterPravah }: Step0WelcomeProps) {
 
           <span className="text-[#D5CBC5]">•</span>
 
-          <div className="flex items-center gap-1.5">
+          <div
+            className={`flex items-center gap-1.5 transition-all duration-300 ${
+              activeStage === 1 || activeStage === 2
+                ? 'text-[#7A1C28] scale-105 font-extrabold'
+                : ''
+            }`}
+          >
             <span className="material-symbols-outlined text-[15px] text-[#7A1C28]">
               bolt
             </span>
@@ -506,7 +619,13 @@ export function Step0Welcome({ onEnterPravah }: Step0WelcomeProps) {
 
           <span className="text-[#D5CBC5]">•</span>
 
-          <div className="flex items-center gap-1.5">
+          <div
+            className={`flex items-center gap-1.5 transition-all duration-300 ${
+              activeStage === 2 || activeStage === 3
+                ? 'text-[#2563EB] scale-105 font-extrabold'
+                : ''
+            }`}
+          >
             <span className="material-symbols-outlined text-[15px] text-[#2563EB]">
               lock
             </span>
