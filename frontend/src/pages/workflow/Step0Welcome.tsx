@@ -103,9 +103,9 @@ export function Step0Welcome({ onEnterPravah }: Step0WelcomeProps) {
     },
   ]
 
-  // Continuous Attention-Control Loop: Stage-weighted timing
+  // Continuous Attention-Control Loop: Stage-weighted timing (starts only after splash screen completes)
   useEffect(() => {
-    if (isPaused || selectedStage !== null) return
+    if (showSplash || isPaused || selectedStage !== null) return
 
     const duration = activeStage === 2 ? 3000 : 2500
 
@@ -114,7 +114,7 @@ export function Step0Welcome({ onEnterPravah }: Step0WelcomeProps) {
     }, duration)
 
     return () => clearTimeout(timer)
-  }, [activeStage, isPaused, selectedStage, STAGES.length])
+  }, [showSplash, activeStage, isPaused, selectedStage, STAGES.length])
 
   // Subtle Background Network Canvas
   useEffect(() => {
@@ -196,7 +196,12 @@ export function Step0Welcome({ onEnterPravah }: Step0WelcomeProps) {
     <>
       {/* Interactive Syringe Splash Screen */}
       {showSplash && (
-        <SyringeSplashScreen onComplete={() => setShowSplash(false)} />
+        <SyringeSplashScreen
+          onComplete={() => {
+            setActiveStage(0)
+            setShowSplash(false)
+          }}
+        />
       )}
 
       <div className="h-screen w-screen overflow-hidden bg-[#FAF7F5] text-[#1F1B19] font-sans antialiased flex flex-col justify-between p-4 sm:p-5 lg:p-7 select-none relative">
