@@ -6,7 +6,7 @@ interface StitchModelsPageProps {
 }
 
 export function StitchModelsPage({ metricsData, provenanceData }: StitchModelsPageProps) {
-  const m = metricsData?.metrics
+  const m = (metricsData as any)?.metrics || (metricsData as any)
 
   return (
     <div className="p-6 md:p-12 max-w-7xl mx-auto w-full space-y-12 select-none font-sans">

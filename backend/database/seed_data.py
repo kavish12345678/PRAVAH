@@ -1,13 +1,19 @@
 """National dataset seeding for PRAVAH.
 
-Ingests authoritative data from sih datacollection 2/data/processed/ and sih datacollection 2/models/.
+Ingests authoritative data from data/processed/ and ml/models/.
+Ensures complete coverage for all 4,390 blood banks, with full telemetry,
+inventory, risk scores, demand forecasts, and equipment records for Chennai RGH (282724)
+and its dynamic 200 km regional network.
 """
+
+from __future__ import annotations
 
 import json
 import logging
+import math
 from datetime import date, datetime, timedelta
 from pathlib import Path
-from typing import Dict
+from typing import Dict, List, Set
 
 import joblib
 import numpy as np
@@ -34,17 +40,32 @@ BACKEND_DIR = Path(__file__).resolve().parent.parent
 PROJECT_ROOT = BACKEND_DIR.parent
 
 POSSIBLE_DATA_DIRS = [
-    PROJECT_ROOT / "sih datacollection 2" / "data" / "processed",
     PROJECT_ROOT / "data" / "processed",
+    PROJECT_ROOT / "sih datacollection 2" / "data" / "processed",
     BACKEND_DIR / "data" / "processed",
 ]
 DATA_DIR = next((d for d in POSSIBLE_DATA_DIRS if d.exists()), PROJECT_ROOT / "data" / "processed")
 
 POSSIBLE_MODEL_DIRS = [
+    PROJECT_ROOT / "ml" / "models",
     PROJECT_ROOT / "sih datacollection 2" / "models",
     PROJECT_ROOT / "models",
 ]
-MODEL_DIR = next((d for d in POSSIBLE_MODEL_DIRS if d.exists()), PROJECT_ROOT / "sih datacollection 2" / "models")
+MODEL_DIR = next((d for d in POSSIBLE_MODEL_DIRS if d.exists()), PROJECT_ROOT / "ml" / "models")
+
+CHENNAI_RGH_ID = 282724
+
+
+def haversine_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+    """Computes exact great-circle distance between two coordinates in km."""
+    if lat1 == 0 or lon1 == 0 or lat2 == 0 or lon2 == 0:
+        return 9999.0
+    r = 6371.0
+    phi1, phi2 = math.radians(lat1), math.radians(lat2)
+    dphi = math.radians(lat2 - lat1)
+    dlambda = math.radians(lon2 - lon1)
+    a = math.sin(dphi / 2.0) ** 2 + math.cos(phi1) * math.cos(phi2) * math.sin(dlambda / 2.0) ** 2
+    return round(2 * r * math.asin(math.sqrt(max(0.0, min(1.0, a)))), 2)
 
 
 def load_national_blood_banks(session, df_banks: pd.DataFrame) -> dict[int, BloodBank]:
@@ -53,19 +74,18 @@ def load_national_blood_banks(session, df_banks: pd.DataFrame) -> dict[int, Bloo
     banks_to_add: list[BloodBank] = []
 
     for _, row in df_banks.iterrows():
-        bank_id = int(row["bank_id"])
-        if bank_id in existing_banks:
+        bank_id = int(row.get("bank_id", row.get("id", 0)))
+        if bank_id in existing_banks or bank_id == 0:
             continue
 
         bank_obj = BloodBank(
             id=bank_id,
             name=str(row["name"]).strip(),
-            state=str(row.get("state", "Unknown")),
-            district=str(row.get("district", "Unknown")),
             city=str(row.get("city", "Unknown")),
             latitude=float(row.get("latitude", 20.5937)),
             longitude=float(row.get("longitude", 78.9629)),
-            category=str(row.get("category", "Government")),
+            capacity=int(row.get("capacity", 2500 if bank_id != CHENNAI_RGH_ID else 5000)),
+            status="ACTIVE",
         )
         banks_to_add.append(bank_obj)
         existing_banks[bank_id] = bank_obj
@@ -84,6 +104,7 @@ def load_national_dataset_records(session) -> dict[str, int]:
     unit_risk_path = DATA_DIR / "unit_expiry_risk_features.csv"
     recs_path = DATA_DIR / "redistribution_recommendations.csv"
     inventory_path = DATA_DIR / "platelet_inventory.csv"
+    cold_chain_path = DATA_DIR / "cold_chain.csv"
     alerts_path = DATA_DIR / "cold_chain_alerts.csv"
     equipment_path = DATA_DIR / "equipment.csv"
     model_path = MODEL_DIR / "expiry_risk_model.joblib"
@@ -108,6 +129,19 @@ def load_national_dataset_records(session) -> dict[str, int]:
     counts["blood_banks"] = len(bank_map)
     valid_bank_ids = set(bank_map.keys())
 
+    # Find Chennai anchor coordinates & identify all facilities within 200 km
+    anchor_bank = bank_map.get(CHENNAI_RGH_ID)
+    if anchor_bank:
+        anchor_lat, anchor_lon = anchor_bank.latitude, anchor_bank.longitude
+    else:
+        anchor_lat, anchor_lon = 13.081279, 80.27678
+
+    nearby_ids: Set[int] = {
+        b_id for b_id, b in bank_map.items()
+        if haversine_distance(anchor_lat, anchor_lon, b.latitude, b.longitude) <= 200.0
+    }
+    nearby_ids.add(CHENNAI_RGH_ID)
+
     today = date.today()
     now = datetime.now()
 
@@ -125,12 +159,12 @@ def load_national_dataset_records(session) -> dict[str, int]:
     # 2. Load Inventory Batches & Unit Expiry Risks directly from unit_expiry_risk_features.csv
     if unit_risk_path.exists():
         df_risk = pd.read_csv(unit_risk_path)
-        # Filter to valid blood banks and sample up to 5,000 distinct unit records
         df_risk_valid = df_risk[df_risk["bank_id"].isin(valid_bank_ids)].copy()
-        if len(df_risk_valid) > 5000:
-            df_risk_sample = df_risk_valid.head(5000).copy()
-        else:
-            df_risk_sample = df_risk_valid.copy()
+
+        # ALWAYS include all records from 200 km cohort + sample from other facilities
+        nearby_risk_df = df_risk_valid[df_risk_valid["bank_id"].isin(nearby_ids)].copy()
+        other_risk_df = df_risk_valid[~df_risk_valid["bank_id"].isin(nearby_ids)].head(6000).copy()
+        df_risk_sample = pd.concat([nearby_risk_df, other_risk_df], ignore_index=True)
 
         # Run direct model inference if model is loaded
         if prob_model is not None and feature_cols:
@@ -161,7 +195,6 @@ def load_national_dataset_records(session) -> dict[str, int]:
             qty = int(row.get("represented_units", 8))
             bg = bg_list[inv_id % len(bg_list)]
 
-            # Parse authentic dates from timestamps or calculate accurately
             rem_hours = float(row.get("remaining_shelf_life_hours", 72.0))
             coll_ts = row.get("collection_timestamp")
             exp_ts = row.get("expiry_timestamp")
@@ -182,7 +215,6 @@ def load_national_dataset_records(session) -> dict[str, int]:
             else:
                 coll_d = exp_d - timedelta(days=5)
 
-            # Accurate status
             if rem_hours <= 48:
                 status = "NEAR_EXPIRY"
             elif qty >= 20:
@@ -205,10 +237,9 @@ def load_national_dataset_records(session) -> dict[str, int]:
                 )
             )
 
-            # Score & Explainability
             pred_score = round(float(model_scores[idx]), 4)
             pred_score = max(0.01, min(0.999, pred_score))
-            level = "HIGH" if pred_score >= 0.65 else ("MEDIUM" if pred_score >= 0.35 else "LOW")
+            level = "CRITICAL" if pred_score >= 0.70 else ("HIGH" if pred_score >= 0.50 else ("MODERATE" if pred_score >= 0.30 else "LOW"))
 
             features_list = []
             if rem_hours <= 48:
@@ -242,12 +273,51 @@ def load_national_dataset_records(session) -> dict[str, int]:
         counts["inventory"] = len(inv_objs)
         counts["risk_predictions"] = len(risk_objs)
 
-    # 3. Load Demand Forecasts from Prediction Targets
+    # 3. Load Cold Chain Telemetry
+    if cold_chain_path.exists():
+        df_cc = pd.read_csv(cold_chain_path)
+        # Prioritize Chennai anchor + 200 km cohort
+        nearby_cc = df_cc[df_cc["bank_id"].isin(nearby_ids)].copy()
+        if nearby_cc.empty:
+            nearby_cc = df_cc.head(5000).copy()
+
+        session.execute(delete(ColdChainTelemetry))
+        cc_objs: list[ColdChainTelemetry] = []
+        cc_id = 1
+
+        for _, row in nearby_cc.iterrows():
+            b_id = int(row["bank_id"])
+            ts_str = str(row["timestamp"])
+            try:
+                ts = datetime.fromisoformat(ts_str)
+            except Exception:
+                ts = now
+
+            temp = float(row.get("temperature", 22.0))
+            agit_str = str(row.get("agitation_status", "ON")).upper()
+            agit = agit_str in ["ON", "TRUE", "1"]
+
+            cc_objs.append(
+                ColdChainTelemetry(
+                    id=cc_id,
+                    bank_id=b_id,
+                    timestamp=ts,
+                    temperature=temp,
+                    agitation_status=agit,
+                )
+            )
+            cc_id += 1
+
+        session.bulk_save_objects(cc_objs)
+        session.commit()
+        counts["cold_chain_telemetry"] = len(cc_objs)
+
+    # 4. Load Demand Forecasts from Prediction Targets
     if targets_path.exists():
         df_targets = pd.read_csv(targets_path)
-        df_targets_sample = df_targets[df_targets["date"] == "2026-08-21"].copy()
-        if df_targets_sample.empty:
-            df_targets_sample = df_targets.head(4390).copy()
+        nearby_targets = df_targets[df_targets["bank_id"].isin(nearby_ids)].copy()
+        other_targets = df_targets[~df_targets["bank_id"].isin(nearby_ids)].head(4000).copy()
+        df_targets_sample = pd.concat([nearby_targets, other_targets], ignore_index=True)
 
         session.execute(delete(DemandForecast))
         forecast_objs: list[DemandForecast] = []
@@ -290,7 +360,7 @@ def load_national_dataset_records(session) -> dict[str, int]:
         session.commit()
         counts["demand_forecasts"] = len(forecast_objs)
 
-    # 4. Load National Redistribution Recommendations
+    # 5. Load National Redistribution Recommendations
     if recs_path.exists():
         df_recs = pd.read_csv(recs_path)
         session.execute(delete(TransferRecommendation))
@@ -306,7 +376,6 @@ def load_national_dataset_records(session) -> dict[str, int]:
             qty = int(row["recommended_units"])
             dist = float(row["distance_km"])
             tt = int(row["travel_time_min"])
-            reason = str(row.get("reason", "Balance surplus against stockout risk"))
 
             src_name = bank_map[src].name
             dst_name = bank_map[dst].name
@@ -320,7 +389,7 @@ def load_national_dataset_records(session) -> dict[str, int]:
                     blood_group="O+",
                     quantity=qty,
                     route=f"{src_name} → {dst_name} ({dist:.1f} km, {tt}m)",
-                    vehicle="Refrigerated Van",
+                    vehicle="Refrigerated Van (22°C)",
                     status="PENDING" if rec_id % 4 != 0 else "APPROVED",
                     created_at=now - timedelta(hours=rec_id % 72),
                 )
@@ -331,7 +400,7 @@ def load_national_dataset_records(session) -> dict[str, int]:
         session.commit()
         counts["transfer_recommendations"] = len(rec_objs)
 
-    # 5. Load Equipment Records
+    # 6. Load Equipment Records
     if equipment_path.exists():
         df_eq = pd.read_csv(equipment_path)
         session.execute(delete(Equipment))
@@ -358,7 +427,7 @@ def load_national_dataset_records(session) -> dict[str, int]:
         session.commit()
         counts["equipment"] = len(eq_objs)
 
-    # 6. Seed Initial Audit Logs from Real Transfers
+    # 7. Seed Initial Audit Logs
     session.execute(delete(AuditLog))
     approved_transfers = session.scalars(
         select(TransferRecommendation).where(TransferRecommendation.status == "APPROVED").limit(20)
@@ -369,7 +438,7 @@ def load_national_dataset_records(session) -> dict[str, int]:
             id=idx + 1,
             timestamp=t.created_at,
             action="TRANSFER_APPROVED",
-            user="National Logistics Officer",
+            user="Chennai Centre Logistics Officer",
             recommendation_id=t.id,
             source_bank_id=t.source_bank_id,
             destination_bank_id=t.destination_bank_id,
@@ -382,7 +451,7 @@ def load_national_dataset_records(session) -> dict[str, int]:
         session.bulk_save_objects(audit_objs)
         session.commit()
 
-    logger.info(f"National dataset successfully loaded: {counts}")
+    logger.info(f"PRAVAH dataset successfully loaded: {counts}")
     return counts
 
 

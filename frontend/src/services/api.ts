@@ -1,5 +1,7 @@
 import type {
   AuditItem,
+  CentreColdChainData,
+  CentreHealthData,
   CentreNetworkFacility,
   CentrePressureData,
   CentreProfile,
@@ -17,161 +19,163 @@ import type {
   TransferStatusUpdate,
 } from '../types'
 
-const API_BASE = import.meta.env.VITE_API_URL ?? ''
-
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const urlsToTry = API_BASE
-    ? [`${API_BASE}${path}`, path, `http://127.0.0.1:8000${path}`]
-    : [path, `http://127.0.0.1:8000${path}`, `http://localhost:8000${path}`]
-
-  let lastError: Error | null = null
-
-  for (const url of urlsToTry) {
-    try {
-      const response = await fetch(url, {
-        ...init,
-        headers: {
-          Accept: 'application/json',
-          ...init?.headers,
-        },
-        signal: AbortSignal.timeout ? AbortSignal.timeout(5000) : undefined,
-      })
-
-      if (response.ok) {
-        const contentType = response.headers.get('content-type') || ''
-        if (contentType.includes('application/json')) {
-          return (await response.json()) as T
-        }
-        // If non-JSON returned, throw error so next fallback URL can be attempted
-        throw new Error(`Expected JSON but received ${contentType || 'text'}`)
-      } else {
-        lastError = new Error(`HTTP ${response.status}: ${response.statusText}`)
-      }
-    } catch (err) {
-      lastError = err instanceof Error ? err : new Error(String(err))
+const getApiBase = () => {
+  if (typeof window !== 'undefined') {
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      return 'http://127.0.0.1:8000'
     }
   }
-
-  throw lastError || new Error('PRAVAH backend service unavailable.')
+  return import.meta.env.VITE_API_BASE_URL || ''
 }
 
-export function fetchDashboardSummary(): Promise<DashboardSummary> {
+const PRIMARY_API_BASE = getApiBase()
+const FALLBACK_API_BASE = 'http://localhost:8000'
+
+async function request<T>(path: string, options?: RequestInit): Promise<T> {
+  const tryFetch = async (baseUrl: string) => {
+    const res = await fetch(`${baseUrl}${path}`, options)
+    if (!res.ok) {
+      const errorBody = await res.text()
+      let errorDetail = `HTTP ${res.status}: ${res.statusText}`
+      try {
+        const parsed = JSON.parse(errorBody)
+        if (parsed.detail) {
+          errorDetail = parsed.detail
+        }
+      } catch {
+        // not json
+      }
+      throw new Error(errorDetail)
+    }
+    return res.json() as Promise<T>
+  }
+
+  try {
+    return await tryFetch(PRIMARY_API_BASE)
+  } catch (primaryErr) {
+    if (PRIMARY_API_BASE !== FALLBACK_API_BASE) {
+      try {
+        return await tryFetch(FALLBACK_API_BASE)
+      } catch {
+        // rethrow primary error if both fail
+      }
+    }
+    throw primaryErr
+  }
+}
+
+// ----------------------------------------------------
+// NATIONAL DASHBOARD APIs
+// ----------------------------------------------------
+
+export function fetchSummary(): Promise<DashboardSummary> {
   return request<DashboardSummary>('/api/dashboard/summary')
 }
+export const fetchDashboardSummary = fetchSummary
 
 export function fetchInventory(params?: {
+  bank_name?: string
   blood_group?: string
   component?: string
-  bank_id?: number
   status?: string
-  limit?: number
 }): Promise<InventoryItem[]> {
   const search = new URLSearchParams()
-  if (params?.blood_group && params.blood_group !== 'All') {
-    search.set('blood_group', params.blood_group)
-  }
-  if (params?.component && params.component !== 'All') {
-    search.set('component', params.component)
-  }
-  if (params?.status && params.status !== 'All') {
-    search.set('status', params.status)
-  }
-  if (params?.bank_id != null) {
-    search.set('bank_id', String(params.bank_id))
-  }
-  if (params?.limit != null) {
-    search.set('limit', String(params.limit))
-  }
-  const query = search.toString()
-
-  return request<InventoryItem[]>(`/api/inventory${query ? `?${query}` : ''}`)
+  if (params?.bank_name) search.set('bank_name', params.bank_name)
+  if (params?.blood_group) search.set('blood_group', params.blood_group)
+  if (params?.component) search.set('component', params.component)
+  if (params?.status) search.set('status', params.status)
+  const qs = search.toString()
+  return request<InventoryItem[]>(`/api/inventory${qs ? `?${qs}` : ''}`)
 }
 
-export function fetchForecasts(params?: {
-  bank_id?: number
+export function fetchForecast(params?: {
+  bank_name?: string
   component?: string
-  blood_group?: string
+  horizon?: string
   limit?: number
 }): Promise<ForecastItem[]> {
   const search = new URLSearchParams()
-  if (params?.bank_id != null) search.set('bank_id', String(params.bank_id))
-  if (params?.component && params.component !== 'All') search.set('component', params.component)
-  if (params?.blood_group && params.blood_group !== 'All') search.set('blood_group', params.blood_group)
-  if (params?.limit != null) search.set('limit', String(params.limit))
-  const query = search.toString()
-
-  return request<ForecastItem[]>(`/api/forecast${query ? `?${query}` : ''}`)
+  if (params?.bank_name) search.set('bank_name', params.bank_name)
+  if (params?.component) search.set('component', params.component)
+  if (params?.horizon) search.set('horizon', params.horizon)
+  if (params?.limit) search.set('limit', String(params.limit))
+  const qs = search.toString()
+  return request<ForecastItem[]>(`/api/forecast${qs ? `?${qs}` : ''}`)
 }
-
-export function fetchRiskSummary(): Promise<RiskSummary> {
-  return request<RiskSummary>('/api/risk/summary')
-}
+export const fetchForecasts = fetchForecast
 
 export function fetchRisk(params?: {
+  bank_name?: string
   level?: string
-  bank_id?: number
   limit?: number
 }): Promise<RiskItem[]> {
   const search = new URLSearchParams()
-  if (params?.level && params.level !== 'All') search.set('level', params.level)
-  if (params?.bank_id != null) search.set('bank_id', String(params.bank_id))
-  if (params?.limit != null) search.set('limit', String(params.limit))
-  const query = search.toString()
-
-  return request<RiskItem[]>(`/api/risk${query ? `?${query}` : ''}`)
+  if (params?.bank_name) search.set('bank_name', params.bank_name)
+  if (params?.level) search.set('level', params.level)
+  if (params?.limit) search.set('limit', String(params.limit))
+  const qs = search.toString()
+  return request<RiskItem[]>(`/api/risk${qs ? `?${qs}` : ''}`)
 }
+export const fetchRisks = fetchRisk
 
-export function fetchRiskDetail(batchId: number): Promise<RiskItem> {
+export function fetchRiskDetail(batchId: string | number): Promise<RiskItem> {
   return request<RiskItem>(`/api/risk/${batchId}`)
 }
 
 export function fetchTransfers(params?: {
+  status?: string
   limit?: number
 }): Promise<TransferItem[]> {
   const search = new URLSearchParams()
+  if (params?.status) search.set('status', params.status)
   if (params?.limit != null) search.set('limit', String(params.limit))
-  const query = search.toString()
-
-  return request<TransferItem[]>(`/api/transfers${query ? `?${query}` : ''}`)
+  const qs = search.toString()
+  return request<TransferItem[]>(`/api/transfers${qs ? `?${qs}` : ''}`)
 }
 
-export function fetchAuditLogs(params?: {
-  limit?: number
-}): Promise<AuditItem[]> {
-  const search = new URLSearchParams()
-  if (params?.limit != null) search.set('limit', String(params.limit))
-  const query = search.toString()
+export function fetchAuditLogs(params?: { limit?: number } | number): Promise<AuditItem[]> {
+  const lim = typeof params === 'number' ? params : (params?.limit ?? 50)
+  return request<AuditItem[]>(`/api/transfers/audit?limit=${lim}`)
+}
 
-  return request<AuditItem[]>(`/api/transfers/audit${query ? `?${query}` : ''}`)
+export function runOptimization(): Promise<{
+  solver_type: string
+  transfers_generated: number
+  total_units: number
+  cost_reduction_percent: number
+  message: string
+}> {
+  return request('/api/transfers/optimize', { method: 'POST' })
+}
+
+export function updateTransferStatus(id: number, status: TransferStatusUpdate): Promise<TransferItem> {
+  return request<TransferItem>(`/api/transfers/${id}/status`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status }),
+  })
 }
 
 export function fetchIntelligenceStatus(): Promise<IntelligenceStatus> {
   return request<IntelligenceStatus>('/api/intelligence/status')
 }
 
-export function fetchModelMetrics(): Promise<ModelMetricsResponse> {
-  return request<ModelMetricsResponse>('/api/intelligence/metrics')
+export function runIntelligenceEngine(): Promise<IntelligenceRunResult> {
+  return request<IntelligenceRunResult>('/api/intelligence/run', { method: 'POST' })
+}
+export const runIntelligence = runIntelligenceEngine
+
+export function fetchRiskSummary(): Promise<RiskSummary> {
+  return request<RiskSummary>('/api/intelligence/risk-summary')
 }
 
-export function fetchProvenance(): Promise<ProvenanceResponse> {
+export function fetchModelProvenance(): Promise<ProvenanceResponse> {
   return request<ProvenanceResponse>('/api/intelligence/provenance')
 }
+export const fetchProvenance = fetchModelProvenance
 
-export function runIntelligence(): Promise<IntelligenceRunResult> {
-  return request<IntelligenceRunResult>('/api/intelligence/run', {
-    method: 'POST',
-  })
-}
-
-export function updateTransferStatus(
-  id: number,
-  status: TransferStatusUpdate,
-): Promise<TransferItem> {
-  return request<TransferItem>(`/api/transfers/${id}/status`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ status }),
-  })
+export function fetchModelMetrics(): Promise<ModelMetricsResponse> {
+  return request<ModelMetricsResponse>('/api/ml/metrics')
 }
 
 export function fetchHealth(): Promise<{
@@ -195,19 +199,19 @@ export function fetchDataStatus(): Promise<{
   return request('/api/data-status')
 }
 
-// ==========================================
-// CENTRE WORKSPACE ENDPOINTS (200 KM RADIUS)
-// ==========================================
+// ----------------------------------------------------
+// CENTRE-SPECIFIC OPERATIONAL WORKSPACE API (200km radius)
+// ----------------------------------------------------
 
-export function loginCentre(centre_id: string, password: string): Promise<{
+export function centreLogin(centreId: string = 'CHN-RGH-001', password: string = 'demo'): Promise<{
   status: string
   token: string
-  centre: CentreProfile
+  centre: CentreProfile & { operational_radius_km: number; role: string }
 }> {
   return request('/api/centre/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ centre_id, password }),
+    body: JSON.stringify({ centre_id: centreId, password }),
   })
 }
 
@@ -217,6 +221,15 @@ export function fetchCentreProfile(centreId: number = 282724): Promise<CentrePro
 
 export function fetchCentreSummary(centreId: number = 282724, radiusKm: number = 200): Promise<CentreSummary> {
   return request<CentreSummary>(`/api/centre/summary?centre_id=${centreId}&radius_km=${radiusKm}`)
+}
+export const fetchCentreOverview = fetchCentreSummary
+
+export function fetchCentreColdChain(centreId: number = 282724): Promise<CentreColdChainData> {
+  return request<CentreColdChainData>(`/api/centre/cold-chain?centre_id=${centreId}`)
+}
+
+export function fetchCentreHealth(centreId: number = 282724): Promise<CentreHealthData> {
+  return request<CentreHealthData>(`/api/centre/health?centre_id=${centreId}`)
 }
 
 export function fetchCentreNetwork(centreId: number = 282724, radiusKm: number = 200): Promise<CentreNetworkFacility[]> {
@@ -229,6 +242,7 @@ export function fetchCentreInventory(params?: {
   blood_group?: string
   component?: string
   status?: string
+  anchor_only?: boolean
   limit?: number
 }): Promise<(InventoryItem & { distance_km: number; city: string; is_anchor: boolean })[]> {
   const search = new URLSearchParams()
@@ -237,12 +251,38 @@ export function fetchCentreInventory(params?: {
   if (params?.blood_group && params.blood_group !== 'All') search.set('blood_group', params.blood_group)
   if (params?.component && params.component !== 'All') search.set('component', params.component)
   if (params?.status && params.status !== 'All') search.set('status', params.status)
+  if (params?.anchor_only) search.set('anchor_only', 'true')
   if (params?.limit) search.set('limit', String(params.limit))
   return request(`/api/centre/inventory?${search.toString()}`)
 }
 
-export function fetchCentreForecast(centreId: number = 282724, radiusKm: number = 200): Promise<(ForecastItem & { distance_km: number; current_stock: number; balance_status: string; is_anchor: boolean })[]> {
-  return request(`/api/centre/forecast?centre_id=${centreId}&radius_km=${radiusKm}`)
+export function fetchCentreForecast(
+  centreIdOrParams: number | {
+    centre_id?: number
+    radius_km?: number
+    horizon?: string
+    blood_group?: string
+    component?: string
+    status?: string
+    limit?: number
+  } = 282724,
+  radiusKm: number = 200,
+): Promise<ForecastItem[]> {
+  const search = new URLSearchParams()
+  if (typeof centreIdOrParams === 'object') {
+    search.set('centre_id', String(centreIdOrParams.centre_id ?? 282724))
+    search.set('radius_km', String(centreIdOrParams.radius_km ?? 200))
+    if (centreIdOrParams.horizon) search.set('horizon', centreIdOrParams.horizon)
+    if (centreIdOrParams.blood_group && centreIdOrParams.blood_group !== 'All') search.set('blood_group', centreIdOrParams.blood_group)
+    if (centreIdOrParams.component && centreIdOrParams.component !== 'All') search.set('component', centreIdOrParams.component)
+    if (centreIdOrParams.status && centreIdOrParams.status !== 'All') search.set('status', centreIdOrParams.status)
+    if (centreIdOrParams.limit) search.set('limit', String(centreIdOrParams.limit))
+  } else {
+    search.set('centre_id', String(centreIdOrParams))
+    search.set('radius_km', String(radiusKm))
+    search.set('limit', '200')
+  }
+  return request<ForecastItem[]>(`/api/centre/forecast?${search.toString()}`)
 }
 
 export function fetchCentreRisk(params?: {
@@ -263,6 +303,10 @@ export function fetchCentrePressure(centreId: number = 282724, radiusKm: number 
   return request<CentrePressureData>(`/api/centre/pressure?centre_id=${centreId}&radius_km=${radiusKm}`)
 }
 
+export function fetchCentreTransfers(centreId: number = 282724, radiusKm: number = 200): Promise<(TransferItem & { distance_km: number; is_connected_to_anchor: boolean })[]> {
+  return request(`/api/centre/transfers?centre_id=${centreId}&radius_km=${radiusKm}&limit=150`)
+}
+
 export function runCentreOptimization(centreId: number = 282724, radiusKm: number = 200): Promise<{
   status: string
   solver: string
@@ -275,21 +319,48 @@ export function runCentreOptimization(centreId: number = 282724, radiusKm: numbe
   })
 }
 
-export function fetchCentreTransfers(centreId: number = 282724, radiusKm: number = 200): Promise<(TransferItem & { distance_km: number; is_connected_to_anchor: boolean })[]> {
-  return request(`/api/centre/transfers?centre_id=${centreId}&radius_km=${radiusKm}`)
-}
-
-export function updateCentreTransferStatus(
-  id: number,
-  status: TransferStatusUpdate,
-): Promise<{ id: number; status: string; source_bank: string; destination_bank: string }> {
-  return request(`/api/centre/transfers/${id}/status`, {
+export function updateCentreTransferStatus(transferId: number, status: TransferStatusUpdate): Promise<TransferItem> {
+  return request<TransferItem>(`/api/centre/transfers/${transferId}/status`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ status }),
   })
 }
 
-export function fetchCentreAudit(centreId: number = 282724): Promise<AuditItem[]> {
-  return request<AuditItem[]>(`/api/centre/audit?centre_id=${centreId}`)
+export function fetchCentreAudit(centreId: number = 282724, limit: number = 50): Promise<AuditItem[]> {
+  return request<AuditItem[]>(`/api/centre/audit?centre_id=${centreId}&limit=${limit}`)
 }
+
+export interface RoadRouteResponse {
+  status: string
+  provider: string
+  source: { latitude: number; longitude: number }
+  destination: { latitude: number; longitude: number }
+  distance_km: number
+  duration_minutes: number
+  geometry: {
+    type: string
+    coordinates: [number, number][]
+  }
+  alternatives?: {
+    distance_km: number
+    duration_minutes: number
+    geometry: {
+      type: string
+      coordinates: [number, number][]
+    }
+  }[]
+}
+
+export function fetchRoadRoute(
+  sourceLat: number,
+  sourceLng: number,
+  destLat: number,
+  destLng: number,
+  alternatives: boolean = true,
+): Promise<RoadRouteResponse> {
+  return request<RoadRouteResponse>(
+    `/api/routes/road?source_lat=${sourceLat}&source_lng=${sourceLng}&destination_lat=${destLat}&destination_lng=${destLng}&alternatives=${alternatives}`,
+  )
+}
+

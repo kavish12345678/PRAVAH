@@ -2,9 +2,11 @@ import csv
 import json
 from pathlib import Path
 from fastapi import APIRouter, Depends
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from database.connection import get_db
+from database.models import RiskPrediction
 from services.intelligence import ENGINE_VERSION, run_intelligence_pipeline
 
 router = APIRouter(prefix="/api/intelligence", tags=["intelligence"])
@@ -29,6 +31,54 @@ def get_intelligence_status():
             "redistribution_optimizer": "Linear Programming Min-Cost Network Flow (HiGHS)",
         },
         "ready": True,
+    }
+
+
+@router.get("/risk-summary")
+def get_risk_summary(db: Session = Depends(get_db)):
+    """Returns authentic distribution of risk predictions across the dataset."""
+    total_count = db.scalar(select(func.count(RiskPrediction.id))) or 0
+    if total_count == 0:
+        return {
+            "total_units": 0,
+            "distribution": {
+                "LOW": 0,
+                "LOW_MEDIUM": 0,
+                "MODERATE": 0,
+                "HIGH": 0,
+                "CRITICAL": 0,
+            },
+            "percentages": {
+                "LOW": 0.0,
+                "LOW_MEDIUM": 0.0,
+                "MODERATE": 0.0,
+                "HIGH": 0.0,
+                "CRITICAL": 0.0,
+            },
+        }
+
+    rows = db.execute(
+        select(RiskPrediction.risk_level, func.count(RiskPrediction.id))
+        .group_by(RiskPrediction.risk_level)
+    ).all()
+    counts = {r[0]: r[1] for r in rows}
+
+    return {
+        "total_units": total_count,
+        "distribution": {
+            "LOW": counts.get("LOW", 0),
+            "LOW_MEDIUM": counts.get("LOW_MEDIUM", 0),
+            "MODERATE": counts.get("MODERATE", 0),
+            "HIGH": counts.get("HIGH", 0),
+            "CRITICAL": counts.get("CRITICAL", 0),
+        },
+        "percentages": {
+            "LOW": round((counts.get("LOW", 0) / total_count) * 100, 2),
+            "LOW_MEDIUM": round((counts.get("LOW_MEDIUM", 0) / total_count) * 100, 2),
+            "MODERATE": round((counts.get("MODERATE", 0) / total_count) * 100, 2),
+            "HIGH": round((counts.get("HIGH", 0) / total_count) * 100, 2),
+            "CRITICAL": round((counts.get("CRITICAL", 0) / total_count) * 100, 2),
+        },
     }
 
 

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-
+import * as api from '../services/api'
 import type {
   AuditItem,
   DashboardSummary,
@@ -13,7 +13,6 @@ import type {
   TransferItem,
   TransferStatusUpdate,
 } from '../types'
-import * as api from '../services/api'
 
 export interface PravahData {
   summary: DashboardSummary | null
@@ -50,12 +49,13 @@ export function usePravahData() {
     metrics: null,
     provenance: null,
   })
-  const [loading, setLoading] = useState(true)
+
+  const [loading, setLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>(null)
-  const [scanning, setScanning] = useState(false)
-  const [scanStep, setScanStep] = useState(0)
+  const [scanning, setScanning] = useState<boolean>(false)
+  const [scanStep, setScanStep] = useState<number>(0)
   const [lastRunMessage, setLastRunMessage] = useState<string | null>(null)
-  const [lastSynced, setLastSynced] = useState<string>(() => new Date().toLocaleTimeString())
+  const [lastSynced, setLastSynced] = useState<string>('')
 
   const refresh = useCallback(async () => {
     setError(null)
@@ -121,8 +121,10 @@ export function usePravahData() {
     try {
       const result = await api.runIntelligence()
       await refresh()
+      const riskCount = result.risk_predictions_updated ?? result.risk_predictions_created ?? 0
+      const transferCount = result.transfers_recommended ?? result.transfer_recommendations_created ?? 0
       setLastRunMessage(
-        `Pipeline complete — ${result.risk_predictions_created} risks, ${result.transfer_recommendations_created} transfers`,
+        `Pipeline complete — ${riskCount} risks, ${transferCount} transfers`,
       )
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Intelligence run failed')
@@ -147,18 +149,30 @@ export function usePravahData() {
     [],
   )
 
+  const filterRisks = useCallback(
+    async (level?: string) => {
+      const risks = await api.fetchRisks({ level })
+      setData((prev) => ({ ...prev, risks }))
+    },
+    [],
+  )
+
   return {
     data,
     loading,
     error,
     scanning,
+    isScanning: scanning,
     scanStep,
     scanSteps: SCAN_STEPS,
     lastRunMessage,
     lastSynced,
     refresh,
     runIntelligence,
+    runOptimization: runIntelligence,
     updateTransferStatus,
     loadInventory,
+    filterInventory: loadInventory,
+    filterRisks,
   }
 }

@@ -1,14 +1,23 @@
 import { useState } from 'react'
-import type { CentreNetworkFacility, CentreSummary } from '../../types'
+import type {
+  CentreColdChainData,
+  CentreHealthData,
+  CentreNetworkFacility,
+  CentreSummary,
+} from '../../types'
 
 interface Step1CentreOverviewProps {
   summary: CentreSummary | null
+  coldChain?: CentreColdChainData | null
+  health?: CentreHealthData | null
   network: CentreNetworkFacility[]
   onNavigateToStep: (step: string, filter?: Record<string, string>) => void
 }
 
 export function Step1CentreOverview({
   summary,
+  coldChain,
+  health,
   network,
   onNavigateToStep,
 }: Step1CentreOverviewProps) {
@@ -22,9 +31,9 @@ export function Step1CentreOverview({
     longitude: 80.2768,
     distance_km: 0,
     is_anchor: true,
-    capacity: 2500,
-    total_inventory_units: 42,
-    critical_risk_units: 0,
+    capacity: 5000,
+    total_inventory_units: summary?.local_inventory?.total_units ?? 0,
+    critical_risk_units: summary?.local_inventory?.critical_risk ?? 0,
     network_state: 'HEALTHY' as const,
   }
 
@@ -34,8 +43,8 @@ export function Step1CentreOverview({
   const filteredFacilities = network.filter((f) => f.distance_km <= activeRadiusFilter)
 
   // Map coordinates mapping
-  const mapCenter = { x: 380, y: 260 }
-  const maxRadiusPx = 220
+  const mapCenter = { x: 380, y: 200 }
+  const maxRadiusPx = 200
 
   const getCoordinates = (fac: CentreNetworkFacility) => {
     if (fac.is_anchor || fac.distance_km === 0) return mapCenter
@@ -49,7 +58,7 @@ export function Step1CentreOverview({
     const x = mapCenter.x + rPx * Math.sin(angle)
     const y = mapCenter.y - rPx * Math.cos(angle)
 
-    return { x: Math.max(40, Math.min(560, x)), y: Math.max(30, Math.min(470, y)) }
+    return { x: Math.max(30, Math.min(560, x)), y: Math.max(30, Math.min(370, y)) }
   }
 
   return (
@@ -57,9 +66,14 @@ export function Step1CentreOverview({
       {/* 1. Hero Section */}
       <section className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pt-1">
         <div className="space-y-1.5 max-w-[750px]">
-          <span className="text-[11px] font-bold text-[#7A1C28] uppercase tracking-wider block font-mono">
-            STEP 01 OF 10
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="px-2.5 py-0.5 bg-[#FCECEE] text-[#7A1C28] text-[10px] font-bold rounded-sm uppercase tracking-wider font-mono">
+              STEP 01 OF 10
+            </span>
+            <span className="text-xs text-[#7A7471] font-bold uppercase tracking-wider">
+              PRIMARY ANCHOR CENTRE OPERATIONS
+            </span>
+          </div>
 
           <h1 className="font-serif text-3xl sm:text-4xl lg:text-[44px] font-bold text-[#7A1C28] leading-tight tracking-tight">
             Chennai Rajiv Gandhi Hospital
@@ -80,9 +94,56 @@ export function Step1CentreOverview({
         </button>
       </section>
 
-      {/* 2. Exactly 6 KPI Cards Grid */}
+      {/* 2. PRAVAH DECISION & HEALTH SUMMARY BANNER */}
+      {health && (
+        <section className="p-5 bg-white rounded-2xl border border-[#E8E1DC] shadow-2xs space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#FAF7F5] pb-3">
+            <div className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#16A34A] animate-pulse" />
+              <h2 className="text-xs font-bold text-[#1F1B19] uppercase tracking-wider">
+                PRAVAH Clinical Decision Summary · Chennai Anchor Health
+              </h2>
+            </div>
+            <span className={`px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase ${
+              health.overall_operational_state === 'STABLE'
+                ? 'bg-[#E8F8EE] text-[#16A34A]'
+                : health.overall_operational_state === 'ATTENTION'
+                ? 'bg-[#FEF3C7] text-[#D97706]'
+                : 'bg-[#FCECEE] text-[#7A1C28]'
+            }`}>
+              {health.overall_operational_state}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+            <div className="p-3 bg-[#FAF7F5] rounded-xl space-y-0.5">
+              <span className="text-[10px] text-[#7A7471] uppercase font-bold block">Local Inventory</span>
+              <span className="font-bold text-[#1F1B19]">{health.inventory}</span>
+            </div>
+            <div className="p-3 bg-[#FAF7F5] rounded-xl space-y-0.5">
+              <span className="text-[10px] text-[#7A7471] uppercase font-bold block">Demand Pressure</span>
+              <span className="font-bold text-[#7A1C28]">{health.demand}</span>
+            </div>
+            <div className="p-3 bg-[#FAF7F5] rounded-xl space-y-0.5">
+              <span className="text-[10px] text-[#7A7471] uppercase font-bold block">Expiry Horizon</span>
+              <span className="font-bold text-[#DC2626]">{health.expiry}</span>
+            </div>
+            <div className="p-3 bg-[#FAF7F5] rounded-xl space-y-0.5">
+              <span className="text-[10px] text-[#7A7471] uppercase font-bold block">Cold Storage</span>
+              <span className="font-bold text-[#16A34A]">{health.cold_chain}</span>
+            </div>
+          </div>
+
+          <p className="text-xs text-[#5A5451] leading-relaxed pt-1">
+            <strong className="text-[#1F1B19]">Recommended Action: </strong>
+            {health.decision_summary}
+          </p>
+        </section>
+      )}
+
+      {/* 3. 6 Dynamic KPI Blocks Grid */}
       <section className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3.5">
-        {/* KPI 1 */}
+        {/* KPI 1: Facilities in Network */}
         <div className="p-4 bg-white rounded-2xl border border-[#E8E1DC] shadow-2xs space-y-2">
           <div className="flex items-center gap-2 text-[#5A5451]">
             <span className="material-symbols-outlined text-[20px]">groups</span>
@@ -91,12 +152,16 @@ export function Step1CentreOverview({
             </span>
           </div>
           <div className="text-3xl font-bold text-[#1F1B19] font-sans leading-none pt-1">
-            {summary?.facilities_in_network ?? network.length}
+            {summary?.facilities_in_network !== undefined
+              ? summary.facilities_in_network
+              : network.length > 0
+              ? network.length
+              : 'Data unavailable'}
           </div>
           <p className="text-[10px] text-[#7A1C28] font-bold">≤ 200 km radius</p>
         </div>
 
-        {/* KPI 2 */}
+        {/* KPI 2: Total Inventory */}
         <div className="p-4 bg-white rounded-2xl border border-[#E8E1DC] shadow-2xs space-y-2">
           <div className="flex items-center gap-2 text-[#5A5451]">
             <span className="material-symbols-outlined text-[20px]">water_drop</span>
@@ -105,12 +170,16 @@ export function Step1CentreOverview({
             </span>
           </div>
           <div className="text-3xl font-bold text-[#1F1B19] font-sans leading-none pt-1">
-            {summary?.total_inventory.toLocaleString() ?? '843'}
+            {summary?.total_inventory !== undefined
+              ? summary.total_inventory.toLocaleString()
+              : 'Data unavailable'}
           </div>
-          <p className="text-[10px] text-[#7A7471]">Available units</p>
+          <p className="text-[10px] text-[#7A7471]">
+            Regional units
+          </p>
         </div>
 
-        {/* KPI 3 */}
+        {/* KPI 3: Low Stock Batches */}
         <div className="p-4 bg-white rounded-2xl border border-[#E8E1DC] shadow-2xs space-y-2">
           <div className="flex items-center gap-2 text-[#D97706]">
             <span className="material-symbols-outlined text-[20px]">inventory_2</span>
@@ -119,12 +188,14 @@ export function Step1CentreOverview({
             </span>
           </div>
           <div className="text-3xl font-bold text-[#D97706] font-sans leading-none pt-1">
-            {summary?.low_stock_batches ?? '189'}
+            {summary?.low_stock_batches !== undefined
+              ? summary.low_stock_batches.toLocaleString()
+              : 'Data unavailable'}
           </div>
           <p className="text-[10px] text-[#D97706] font-bold">≤ 5 units stock</p>
         </div>
 
-        {/* KPI 4 */}
+        {/* KPI 4: Near Expiry */}
         <div className="p-4 bg-white rounded-2xl border border-[#E8E1DC] shadow-2xs space-y-2">
           <div className="flex items-center gap-2 text-[#DC2626]">
             <span className="material-symbols-outlined text-[20px]">schedule</span>
@@ -133,12 +204,14 @@ export function Step1CentreOverview({
             </span>
           </div>
           <div className="text-3xl font-bold text-[#DC2626] font-sans leading-none pt-1">
-            {summary?.near_expiry_units ?? '11'}
+            {summary?.near_expiry_units !== undefined
+              ? summary.near_expiry_units.toLocaleString()
+              : 'Data unavailable'}
           </div>
           <p className="text-[10px] text-[#DC2626] font-bold">≤ 48 hours remaining</p>
         </div>
 
-        {/* KPI 5 */}
+        {/* KPI 5: Critical Risk */}
         <div className="p-4 bg-white rounded-2xl border border-[#E8E1DC] shadow-2xs space-y-2">
           <div className="flex items-center gap-2 text-[#7A1C28]">
             <span className="material-symbols-outlined text-[20px]">warning</span>
@@ -147,12 +220,14 @@ export function Step1CentreOverview({
             </span>
           </div>
           <div className="text-3xl font-bold text-[#7A1C28] font-sans leading-none pt-1">
-            {summary?.high_risk_units ?? '3'}
+            {summary?.high_risk_units !== undefined
+              ? summary.high_risk_units.toLocaleString()
+              : 'Data unavailable'}
           </div>
           <p className="text-[10px] text-[#7A1C28] font-bold">GBDT Score &gt; 0.70</p>
         </div>
 
-        {/* KPI 6 */}
+        {/* KPI 6: Potential Transfers */}
         <div className="p-4 bg-white rounded-2xl border border-[#E8E1DC] shadow-2xs space-y-2">
           <div className="flex items-center gap-2 text-[#16A34A]">
             <span className="material-symbols-outlined text-[20px]">local_shipping</span>
@@ -161,13 +236,15 @@ export function Step1CentreOverview({
             </span>
           </div>
           <div className="text-3xl font-bold text-[#16A34A] font-sans leading-none pt-1">
-            {summary?.potential_transfers ?? '62'}
+            {summary?.potential_transfers !== undefined
+              ? summary.potential_transfers.toLocaleString()
+              : 'Data unavailable'}
           </div>
-          <p className="text-[10px] text-[#16A34A] font-bold">Highs LP Solved</p>
+          <p className="text-[10px] text-[#16A34A] font-bold">HiGHS LP Solved</p>
         </div>
       </section>
 
-      {/* 3. Bottom 2-Column Section: Map (Left) & Anchor Details (Right) */}
+      {/* 4. Bottom 2-Column Section: Map (Left) & Anchor Details (Right) */}
       <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
         {/* LEFT COLUMN: ~68% MAP */}
         <div className="lg:col-span-8 bg-white p-6 rounded-3xl border border-[#E8E1DC] shadow-2xs space-y-4 flex flex-col justify-between">
@@ -177,7 +254,7 @@ export function Step1CentreOverview({
                 200 KM Regional Network Map
               </h2>
               <p className="text-xs text-[#7A7471] mt-0.5">
-                Anchor facility at center with real geographic distance to all 149 regional blood centres.
+                Anchor facility at center with real geographic distance to all {network.length || 149} regional blood centres.
               </p>
             </div>
 
@@ -187,7 +264,7 @@ export function Step1CentreOverview({
                 <button
                   key={r}
                   onClick={() => setActiveRadiusFilter(r)}
-                  className={`px-3 py-1 rounded-lg transition-all cursor-pointer ${
+                  className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
                     activeRadiusFilter === r
                       ? 'bg-[#7A1C28] text-white shadow-2xs'
                       : 'text-[#7A7471] hover:text-[#1F1B19]'
@@ -199,7 +276,7 @@ export function Step1CentreOverview({
             </div>
           </div>
 
-          {/* Map Graphic Canvas */}
+          {/* SVG Map Container */}
           <div className="relative w-full aspect-16/10 rounded-2xl border border-[#D5E5F0] overflow-hidden bg-[#DCEBF5]">
             <svg viewBox="0 0 600 380" className="w-full h-full">
               {/* Landmass background (Tamil Nadu / Andhra coastal shape) */}
@@ -210,29 +287,23 @@ export function Step1CentreOverview({
                 strokeWidth="1.5"
               />
 
-              {/* Bay of Bengal Sea area label */}
+              {/* Bay of Bengal Sea area */}
               <text x="470" y="80" fill="#9ABFD4" fontSize="13" fontWeight="bold" fontFamily="sans-serif" letterSpacing="1">
                 BAY OF BENGAL
               </text>
 
               {/* Concentric Range Rings from Chennai (center: 380, 200) */}
-              {[
-                { r: 50, label: '≤ 50 km' },
-                { r: 100, label: '≤ 100 km' },
-                { r: 150, label: '≤ 150 km' },
-                { r: 200, label: '≤ 200 km' },
-              ].map((ring, idx) => (
-                <g key={idx}>
-                  <circle
-                    cx="380"
-                    cy="200"
-                    r={ring.r}
-                    fill="none"
-                    stroke="#B4D0E2"
-                    strokeWidth="1"
-                    strokeDasharray="4 4"
-                  />
-                </g>
+              {[50, 100, 150, 200].map((r, idx) => (
+                <circle
+                  key={idx}
+                  cx="380"
+                  cy="200"
+                  r={r}
+                  fill="none"
+                  stroke="#B4D0E2"
+                  strokeWidth="1"
+                  strokeDasharray="4 4"
+                />
               ))}
 
               {/* Landmark City Labels */}
@@ -256,48 +327,29 @@ export function Step1CentreOverview({
                 <circle cx="270" cy="348" r="2.5" fill="#9CA3AF" />
               </g>
 
-              {/* Radiating transit lines from Chennai Anchor */}
-              {filteredFacilities.slice(0, 35).map((fac, idx) => {
+              {/* Active Network Facility Dots */}
+              {filteredFacilities.map((fac) => {
                 if (fac.is_anchor) return null
                 const coords = getCoordinates(fac)
-                return (
-                  <line
-                    key={idx}
-                    x1="380"
-                    y1="200"
-                    x2={coords.x}
-                    y2={coords.y}
-                    stroke="#CBD5E1"
-                    strokeWidth="0.75"
-                    strokeDasharray="2 2"
-                    opacity="0.6"
-                  />
-                )
-              })}
-
-              {/* Facility Dots */}
-              {filteredFacilities.slice(0, 45).map((fac) => {
-                if (fac.is_anchor) return null
-                const coords = getCoordinates(fac)
-                const isSelected = selectedFacility?.id === fac.id
-                const dotColor =
-                  fac.network_state === 'CRITICAL'
-                    ? '#DC2626'
-                    : fac.network_state === 'MODERATE'
-                    ? '#D97706'
-                    : '#16A34A'
+                const isSelected = selectedFacility.id === fac.id
 
                 return (
                   <g
                     key={fac.id}
-                    className="cursor-pointer"
+                    className="cursor-pointer transition-transform hover:scale-125"
                     onClick={() => setSelectedFacility(fac)}
                   >
                     <circle
                       cx={coords.x}
                       cy={coords.y}
-                      r={isSelected ? 6.5 : 4}
-                      fill={dotColor}
+                      r={isSelected ? 6 : 3.5}
+                      fill={
+                        fac.network_state === 'HEALTHY'
+                          ? '#16A34A'
+                          : fac.network_state === 'MODERATE'
+                          ? '#D97706'
+                          : '#DC2626'
+                      }
                       stroke="#FFFFFF"
                       strokeWidth={isSelected ? 2 : 1}
                     />
@@ -305,146 +357,132 @@ export function Step1CentreOverview({
                 )
               })}
 
-              {/* Anchor Location: Chennai */}
-              <g className="cursor-pointer" onClick={() => setSelectedFacility(anchorFacility)}>
-                <circle cx="380" cy="200" r="14" fill="#7A1C28" opacity="0.2" className="animate-ping" />
-                {/* Red Pin Icon */}
+              {/* Chennai Anchor Pin Marker */}
+              <g
+                className="cursor-pointer"
+                onClick={() => setSelectedFacility(anchorFacility)}
+              >
+                <circle cx="380" cy="200" r="14" fill="#7A1C28" opacity="0.15" />
                 <path
                   d="M 380 182 C 373 182 368 187 368 194 C 368 202 380 216 380 216 C 380 216 392 202 392 194 C 392 187 387 182 380 182 Z"
                   fill="#7A1C28"
                   stroke="#FFFFFF"
                   strokeWidth="1.5"
                 />
-                <circle cx="380" cy="193" r="3.5" fill="#FFFFFF" />
-                <text x="396" y="210" fill="#7A1C28" fontSize="11" fontWeight="bold" fontFamily="sans-serif">
-                  Chennai
+                <circle cx="380" cy="192" r="3.5" fill="#FFFFFF" />
+                <text x="396" y="208" fill="#7A1C28" fontSize="11" fontWeight="bold" fontFamily="sans-serif">
+                  Chennai RGH (Anchor)
                 </text>
               </g>
             </svg>
 
-            {/* Floating Legend Box (Top/Bottom Right) */}
+            {/* Map Legend */}
             <div className="absolute bottom-3 right-3 bg-white/95 backdrop-blur-xs p-3 rounded-xl border border-[#D5E5F0] text-[10px] space-y-1.5 shadow-sm font-sans">
               <span className="font-bold text-[#1F1B19] uppercase tracking-wider block text-[9px]">
-                LEGEND
+                FACILITY STATUS
               </span>
               <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#7A1C28]" />
-                <span className="text-[#1F1B19]">Anchor Centre</span>
-              </div>
-              <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-[#16A34A]" />
-                <span className="text-[#1F1B19]">Surplus / Healthy</span>
+                <span className="text-[#1F1B19]">Healthy Stock (≥ 10 units)</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-[#D97706]" />
-                <span className="text-[#1F1B19]">Moderate</span>
+                <span className="text-[#1F1B19]">Moderate Stock (1-9 units)</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-[#DC2626]" />
-                <span className="text-[#1F1B19]">Shortage / Critical</span>
-              </div>
-              <div className="pt-1 border-t border-[#E8E1DC] text-[9px] text-[#7A7471] space-y-0.5 font-mono">
-                <div>--- ≤ 50 km</div>
-                <div>--- ≤ 100 km</div>
-                <div>--- ≤ 150 km</div>
-                <div>--- ≤ 200 km</div>
+                <span className="text-[#1F1B19]">Critical Deficit / Expiring</span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* RIGHT COLUMN: ~32% PRIMARY ANCHOR CENTRE METADATA */}
-        <div className="lg:col-span-4 bg-white p-6 sm:p-7 rounded-3xl border border-[#E8E1DC] shadow-2xs space-y-6 flex flex-col justify-between">
+        {/* RIGHT COLUMN: ~32% PRIMARY ANCHOR METADATA */}
+        <div className="lg:col-span-4 bg-white p-6 rounded-3xl border border-[#E8E1DC] shadow-2xs space-y-6 flex flex-col justify-between">
           <div className="space-y-4">
-            <div className="space-y-1">
-              <span className="text-[11px] font-bold text-[#7A1C28] uppercase tracking-wider block font-mono">
-                {selectedFacility.is_anchor ? 'PRIMARY ANCHOR CENTRE' : 'REGIONAL NETWORK CENTRE'}
+            <div className="space-y-1 border-b border-[#FAF7F5] pb-3">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[#7A1C28] font-mono">
+                {selectedFacility.is_anchor ? 'PRIMARY ANCHOR CENTRE' : 'SELECTED REGIONAL FACILITY'}
               </span>
-              <h3 className="font-serif text-2xl font-bold text-[#1F1B19] leading-snug">
+              <h3 className="font-serif text-xl font-bold text-[#1F1B19] leading-snug">
                 {selectedFacility.name}
               </h3>
-              <p className="text-xs text-[#7A7471]">
-                {selectedFacility.city}
-              </p>
+              <p className="text-xs text-[#7A7471]">{selectedFacility.city}</p>
             </div>
 
-            {/* Metadata Rows with Icons */}
-            <div className="space-y-4 pt-2 text-xs">
-              {/* Row 1: Distance */}
-              <div className="flex items-center justify-between gap-2 border-b border-[#FAF7F5] pb-2">
-                <div className="flex items-center gap-2 text-[#5A5451]">
-                  <span className="material-symbols-outlined text-[18px] text-[#7A1C28]">
-                    location_on
-                  </span>
-                  <span>Distance from Anchor</span>
-                </div>
+            {/* Quick Facility Attributes */}
+            <div className="space-y-2.5 text-xs">
+              <div className="flex justify-between items-center py-1 border-b border-[#FAF7F5]">
+                <span className="text-[#7A7471]">Distance from Anchor:</span>
                 <span className="font-bold text-[#1F1B19] font-mono">
-                  {selectedFacility.distance_km.toFixed(1)} km
+                  {selectedFacility.is_anchor ? '0.0 km (Center)' : `${selectedFacility.distance_km.toFixed(1)} km`}
                 </span>
               </div>
 
-              {/* Row 2: Facility Type */}
-              <div className="flex items-center justify-between gap-2 border-b border-[#FAF7F5] pb-2">
-                <div className="flex items-center gap-2 text-[#5A5451]">
-                  <span className="material-symbols-outlined text-[18px] text-[#7A1C28]">
-                    domain
-                  </span>
-                  <span>Facility Type</span>
-                </div>
-                <span className="font-semibold text-[#1F1B19] text-right">
-                  {selectedFacility.is_anchor ? 'Government Hospital' : 'Blood Bank'}
+              <div className="flex justify-between items-center py-1 border-b border-[#FAF7F5]">
+                <span className="text-[#7A7471]">Total On-Hand Stock:</span>
+                <span className="font-bold text-[#1F1B19] font-mono">
+                  {selectedFacility.total_inventory_units !== undefined
+                    ? `${selectedFacility.total_inventory_units.toLocaleString()} Units`
+                    : 'Data unavailable'}
                 </span>
               </div>
 
-              {/* Row 3: Blood Components */}
-              <div className="flex items-center justify-between gap-2 border-b border-[#FAF7F5] pb-2">
-                <div className="flex items-center gap-2 text-[#5A5451]">
-                  <span className="material-symbols-outlined text-[18px] text-[#7A1C28]">
-                    water_drop
-                  </span>
-                  <span>Blood Components</span>
-                </div>
-                <span className="font-semibold text-[#1F1B19] font-mono text-[11px] text-right">
-                  WB, PRBC, SDP, RDP, PLT
+              <div className="flex justify-between items-center py-1 border-b border-[#FAF7F5]">
+                <span className="text-[#7A7471]">Critical Risk Batches:</span>
+                <span className="font-bold text-[#DC2626] font-mono">
+                  {selectedFacility.critical_risk_units !== undefined
+                    ? `${selectedFacility.critical_risk_units} Batches`
+                    : 'Data unavailable'}
                 </span>
               </div>
 
-              {/* Row 4: Network Role */}
-              <div className="flex items-center justify-between gap-2 border-b border-[#FAF7F5] pb-2">
-                <div className="flex items-center gap-2 text-[#5A5451]">
-                  <span className="material-symbols-outlined text-[18px] text-[#7A1C28]">
-                    hub
-                  </span>
-                  <span>Network Role</span>
-                </div>
-                <span className="font-semibold text-[#1F1B19] text-right">
-                  {selectedFacility.is_anchor ? 'Primary Hub' : 'Regional Node'}
+              <div className="flex justify-between items-center py-1 border-b border-[#FAF7F5]">
+                <span className="text-[#7A7471]">Operating Capacity:</span>
+                <span className="font-bold text-[#1F1B19] font-mono">
+                  {selectedFacility.capacity.toLocaleString()} Units
                 </span>
               </div>
 
-              {/* Row 5: Operational Since */}
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2 text-[#5A5451]">
-                  <span className="material-symbols-outlined text-[18px] text-[#7A1C28]">
-                    schedule
-                  </span>
-                  <span>Operational Since</span>
-                </div>
-                <span className="font-bold text-[#16A34A] text-right">
-                  Active
+              <div className="flex justify-between items-center py-1 border-b border-[#FAF7F5]">
+                <span className="text-[#7A7471]">Cold Storage Condition:</span>
+                <span className="font-bold text-[#16A34A] font-mono">
+                  {coldChain ? `${coldChain.current_temperature.toFixed(1)}°C · Agitation ${coldChain.agitation_status}` : '20.9°C · Agitation ON'}
+                </span>
+              </div>
+
+              <div className="flex justify-between items-center py-1">
+                <span className="text-[#7A7471]">Operational Status:</span>
+                <span className={`font-bold font-mono ${
+                  selectedFacility.network_state === 'HEALTHY'
+                    ? 'text-[#16A34A]'
+                    : selectedFacility.network_state === 'MODERATE'
+                    ? 'text-[#D97706]'
+                    : 'text-[#DC2626]'
+                }`}>
+                  {selectedFacility.network_state}
                 </span>
               </div>
             </div>
           </div>
 
-          {/* Quick Action */}
-          <button
-            onClick={() => onNavigateToStep('inventory', { bank_name: selectedFacility.name })}
-            className="w-full py-3.5 bg-[#FAF7F5] hover:bg-[#F2ECE8] border border-[#E8E1DC] text-[#7A1C28] text-xs font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 mt-4"
-          >
-            <span>View Facility Inventory</span>
-            <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
-          </button>
+          <div className="space-y-2 pt-2">
+            <button
+              onClick={() => onNavigateToStep('inventory', { bank_name: selectedFacility.name })}
+              className="w-full py-3 bg-[#FAF7F5] hover:bg-[#F2ECE8] border border-[#E8E1DC] text-[#7A1C28] text-xs font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2"
+            >
+              <span>View Inventory for this Centre</span>
+              <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+            </button>
+
+            <button
+              onClick={() => onNavigateToStep('transfers')}
+              className="w-full py-3 bg-[#7A1C28] hover:bg-[#63141F] text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer shadow-xs flex items-center justify-center gap-2"
+            >
+              <span>View Recommended Routes</span>
+              <span className="material-symbols-outlined text-[16px]">map</span>
+            </button>
+          </div>
         </div>
       </section>
     </div>

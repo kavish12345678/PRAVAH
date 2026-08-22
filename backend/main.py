@@ -15,6 +15,7 @@ from api.intelligence import router as intelligence_router
 from api.inventory import router as inventory_router
 from api.ml import router as ml_router
 from api.risk import router as risk_router
+from api.routes import router as routes_router
 from api.transfer import router as transfer_router
 from database.connection import get_db
 from database.models import BloodBank, Inventory, DemandForecast, RiskPrediction, TransferRecommendation
@@ -48,10 +49,12 @@ app.include_router(dashboard_router)
 app.include_router(inventory_router)
 app.include_router(forecast_router)
 app.include_router(risk_router)
+app.include_router(routes_router)
 app.include_router(transfer_router)
 app.include_router(intelligence_router)
 app.include_router(events_router)
 app.include_router(ml_router)
+app.include_router(ml_router, prefix="/api")
 
 
 @app.get("/")
@@ -63,6 +66,8 @@ def root():
     }
 
 
+@app.get("/healthz")
+@app.get("/api/healthz")
 @app.get("/api/health")
 def get_health(db: Session = Depends(get_db)) -> Dict[str, Any]:
     """Diagnostic health check reporting dynamic live record counts."""

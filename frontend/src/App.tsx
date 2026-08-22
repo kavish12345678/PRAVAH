@@ -1,12 +1,23 @@
 import { useState } from 'react'
-import { usePravahData } from './hooks/usePravahData'
-import { useCentreData } from './hooks/useCentreData'
-import type { PravahMode, PravahStep } from './types'
-
-// National Layout & Pages
-import { StitchWorkflowNav } from './components/layout/StitchWorkflowNav'
+import { CentreTopHeader } from './components/centre/CentreTopHeader'
+import { CentreWorkflowNav } from './components/centre/CentreWorkflowNav'
 import { StitchTopHeader } from './components/layout/StitchTopHeader'
+import { StitchWorkflowNav } from './components/layout/StitchWorkflowNav'
 import { StitchWorkflowRibbon } from './components/layout/StitchWorkflowRibbon'
+import { useCentreData } from './hooks/useCentreData'
+import { usePravahData } from './hooks/usePravahData'
+import { CentreLoginScreen } from './pages/centre/CentreLoginScreen'
+import { Step1CentreOverview } from './pages/centre/Step1CentreOverview'
+import { Step2CentreInventory } from './pages/centre/Step2CentreInventory'
+import { Step3CentreForecast } from './pages/centre/Step3CentreForecast'
+import { Step4CentreRisk } from './pages/centre/Step4CentreRisk'
+import { Step5CentreColdChain } from './pages/centre/Step5CentreColdChain'
+import { Step6CentrePressure } from './pages/centre/Step6CentrePressure'
+import { Step7CentreOptimize } from './pages/centre/Step7CentreOptimize'
+import { Step8CentreTransfers } from './pages/centre/Step8CentreTransfers'
+import { Step9CentreApproval } from './pages/centre/Step9CentreApproval'
+import { Step10CentreAudit } from './pages/centre/Step10CentreAudit'
+import { StitchModelsPage } from './pages/stitch/StitchModelsPage'
 import { Step0Welcome } from './pages/workflow/Step0Welcome'
 import { Step1Overview } from './pages/workflow/Step1Overview'
 import { Step2Inventory } from './pages/workflow/Step2Inventory'
@@ -18,61 +29,46 @@ import { Step7Optimize } from './pages/workflow/Step7Optimize'
 import { Step8Transfers } from './pages/workflow/Step8Transfers'
 import { Step9Approval } from './pages/workflow/Step9Approval'
 import { Step10Audit } from './pages/workflow/Step10Audit'
-import { StitchModelsPage } from './pages/stitch/StitchModelsPage'
+import type { PravahMode, PravahStep } from './types'
 
-// Centre Workspace Layout & Pages
-import { CentreLoginScreen } from './pages/centre/CentreLoginScreen'
-import { CentreTopHeader } from './components/centre/CentreTopHeader'
-import { CentreWorkflowNav } from './components/centre/CentreWorkflowNav'
-import { Step1CentreOverview } from './pages/centre/Step1CentreOverview'
-import { Step2CentreInventory } from './pages/centre/Step2CentreInventory'
-import { Step3CentreForecast } from './pages/centre/Step3CentreForecast'
-import { Step4CentreRisk } from './pages/centre/Step4CentreRisk'
-import { Step5CentreColdChain } from './pages/centre/Step5CentreColdChain'
-import { Step6CentrePressure } from './pages/centre/Step6CentrePressure'
-import { Step7CentreOptimize } from './pages/centre/Step7CentreOptimize'
-import { Step8CentreTransfers } from './pages/centre/Step8CentreTransfers'
-import { Step9CentreApproval } from './pages/centre/Step9CentreApproval'
-import { Step10CentreAudit } from './pages/centre/Step10CentreAudit'
-
-export default function App() {
-  // Application Mode: 'national' | 'centre' | 'centre-login'
-  const [appMode, setAppMode] = useState<PravahMode | 'centre-login'>('national')
+export function App() {
+  // Operating Mode: 'national' (General National Dashboard) vs 'centre' (Chennai RGH + 200km Network) vs 'centre-login'
+  const [appMode, setAppMode] = useState<PravahMode | 'centre-login'>('centre')
   const [currentStep, setCurrentStep] = useState<PravahStep>('overview')
   const [selectedBank, setSelectedBank] = useState<string | null>(null)
   const [selectedTransferId, setSelectedTransferId] = useState<number | null>(null)
 
-  // 1. National Data State Hook
+  // National Dataset Hook
   const {
     data: nationalData,
     loading: nationalLoading,
     error: nationalError,
-    scanning: nationalScanning,
     lastSynced: nationalLastSynced,
+    isScanning,
     refresh: refreshNational,
-    runIntelligence: runNationalIntelligence,
+    runOptimization: runNationalOptimization,
     updateTransferStatus: updateNationalTransferStatus,
   } = usePravahData()
 
-  // 2. Centre Workspace State Hook (Scoped to Chennai Rajiv Gandhi Hospital & 200 km radius)
+  // Centre Workspace Hook (Chennai RGH 282724 Anchor + 200km Radius)
   const {
     data: centreData,
     loading: centreLoading,
     error: centreError,
+    lastSynced: centreLastSynced,
     isOptimizing: centreOptimizing,
     lastOptimizedMsg: centreOptimizedMsg,
-    lastSynced: centreLastSynced,
     refresh: refreshCentre,
     optimize: optimizeCentre,
     updateTransferStatus: updateCentreTransferStatus,
     filterInventory: filterCentreInventory,
     filterRisks: filterCentreRisks,
-  } = useCentreData()
+  } = useCentreData(282724)
 
   // Handler for National Optimization
   const handleRunNationalOptimization = async () => {
     try {
-      await runNationalIntelligence()
+      await runNationalOptimization()
       setCurrentStep('optimize')
     } catch {
       setCurrentStep('optimize')
@@ -127,7 +123,7 @@ export default function App() {
   // =========================================================================
   if (appMode === 'centre') {
     return (
-      <div className="min-h-screen bg-[#FBF7F4] text-[#1f1b19] font-sans antialiased flex flex-col selection:bg-primary-container selection:text-white">
+      <div className="min-h-screen bg-[#FAF7F5] text-[#1f1b19] font-sans antialiased flex flex-col selection:bg-[#FCECEE] selection:text-[#7A1C28]">
         {/* Centre Step Navigation Sidebar */}
         <CentreWorkflowNav
           currentStep={currentStep}
@@ -140,7 +136,7 @@ export default function App() {
         />
 
         {/* Centre Canvas */}
-        <div className="flex-1 md:ml-72 flex flex-col min-h-screen">
+        <div className="flex-1 md:ml-[280px] flex flex-col min-h-screen">
           <CentreTopHeader
             onRefresh={refreshCentre}
             onRunOptimization={handleRunCentreOptimization}
@@ -163,17 +159,17 @@ export default function App() {
           {/* Main Centre Step Content */}
           <main className="flex-1 flex flex-col pb-16">
             {centreError && (
-              <div className="m-6 p-6 bg-error-container/20 border border-error/30 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-error">
+              <div className="m-6 p-6 bg-[#FCECEE] border border-[#F5D5D9] rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#7A1C28]">
                 <div className="flex items-center gap-3">
                   <span className="material-symbols-outlined text-2xl">error_outline</span>
                   <div>
                     <p className="font-bold text-sm">Centre Data Service Notice</p>
-                    <p className="text-on-surface-variant mt-0.5">{centreError}</p>
+                    <p className="text-[#5A5451] mt-0.5">{centreError}</p>
                   </div>
                 </div>
                 <button
                   onClick={refreshCentre}
-                  className="px-5 py-2.5 bg-primary text-white font-bold rounded-full cursor-pointer hover:bg-primary-container shrink-0"
+                  className="px-5 py-2.5 bg-[#7A1C28] text-white font-bold rounded-full cursor-pointer hover:bg-[#63141F] shrink-0"
                 >
                   Retry Connection
                 </button>
@@ -182,8 +178,8 @@ export default function App() {
 
             {centreLoading ? (
               <div className="flex-1 flex flex-col items-center justify-center p-16 space-y-4">
-                <span className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
-                <p className="text-xs font-bold uppercase tracking-widest text-on-surface-variant">
+                <span className="w-8 h-8 rounded-full border-2 border-[#7A1C28] border-t-transparent animate-spin" />
+                <p className="text-xs font-bold uppercase tracking-widest text-[#7A7471]">
                   CHENNAI CENTRE WORKSPACE · Loading 200 km regional cohort...
                 </p>
               </div>
@@ -192,6 +188,8 @@ export default function App() {
                 {currentStep === 'overview' && (
                   <Step1CentreOverview
                     summary={centreData.summary}
+                    coldChain={centreData.coldChain}
+                    health={centreData.health}
                     network={centreData.network}
                     onNavigateToStep={navigateToStep}
                   />
@@ -222,6 +220,7 @@ export default function App() {
 
                 {currentStep === 'cold-chain' && (
                   <Step5CentreColdChain
+                    coldChain={centreData.coldChain}
                     onNavigateToStep={navigateToStep}
                   />
                 )}
@@ -275,11 +274,11 @@ export default function App() {
   }
 
   // =========================================================================
-  // MODE 3: NATIONAL OVERVIEW (ALL 4,390 FACILITIES)
+  // MODE 3: NATIONAL OVERVIEW (ALL 4,390 BLOOD BANKS)
   // =========================================================================
   return (
-    <div className="min-h-screen bg-[#FBF7F4] text-[#1f1b19] font-sans antialiased flex flex-col selection:bg-primary-container selection:text-white">
-      {/* Numbered Step Navigation Sidebar */}
+    <div className="min-h-screen bg-[#FAF7F5] text-[#1f1b19] font-sans antialiased flex flex-col selection:bg-[#FCECEE] selection:text-[#7A1C28]">
+      {/* Step Navigation Sidebar */}
       <StitchWorkflowNav
         currentStep={currentStep}
         onSelectStep={setCurrentStep}
@@ -287,38 +286,40 @@ export default function App() {
         bloodBankCount={nationalData.summary?.blood_banks ?? 4390}
       />
 
-      {/* Main Canvas Area */}
+      {/* Main Canvas */}
       <div className="flex-1 md:ml-72 flex flex-col min-h-screen">
-        {/* Top Header */}
         <StitchTopHeader
           onRefresh={refreshNational}
           onRunOptimization={handleRunNationalOptimization}
-          onSwitchToCentre={() => setAppMode('centre-login')}
+          onSwitchToCentre={() => {
+            setAppMode('centre')
+            setCurrentStep('overview')
+          }}
           lastSynced={nationalLastSynced}
-          isScanning={nationalScanning}
+          isScanning={isScanning}
           hasError={!!nationalError}
         />
 
-        {/* Persistent Workflow Progress Ribbon */}
+        {/* Workflow Progress Ribbon */}
         <StitchWorkflowRibbon
           currentStep={currentStep}
           onSelectStep={setCurrentStep}
         />
 
-        {/* Main Step Canvas or Error / Loading States */}
+        {/* Main Step Content */}
         <main className="flex-1 flex flex-col pb-16">
           {nationalError && (
-            <div className="m-6 p-6 bg-error-container/20 border border-error/30 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-error">
+            <div className="m-6 p-6 bg-[#FCECEE] border border-[#F5D5D9] rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#7A1C28]">
               <div className="flex items-center gap-3">
                 <span className="material-symbols-outlined text-2xl">error_outline</span>
                 <div>
                   <p className="font-bold text-sm">PRAVAH Data Service Notice</p>
-                  <p className="text-on-surface-variant mt-0.5">{nationalError}</p>
+                  <p className="text-[#5A5451] mt-0.5">{nationalError}</p>
                 </div>
               </div>
               <button
                 onClick={refreshNational}
-                className="px-5 py-2.5 bg-primary text-white font-bold rounded-full cursor-pointer hover:bg-primary-container shrink-0"
+                className="px-5 py-2.5 bg-[#7A1C28] text-white font-bold rounded-full cursor-pointer hover:bg-[#63141F] shrink-0"
               >
                 Retry Connection
               </button>
@@ -327,9 +328,9 @@ export default function App() {
 
           {nationalLoading ? (
             <div className="flex-1 flex flex-col items-center justify-center p-16 space-y-4">
-              <span className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
-              <p className="text-xs font-bold uppercase tracking-widest text-on-surface-variant">
-                PRAVAH INTELLIGENCE · Loading operational dataset...
+              <span className="w-8 h-8 rounded-full border-2 border-[#7A1C28] border-t-transparent animate-spin" />
+              <p className="text-xs font-bold uppercase tracking-widest text-[#7A7471]">
+                Loading PRAVAH Operational Dataset...
               </p>
             </div>
           ) : (
@@ -340,7 +341,7 @@ export default function App() {
                   inventory={nationalData.inventory}
                   forecasts={nationalData.forecasts}
                   selectedBank={selectedBank}
-                  onSelectBank={setSelectedBank}
+                  onSelectBank={(bank) => setSelectedBank(bank)}
                   onNavigateToStep={navigateToStep}
                 />
               )}
@@ -349,7 +350,7 @@ export default function App() {
                 <Step2Inventory
                   inventory={nationalData.inventory}
                   selectedBank={selectedBank}
-                  onSelectBank={setSelectedBank}
+                  onSelectBank={(bank) => setSelectedBank(bank)}
                   onNavigateToStep={navigateToStep}
                 />
               )}
@@ -359,7 +360,7 @@ export default function App() {
                   forecasts={nationalData.forecasts}
                   inventory={nationalData.inventory}
                   selectedBank={selectedBank}
-                  onSelectBank={setSelectedBank}
+                  onSelectBank={(bank) => setSelectedBank(bank)}
                   onNavigateToStep={navigateToStep}
                 />
               )}
@@ -432,3 +433,5 @@ export default function App() {
     </div>
   )
 }
+
+export default App

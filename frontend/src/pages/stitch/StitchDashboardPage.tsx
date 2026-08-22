@@ -24,7 +24,7 @@ export function StitchDashboardPage({
   const nearExpiry = summary ? summary.near_expiry.toLocaleString() : '3,000'
   const highRisk = summary ? summary.high_risk.toLocaleString() : '3,029'
   const activeTransfers = summary ? summary.active_transfers.toLocaleString() : '1,815'
-  const equipmentWarnings = summary ? summary.equipment_warnings.toLocaleString() : '4,390'
+  const equipmentWarnings = summary ? (summary.equipment_warnings ?? 0).toLocaleString() : '4,390'
 
   // Dynamic blood group quantities from real inventory
   const oNegCount = inventory.filter((i) => i.blood_group === 'O-').reduce((a, b) => a + b.quantity, 0) || 12

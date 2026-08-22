@@ -1,34 +1,70 @@
 export interface DashboardSummary {
   blood_banks: number
   total_inventory: number
+  critical_shortages?: number
   low_stock: number
   near_expiry: number
-  equipment_warnings: number
+  equipment_warnings?: number
   high_risk: number
   active_transfers: number
+  temperature_anomalies?: number
+  last_updated?: string
 }
 
 export interface InventoryItem {
   id: number
   bank_id?: number
   bank_name: string
-  component: string
   blood_group: string
+  component: string
   quantity: number
   collection_date: string
   expiry_date: string
-  status: string
+  status: 'AVAILABLE' | 'LOW' | 'NEAR_EXPIRY' | 'SURPLUS' | string
 }
 
 export interface ForecastItem {
   id: number
   bank_id?: number
   bank_name: string
-  component: string
+  city?: string
+  latitude?: number
+  longitude?: number
+  distance_km?: number
+  is_anchor?: boolean
   blood_group: string
+  component: string
   forecast_date: string
+  current_stock?: number
   predicted_demand: number
-  model_version: string
+  forecast_24h?: number
+  forecast_72h?: number
+  projected_balance?: number
+  projected_balance_24h?: number
+  projected_balance_72h?: number
+  balance_status?: 'DEFICIT' | 'BALANCED' | 'SURPLUS' | string
+  balance_status_24h?: 'DEFICIT' | 'BALANCED' | 'SURPLUS' | string
+  balance_status_72h?: 'DEFICIT' | 'BALANCED' | 'SURPLUS' | string
+  confidence_lower?: number
+  confidence_upper?: number
+  historical_avg?: number
+  model_version?: string
+}
+
+export interface RiskFeatures {
+  age_hours?: number
+  remaining_shelf_life_hours?: number
+  current_stock?: number
+  expiring_48h?: number
+  demand_next_24h?: number
+  demand_next_72h?: number
+  stockout_risk_score?: number
+  wastage_risk_score?: number
+  max_temperature_exposure?: number
+  cumulative_excursion_minutes?: number
+  agitation_off_minutes?: number
+  health_score?: number
+  issue_probability?: number
 }
 
 export interface RiskBandInfo {
@@ -40,10 +76,24 @@ export interface RiskBandInfo {
   description: string
 }
 
+export interface RiskDistribution {
+  critical: number
+  high: number
+  moderate: number
+  low_medium: number
+  low: number
+  total_scored: number
+}
+
 export interface RiskSummary {
-  total_units_analyzed: number
-  active_units_monitored: number
-  bands: {
+  total_units_analyzed?: number
+  active_units_monitored?: number
+  distribution?: RiskDistribution
+  mean_risk_score?: number
+  critical_wastage_count?: number
+  model_name?: string
+  features_analyzed?: number
+  bands?: {
     CRITICAL: RiskBandInfo
     HIGH: RiskBandInfo
     MODERATE: RiskBandInfo
@@ -52,20 +102,12 @@ export interface RiskSummary {
   }
 }
 
-export interface RiskFeatures {
-  age_hours: number
-  remaining_shelf_life_hours: number
-  current_stock: number
-  expiring_48h: number
-  demand_next_24h: number
-  demand_next_72h: number
-  stockout_risk_score: number
-  wastage_risk_score: number
-  max_temperature_exposure: number
-  cumulative_excursion_minutes: number
-  agitation_off_minutes: number
-  health_score: number
-  issue_probability: number
+export interface FeatureImportanceItem {
+  feature: string
+  importance?: number
+  importance_mean?: number
+  importance_std?: number
+  description?: string
 }
 
 export interface RiskItem {
@@ -90,13 +132,28 @@ export interface RiskItem {
 
 export interface TransferItem {
   id: number
+  source_bank_id?: number
+  destination_bank_id?: number
   source_bank: string
+  source_city?: string
+  source_lat?: number
+  source_lon?: number
   destination_bank: string
+  destination_city?: string
+  destination_lat?: number
+  destination_lon?: number
   component: string
   blood_group: string
   quantity: number
   route: string | null
   vehicle: string | null
+  distance_km?: number
+  travel_time_min?: number
+  is_connected_to_anchor?: boolean
+  route_score?: number
+  urgency_level?: 'CRITICAL' | 'HIGH' | 'MODERATE' | string
+  recommendation_reason?: string
+  clinical_impact?: string
   status: 'PENDING' | 'APPROVED' | 'REJECTED' | string
   created_at?: string
 }
@@ -138,61 +195,84 @@ export interface IntelligenceStatus {
   demand_forecast_model?: string
   expiry_risk_model?: string
   cold_chain_anomaly_model?: string
+  optimization_engine?: string
   optimizer_status?: string
   cache_status?: string
   engine?: string
   mode?: string
   version?: string
   ready?: boolean
+  status?: 'IDLE' | 'TRAINING' | 'INFERENCE' | 'ERROR'
 }
 
 export interface IntelligenceRunResult {
-  success: boolean
-  message: string
-  run_id: string
-  duration_ms: number
-  demand_forecasts_created: number
-  risk_predictions_created: number
-  transfer_recommendations_created: number
-  timestamp: string
-}
-
-export interface FeatureImportanceItem {
-  feature: string
-  importance?: number
-  importance_mean?: number
-  importance_std?: number
-  description?: string
+  status?: string
+  success?: boolean
+  message?: string
+  run_id?: string
+  duration_ms?: number
+  demand_forecasts_created?: number
+  risk_predictions_created?: number
+  transfer_recommendations_created?: number
+  demand_forecasts_updated?: number
+  risk_predictions_updated?: number
+  transfers_recommended?: number
+  anomalies_detected?: number
+  timestamp?: string
+  run_timestamp?: string
 }
 
 export interface ModelMetricsData {
   demand_forecasting?: {
-    model_family: string
+    model_name?: string
+    model_family?: string
     r2_score: number
     mae: number
     rmse: number
-    wape: number
-    lead_time_coverage: string
+    wape?: number
+    lead_time_coverage?: string
+    features_count?: number
+    training_samples?: number
   }
-  unit_expiry_risk?: {
-    model_family: string
+  expiry_risk?: {
+    model_name?: string
+    model_family?: string
     auc_roc: number
-    brier_score: number
-    precision_at_k: number
-    f1_score: number
+    brier_score?: number
+    precision_at_k?: number
+    precision?: number
+    recall?: number
+    f1_score?: number
+    distribution?: {
+      critical_pct: number
+      high_pct: number
+      moderate_pct: number
+      low_medium_pct: number
+      low_pct: number
+    }
   }
   cold_chain_anomaly?: {
-    model_family: string
+    model_name?: string
+    model_family?: string
     contamination_rate: number
-    detection_latency: string
-    false_alarm_rate: number
+    detection_latency?: string
+    false_alarm_rate?: number
+    precision?: number
+    recall?: number
+    anomalies_detected?: number
   }
   highs_optimization?: {
     solver: string
-    objective: string
-    avg_solve_time: string
-    optimality_gap: string
-    constraints_active: string[]
+    objective?: string
+    avg_solve_time?: string
+    optimality_gap?: string
+    constraints_active?: string[]
+  }
+  optimization?: {
+    solver: string
+    average_solve_time_ms: number
+    wastage_reduction_pct: number
+    stockout_reduction_pct: number
   }
   metrics?: any
 }
@@ -263,6 +343,7 @@ export interface CentreProfile {
 }
 
 export interface CentreSummary {
+  centre_id: number
   centre_name: string
   centre_city: string
   operational_radius_km: number
@@ -272,6 +353,53 @@ export interface CentreSummary {
   near_expiry_units: number
   high_risk_units: number
   potential_transfers: number
+  local_inventory?: {
+    total_units: number
+    batches_count: number
+    low_stock: number
+    near_expiry: number
+    critical_risk: number
+  }
+}
+
+export interface CentreColdChainData {
+  centre_id: number
+  centre_name: string
+  current_temperature: number
+  min_temperature: number
+  max_temperature: number
+  mean_temperature: number
+  agitation_status: string
+  agitation_rpm: number
+  agitation_off_minutes: number
+  excursions_count: number
+  cumulative_excursion_minutes: number
+  equipment: {
+    id: string
+    type: string
+    health_score: number
+    status: string
+  }
+  anomaly_score: number
+  anomaly_status: string
+  clinical_explanation: string
+  model_version: string
+  telemetry_recent?: {
+    timestamp: string
+    temperature: number
+    agitation: boolean
+  }[]
+}
+
+export interface CentreHealthData {
+  centre_id: number
+  centre_name: string
+  inventory: 'NORMAL' | 'LOW' | 'CRITICAL' | string
+  demand: 'BALANCED' | 'PRESSURE' | 'SHORTAGE' | string
+  expiry: 'NORMAL' | 'WATCH' | 'CRITICAL' | string
+  cold_chain: 'SAFE' | 'ATTENTION' | 'CRITICAL' | string
+  overall_operational_state: 'STABLE' | 'ATTENTION' | 'ACTION REQUIRED' | string
+  decision_summary: string
 }
 
 export interface CentreNetworkFacility {
@@ -299,6 +427,7 @@ export interface CentrePressureFacility {
   demand: number
   surplus_units?: number
   deficit_units?: number
+  is_anchor?: boolean
 }
 
 export interface CentrePressureData {

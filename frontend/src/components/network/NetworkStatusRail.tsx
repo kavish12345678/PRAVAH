@@ -16,7 +16,7 @@ export function NetworkStatusRail({
   let textColor = 'text-emerald-400'
   let dotColor = 'bg-emerald-500'
 
-  if (highRiskCount > 0 || (summary && summary.equipment_warnings > 0)) {
+  if (highRiskCount > 0 || (summary && (summary.equipment_warnings ?? 0) > 0)) {
     statusText = 'ACTION REQUIRED'
     statusColor = 'border-rose-500/40'
     textColor = 'text-rose-400'

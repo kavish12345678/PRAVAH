@@ -2,6 +2,8 @@ import { useCallback, useEffect, useState } from 'react'
 import * as api from '../services/api'
 import type {
   AuditItem,
+  CentreColdChainData,
+  CentreHealthData,
   CentreNetworkFacility,
   CentrePressureData,
   CentreProfile,
@@ -16,14 +18,11 @@ import type {
 export interface CentreWorkspaceData {
   profile: CentreProfile | null
   summary: CentreSummary | null
+  coldChain: CentreColdChainData | null
+  health: CentreHealthData | null
   network: CentreNetworkFacility[]
   inventory: (InventoryItem & { distance_km: number; city: string; is_anchor: boolean })[]
-  forecasts: (ForecastItem & {
-    distance_km: number
-    current_stock: number
-    balance_status: string
-    is_anchor: boolean
-  })[]
+  forecasts: ForecastItem[]
   risks: (RiskItem & { distance_km: number; is_anchor: boolean })[]
   pressure: CentrePressureData | null
   transfers: (TransferItem & { distance_km: number; is_connected_to_anchor: boolean })[]
@@ -36,6 +35,8 @@ export function useCentreData(centreId: number = DEFAULT_CENTRE_ID) {
   const [data, setData] = useState<CentreWorkspaceData>({
     profile: null,
     summary: null,
+    coldChain: null,
+    health: null,
     network: [],
     inventory: [],
     forecasts: [],
@@ -55,19 +56,11 @@ export function useCentreData(centreId: number = DEFAULT_CENTRE_ID) {
     setLoading(true)
     setError(null)
     try {
-      const [
-        profile,
-        summary,
-        network,
-        inventory,
-        forecasts,
-        risks,
-        pressure,
-        transfers,
-        auditLogs,
-      ] = await Promise.all([
+      const results = await Promise.allSettled([
         api.fetchCentreProfile(centreId),
         api.fetchCentreSummary(centreId, 200),
+        api.fetchCentreColdChain(centreId),
+        api.fetchCentreHealth(centreId),
         api.fetchCentreNetwork(centreId, 200),
         api.fetchCentreInventory({ centre_id: centreId, radius_km: 200, limit: 200 }),
         api.fetchCentreForecast(centreId, 200),
@@ -77,9 +70,23 @@ export function useCentreData(centreId: number = DEFAULT_CENTRE_ID) {
         api.fetchCentreAudit(centreId),
       ])
 
+      const profile = results[0].status === 'fulfilled' ? results[0].value : null
+      const summary = results[1].status === 'fulfilled' ? results[1].value : null
+      const coldChain = results[2].status === 'fulfilled' ? results[2].value : null
+      const health = results[3].status === 'fulfilled' ? results[3].value : null
+      const network = results[4].status === 'fulfilled' ? results[4].value : []
+      const inventory = results[5].status === 'fulfilled' ? results[5].value : []
+      const forecasts = results[6].status === 'fulfilled' ? results[6].value : []
+      const risks = results[7].status === 'fulfilled' ? results[7].value : []
+      const pressure = results[8].status === 'fulfilled' ? results[8].value : null
+      const transfers = results[9].status === 'fulfilled' ? results[9].value : []
+      const auditLogs = results[10].status === 'fulfilled' ? results[10].value : []
+
       setData({
         profile,
         summary,
+        coldChain,
+        health,
         network,
         inventory,
         forecasts,
@@ -89,6 +96,12 @@ export function useCentreData(centreId: number = DEFAULT_CENTRE_ID) {
         auditLogs,
       })
       setLastSynced(new Date().toLocaleTimeString())
+
+      const failedCount = results.filter((r) => r.status === 'rejected').length
+      if (failedCount === results.length) {
+        const firstErr = (results[0] as PromiseRejectedResult).reason
+        setError(firstErr instanceof Error ? firstErr.message : 'Data service unavailable')
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load centre workspace data')
     } finally {
@@ -125,16 +138,16 @@ export function useCentreData(centreId: number = DEFAULT_CENTRE_ID) {
   )
 
   const filterInventory = useCallback(
-    async (filters: { blood_group?: string; component?: string; status?: string }) => {
+    async (filters: { blood_group?: string; component?: string; status?: string; anchor_only?: boolean }) => {
       try {
-        const inventory = await api.fetchCentreInventory({
+        const inv = await api.fetchCentreInventory({
           centre_id: centreId,
           radius_km: 200,
           ...filters,
         })
-        setData((prev) => ({ ...prev, inventory }))
+        setData((prev) => ({ ...prev, inventory: inv }))
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Filter failed')
+        console.error('Inventory filtering error:', err)
       }
     },
     [centreId],
@@ -143,14 +156,14 @@ export function useCentreData(centreId: number = DEFAULT_CENTRE_ID) {
   const filterRisks = useCallback(
     async (level?: string) => {
       try {
-        const risks = await api.fetchCentreRisk({
+        const r = await api.fetchCentreRisk({
           centre_id: centreId,
           radius_km: 200,
           level,
         })
-        setData((prev) => ({ ...prev, risks }))
+        setData((prev) => ({ ...prev, risks: r }))
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Risk query failed')
+        console.error('Risk filtering error:', err)
       }
     },
     [centreId],
@@ -158,6 +171,7 @@ export function useCentreData(centreId: number = DEFAULT_CENTRE_ID) {
 
   return {
     data,
+    ...data,
     loading,
     error,
     isOptimizing,
