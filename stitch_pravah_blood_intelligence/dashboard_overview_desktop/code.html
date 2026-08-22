@@ -1,0 +1,279 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>PRAVAH Intelligence Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&amp;family=Noto+Serif:wght@500;600&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-fixed-variant": "#8f0b27",
+                        "on-secondary-fixed-variant": "#2c4e34",
+                        "on-background": "#1f1b19",
+                        "on-tertiary": "#ffffff",
+                        "tertiary-fixed": "#ffddb6",
+                        "outline": "#8c7070",
+                        "surface-container-low": "#fcf1ee",
+                        "surface-container-lowest": "#ffffff",
+                        "error": "#ba1a1a",
+                        "background": "#fff8f6",
+                        "on-primary-fixed": "#40000b",
+                        "on-secondary-container": "#4a6c50",
+                        "surface-tint": "#b1293c",
+                        "on-error-container": "#93000a",
+                        "on-primary": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "primary-fixed": "#ffdada",
+                        "on-surface": "#1f1b19",
+                        "on-primary-container": "#ffb7b8",
+                        "secondary-fixed-dim": "#aad0ae",
+                        "outline-variant": "#e0bfbf",
+                        "on-error": "#ffffff",
+                        "surface": "#fff8f6",
+                        "inverse-surface": "#352f2d",
+                        "secondary": "#44664b",
+                        "secondary-fixed": "#c5ecc9",
+                        "on-secondary-fixed": "#00210c",
+                        "error-container": "#ffdad6",
+                        "on-tertiary-container": "#ffbd65",
+                        "inverse-on-surface": "#f9efeb",
+                        "tertiary": "#583600",
+                        "surface-container": "#f6ece8",
+                        "inverse-primary": "#ffb3b4",
+                        "primary": "#80001f",
+                        "surface-dim": "#e2d8d5",
+                        "secondary-container": "#c5ecc9",
+                        "primary-fixed-dim": "#ffb3b4",
+                        "surface-container-high": "#f0e6e3",
+                        "on-surface-variant": "#594141",
+                        "surface-bright": "#fff8f6",
+                        "surface-container-highest": "#ebe0dd",
+                        "on-tertiary-fixed-variant": "#643f00",
+                        "surface-variant": "#ebe0dd",
+                        "on-tertiary-fixed": "#2a1800",
+                        "primary-container": "#a31e33",
+                        "tertiary-fixed-dim": "#ffb95a",
+                        "tertiary-container": "#774b00"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "panel-gap": "24px",
+                        "container-padding": "48px",
+                        "unit": "8px",
+                        "section-margin": "80px"
+                    },
+                    "fontFamily": {
+                        "kpi-value": ["Manrope"],
+                        "display-lg": ["Noto Serif"],
+                        "display-md": ["Noto Serif"],
+                        "body-md": ["Manrope"],
+                        "headline-lg-mobile": ["Noto Serif"],
+                        "label-sm": ["Manrope"],
+                        "headline-lg": ["Noto Serif"],
+                        "body-lg": ["Manrope"]
+                    },
+                    "fontSize": {
+                        "kpi-value": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.03em", "fontWeight": "700" }],
+                        "display-lg": ["64px", { "lineHeight": "72px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "display-md": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "500" }],
+                        "label-sm": ["13px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "500" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { background-color: #FBF7F4; }
+        .hairline-b { border-bottom: 1px solid rgba(163, 30, 51, 0.15); }
+        .hairline-l { border-left: 1px solid rgba(163, 30, 51, 0.15); }
+        .panel-bg { background-color: #F5F1EE; }
+    </style>
+</head>
+<body class="text-on-surface font-body-md min-h-screen flex">
+<!-- SideNavBar -->
+<nav class="h-screen w-80 fixed left-0 top-0 bg-surface-container-low dark:bg-surface-container flex flex-col py-panel-gap z-20">
+<div class="px-6 mb-12">
+<h1 class="font-display-md text-display-md font-semibold text-primary dark:text-primary-fixed-dim">PRAVAH</h1>
+<p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mt-2">Blood Intelligence</p>
+</div>
+<ul class="flex-1 space-y-2 px-4">
+<li>
+<a class="flex items-center gap-4 text-primary dark:text-primary-fixed-dim font-semibold py-3 px-6 bg-surface-container-high dark:bg-surface-container-highest rounded-full active:scale-[0.98] transition-transform" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+<span class="font-body-md text-body-md">Dashboard</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-4 text-on-surface-variant dark:text-on-surface-variant py-3 px-6 hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-all duration-300 rounded-full active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined">map</span>
+<span class="font-body-md text-body-md">Inventory Map</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-4 text-on-surface-variant dark:text-on-surface-variant py-3 px-6 hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-all duration-300 rounded-full active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined">hub</span>
+<span class="font-body-md text-body-md">Supply Chain</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-4 text-on-surface-variant dark:text-on-surface-variant py-3 px-6 hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-all duration-300 rounded-full active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined">psychology</span>
+<span class="font-body-md text-body-md">AI Insights</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-4 text-on-surface-variant dark:text-on-surface-variant py-3 px-6 hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-all duration-300 rounded-full active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="font-body-md text-body-md">Archive</span>
+</a>
+</li>
+</ul>
+<div class="px-6 mt-auto">
+<div class="mb-6 px-4 py-3 rounded-full bg-secondary-fixed/10 text-secondary border border-secondary/20 flex items-center justify-center gap-2">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span class="font-label-sm text-label-sm">System Status: Stable</span>
+</div>
+<ul class="space-y-2">
+<li>
+<a class="flex items-center gap-4 text-on-surface-variant py-2 px-4 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-sm">help</span>
+<span class="font-body-md text-body-md text-sm">Support</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-4 text-on-surface-variant py-2 px-4 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-sm">settings</span>
+<span class="font-body-md text-body-md text-sm">Settings</span>
+</a>
+</li>
+</ul>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="ml-80 flex-1 flex flex-col min-h-screen">
+<!-- TopNavBar -->
+<header class="w-full h-20 bg-surface dark:bg-surface-dim flex justify-between items-center px-container-padding max-w-[1920px] mx-auto z-10 sticky top-0">
+<div class="flex items-center gap-8">
+<!-- Search would go here in a full implementation -->
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined">search</span>
+<span class="font-body-md text-body-md opacity-50">Search nodes...</span>
+</div>
+</div>
+<nav class="flex items-center gap-8 hidden lg:flex">
+<a class="text-on-surface-variant dark:text-on-surface-variant font-medium hover:text-primary dark:hover:text-primary-fixed-dim transition-colors duration-200 cursor-pointer active:opacity-80" href="#">Inventory</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant font-medium hover:text-primary dark:hover:text-primary-fixed-dim transition-colors duration-200 cursor-pointer active:opacity-80" href="#">Logistics</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant font-medium hover:text-primary dark:hover:text-primary-fixed-dim transition-colors duration-200 cursor-pointer active:opacity-80" href="#">Analytics</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant font-medium hover:text-primary dark:hover:text-primary-fixed-dim transition-colors duration-200 cursor-pointer active:opacity-80" href="#">Forecasts</a>
+</nav>
+<div class="flex items-center gap-6">
+<button class="bg-primary-container text-on-primary font-label-sm text-label-sm px-6 py-2.5 rounded-full hover:opacity-90 transition-opacity">Emergency Alert</button>
+<div class="flex gap-4 text-on-surface-variant">
+<span class="material-symbols-outlined cursor-pointer hover:text-primary transition-colors">notifications</span>
+<span class="material-symbols-outlined cursor-pointer hover:text-primary transition-colors">settings</span>
+</div>
+<div class="w-10 h-10 rounded-full bg-surface-variant overflow-hidden border border-outline-variant">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="A close-up portrait of a medical professional with a warm, confident expression. Soft, high-key lighting creates a pristine, professional atmosphere. The color palette is minimal, focusing on neutral whites and subtle skin tones, reflecting a clean, high-end healthcare environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBy_hT3R11n65SQSIpojKye21sEqZuHLUhjsF4741yQZsm_KfrX0Cx2L_jvDS21VSQOTilscKF8AXHiuJ-YfBNyVBKgrKi34Y0UD7JKXQNTagBoincK6uFOSTfXsS5KeiezUQwFQsX1J2jC1CN8rua2GWtPUIsmaHVUzhcGrxKu-x597fNV4IL_z_v8TImHp09hduL6Yhx2U17jbPwo2_wHipgRfDpPPj2QuOoA4NUVQkz7R2IH8sjY">
+</div>
+</div>
+</header>
+<!-- Dashboard Content -->
+<div class="p-container-padding max-w-[1920px] mx-auto w-full flex-1">
+<div class="flex flex-col xl:flex-row gap-panel-gap mb-section-margin">
+<!-- Left Hero Panel -->
+<section class="xl:w-2/3 panel-bg rounded-2xl p-10 relative overflow-hidden">
+<header class="mb-8">
+<h2 class="font-headline-lg text-headline-lg text-on-surface mb-2">Supply Intelligence</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-xl">Real-time analysis of blood supply nodes vs. projected regional demand over the next 72 hours.</p>
+</header>
+<div class="h-80 w-full relative">
+<!-- Abstract Chart Representation -->
+<div class="absolute bottom-0 left-0 w-full h-full flex items-end justify-between gap-2 opacity-80">
+<div class="w-full bg-primary/10 rounded-t-lg h-1/3 relative"><div class="absolute top-0 w-full border-t border-primary"></div></div>
+<div class="w-full bg-primary/20 rounded-t-lg h-1/2 relative"><div class="absolute top-0 w-full border-t border-primary"></div></div>
+<div class="w-full bg-primary/10 rounded-t-lg h-1/4 relative"><div class="absolute top-0 w-full border-t border-primary"></div></div>
+<div class="w-full bg-primary/30 rounded-t-lg h-3/4 relative"><div class="absolute top-0 w-full border-t border-primary"></div></div>
+<div class="w-full bg-primary/40 rounded-t-lg h-full relative"><div class="absolute top-0 w-full border-t border-primary"></div></div>
+<div class="w-full bg-primary/20 rounded-t-lg h-2/3 relative"><div class="absolute top-0 w-full border-t border-primary"></div></div>
+<div class="w-full bg-primary/10 rounded-t-lg h-1/3 relative"><div class="absolute top-0 w-full border-t border-primary"></div></div>
+</div>
+</div>
+</section>
+<!-- Right Side Panel -->
+<aside class="xl:w-1/3 flex flex-col gap-panel-gap">
+<!-- Global Risk Score -->
+<div class="panel-bg rounded-2xl p-8 flex-1 flex flex-col justify-center">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-4">Global Risk Score</span>
+<div class="flex items-baseline gap-2">
+<span class="font-kpi-value text-[72px] leading-[80px] tracking-tight font-bold text-primary">8.4</span>
+<span class="font-body-lg text-body-lg text-on-surface-variant">/ 10</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mt-4">Elevated risk detected in Northern Sector due to transit delays.</p>
+</div>
+<!-- Critical Alerts -->
+<div class="panel-bg rounded-2xl p-8 flex-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-6 block">Critical Demand</span>
+<ul class="space-y-6">
+<li class="flex justify-between items-start">
+<div>
+<h4 class="font-body-lg text-body-lg font-semibold text-on-surface">Node Alpha</h4>
+<p class="font-body-md text-body-md text-on-surface-variant">Requires O- immediately</p>
+</div>
+<span class="bg-primary/10 text-primary px-3 py-1 rounded-full font-label-sm text-label-sm">Urgent</span>
+</li>
+<li class="hairline-b w-full"></li>
+<li class="flex justify-between items-start">
+<div>
+<h4 class="font-body-lg text-body-lg font-semibold text-on-surface">Node Delta</h4>
+<p class="font-body-md text-body-md text-on-surface-variant">Supply dropping &lt; 15%</p>
+</div>
+<span class="bg-secondary/10 text-secondary px-3 py-1 rounded-full font-label-sm text-label-sm">Monitoring</span>
+</li>
+</ul>
+</div>
+</aside>
+</div>
+<!-- Critical Inventory Section -->
+<section>
+<h3 class="font-headline-lg text-headline-lg text-on-surface mb-8">Critical Inventory</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-panel-gap">
+<!-- KPI Card -->
+<div class="pl-6 hairline-l">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest block mb-2">Type O-</span>
+<div class="font-kpi-value text-kpi-value text-primary mb-1">12 Units</div>
+<span class="font-body-md text-body-md text-error flex items-center gap-1"><span class="material-symbols-outlined text-sm">trending_down</span> Critical Low</span>
+</div>
+<div class="pl-6 hairline-l">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest block mb-2">Type A+</span>
+<div class="font-kpi-value text-kpi-value text-on-surface mb-1">45 Units</div>
+<span class="font-body-md text-body-md text-secondary flex items-center gap-1"><span class="material-symbols-outlined text-sm">trending_flat</span> Stable</span>
+</div>
+<div class="pl-6 hairline-l">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest block mb-2">Type B-</span>
+<div class="font-kpi-value text-kpi-value text-on-surface mb-1">28 Units</div>
+<span class="font-body-md text-body-md text-on-surface-variant flex items-center gap-1"><span class="material-symbols-outlined text-sm">trending_down</span> Declining</span>
+</div>
+<div class="pl-6 hairline-l">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest block mb-2">Type AB+</span>
+<div class="font-kpi-value text-kpi-value text-on-surface mb-1">84 Units</div>
+<span class="font-body-md text-body-md text-secondary flex items-center gap-1"><span class="material-symbols-outlined text-sm">trending_up</span> Optimal</span>
+</div>
+</div>
+</section>
+</div>
+</main>
+</body></html>

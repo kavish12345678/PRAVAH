@@ -33,7 +33,7 @@ def _serialize_transfer(
         "route": transfer.route,
         "vehicle": transfer.vehicle,
         "status": transfer.status,
-        "created_at": transfer.created_at,
+        "created_at": transfer.created_at.isoformat() if transfer.created_at else None,
     }
 
 
@@ -66,6 +66,42 @@ def list_transfers(
     ]
 
 
+@router.get("/audit")
+def list_audit_logs(
+    limit: int = Query(default=50, ge=1, le=500),
+    db: Session = Depends(get_db),
+):
+    source_bank = BloodBank.__table__.alias("source_bank")
+    destination_bank = BloodBank.__table__.alias("destination_bank")
+
+    rows = db.execute(
+        select(
+            AuditLog,
+            source_bank.c.name,
+            destination_bank.c.name,
+        )
+        .outerjoin(source_bank, AuditLog.source_bank_id == source_bank.c.id)
+        .outerjoin(destination_bank, AuditLog.destination_bank_id == destination_bank.c.id)
+        .order_by(AuditLog.timestamp.desc())
+        .limit(limit)
+    ).all()
+
+    return [
+        {
+            "id": log.id,
+            "timestamp": log.timestamp.isoformat(),
+            "action": log.action,
+            "user": log.user,
+            "recommendation_id": log.recommendation_id,
+            "source_bank": source_name or "National Reserve Hub",
+            "destination_bank": destination_name or "Regional Trauma Center",
+            "quantity": log.quantity,
+            "approval_status": log.approval_status,
+        }
+        for log, source_name, destination_name in rows
+    ]
+
+
 @router.patch("/{transfer_id}/status")
 def update_transfer_status(
     transfer_id: int,
@@ -78,19 +114,18 @@ def update_transfer_status(
 
     transfer.status = payload.status
 
-    if payload.status == "APPROVED":
-        db.add(
-            AuditLog(
-                timestamp=datetime.now(),
-                action="TRANSFER_APPROVED",
-                user="prototype-user",
-                recommendation_id=transfer.id,
-                source_bank_id=transfer.source_bank_id,
-                destination_bank_id=transfer.destination_bank_id,
-                quantity=transfer.quantity,
-                approval_status="APPROVED",
-            )
+    db.add(
+        AuditLog(
+            timestamp=datetime.now(),
+            action=f"TRANSFER_{payload.status}",
+            user="National Logistics Officer",
+            recommendation_id=transfer.id,
+            source_bank_id=transfer.source_bank_id,
+            destination_bank_id=transfer.destination_bank_id,
+            quantity=transfer.quantity,
+            approval_status=payload.status,
         )
+    )
 
     db.commit()
     db.refresh(transfer)

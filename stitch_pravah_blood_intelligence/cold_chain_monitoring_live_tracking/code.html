@@ -1,0 +1,376 @@
+<!DOCTYPE html><html class="light" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Cold-Chain Monitoring - PRAVAH Intelligence</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@500;600&amp;family=Manrope:wght@400;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary": "#ffffff",
+                        "on-tertiary-container": "#ffbd65",
+                        "on-secondary": "#ffffff",
+                        "surface-container-highest": "#ebe0dd",
+                        "outline": "#8c7070",
+                        "surface-dim": "#e2d8d5",
+                        "surface-container": "#f6ece8",
+                        "on-primary-fixed": "#40000b",
+                        "on-tertiary-fixed-variant": "#643f00",
+                        "background": "#fff8f6",
+                        "surface-container-high": "#f0e6e3",
+                        "on-primary-container": "#ffb7b8",
+                        "on-surface-variant": "#594141",
+                        "primary-fixed-dim": "#ffb3b4",
+                        "surface-bright": "#fff8f6",
+                        "surface-container-lowest": "#ffffff",
+                        "primary": "#80001f",
+                        "on-primary-fixed-variant": "#8f0b27",
+                        "inverse-primary": "#ffb3b4",
+                        "on-background": "#1f1b19",
+                        "surface-variant": "#ebe0dd",
+                        "on-primary": "#ffffff",
+                        "tertiary-fixed": "#ffddb6",
+                        "inverse-on-surface": "#f9efeb",
+                        "on-error-container": "#93000a",
+                        "surface": "#fff8f6",
+                        "primary-container": "#a31e33",
+                        "error-container": "#ffdad6",
+                        "on-secondary-container": "#4a6c50",
+                        "on-secondary-fixed": "#00210c",
+                        "secondary-fixed-dim": "#aad0ae",
+                        "secondary-fixed": "#c5ecc9",
+                        "surface-tint": "#b1293c",
+                        "tertiary-fixed-dim": "#ffb95a",
+                        "outline-variant": "#e0bfbf",
+                        "on-tertiary-fixed": "#2a1800",
+                        "primary-fixed": "#ffdada",
+                        "on-error": "#ffffff",
+                        "secondary-container": "#c5ecc9",
+                        "tertiary-container": "#774b00",
+                        "tertiary": "#583600",
+                        "on-secondary-fixed-variant": "#2c4e34",
+                        "error": "#ba1a1a",
+                        "surface-container-low": "#fcf1ee",
+                        "inverse-surface": "#352f2d",
+                        "on-surface": "#1f1b19",
+                        "secondary": "#44664b"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "unit": "8px",
+                        "container-padding": "48px",
+                        "panel-gap": "24px",
+                        "section-margin": "80px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Noto Serif"],
+                        "body-md": ["Manrope"],
+                        "display-lg": ["Noto Serif"],
+                        "body-lg": ["Manrope"],
+                        "kpi-value": ["Manrope"],
+                        "label-sm": ["Manrope"],
+                        "display-md": ["Noto Serif"],
+                        "headline-lg-mobile": ["Noto Serif"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "500" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "display-lg": ["64px", { "lineHeight": "72px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "kpi-value": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.03em", "fontWeight": "700" }],
+                        "label-sm": ["13px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "display-md": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { background-color: #FBF7F4; } /* Warm ivory fallback if classes fail */
+        .hairline-b { border-bottom: 1px solid rgba(140, 112, 112, 0.15); }
+        .hairline-l { border-left: 1px solid rgba(140, 112, 112, 0.15); }
+        
+        /* Subtle glow effects for status */
+        .glow-critical { text-shadow: 0 0 40px rgba(163, 30, 51, 0.4); }
+        .glow-normal { text-shadow: 0 0 40px rgba(107, 143, 113, 0.4); }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md antialiased min-h-screen flex">
+<!-- SideNavBar -->
+<nav class="bg-surface-container dark:bg-surface-container-high h-screen w-80 fixed left-0 top-0 flex flex-col h-full py-8 border-r border-outline/10 dark:border-outline-variant/10 z-50 hidden md:flex">
+<div class="px-8 mb-12">
+<h1 class="font-headline-lg text-headline-lg text-primary dark:text-primary-fixed-dim">Cold-Chain Pro</h1>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Active Monitoring</p>
+</div>
+<ul class="flex-1 flex flex-col gap-2">
+<li>
+<a class="group flex items-center gap-4 cursor-pointer text-on-surface-variant dark:text-outline-variant pl-4 py-3 hover:bg-surface-container-highest dark:hover:bg-surface-variant transition-all duration-300" href="#">
+<span class="material-symbols-outlined ml-4" style="font-variation-settings: 'FILL' 0;">dashboard</span>
+<span class="font-label-sm text-label-sm font-body-lg text-body-lg">Dashboard</span>
+</a>
+</li>
+<li>
+<a class="group flex items-center gap-4 cursor-pointer text-on-surface-variant dark:text-outline-variant pl-4 py-3 hover:bg-surface-container-highest dark:hover:bg-surface-variant transition-all duration-300" href="#">
+<span class="material-symbols-outlined ml-4" style="font-variation-settings: 'FILL' 0;">inventory_2</span>
+<span class="font-label-sm text-label-sm font-body-lg text-body-lg">Inventory</span>
+</a>
+</li>
+<li>
+<a class="group flex items-center gap-4 cursor-pointer text-on-surface-variant dark:text-outline-variant pl-4 py-3 hover:bg-surface-container-highest dark:hover:bg-surface-variant transition-all duration-300" href="#">
+<span class="material-symbols-outlined ml-4" style="font-variation-settings: 'FILL' 0;">psychology</span>
+<span class="font-label-sm text-label-sm font-body-lg text-body-lg">Risk Intelligence</span>
+</a>
+</li>
+<li>
+<a class="group flex items-center gap-4 cursor-pointer text-primary dark:text-primary-fixed-dim border-l-2 border-primary dark:border-primary-fixed-dim pl-4 py-3 hover:bg-surface-container-highest dark:hover:bg-surface-variant transition-all duration-300" href="#">
+<span class="material-symbols-outlined ml-4" style="font-variation-settings: 'FILL' 1;">ac_unit</span>
+<span class="font-label-sm text-label-sm font-body-lg text-body-lg font-bold">Cold-Chain Monitoring</span>
+</a>
+</li>
+</ul>
+<div class="px-8 mb-8 mt-auto">
+<button class="w-full bg-primary-container text-on-primary py-3 rounded-DEFAULT font-label-sm text-label-sm hover:opacity-90 transition-opacity">Export Reports</button>
+</div>
+<ul class="flex flex-col gap-2 border-t border-outline/10 pt-4">
+<li>
+<a class="group flex items-center gap-4 cursor-pointer text-on-surface-variant dark:text-outline-variant pl-4 py-3 hover:bg-surface-container-highest dark:hover:bg-surface-variant transition-all duration-300" href="#">
+<span class="material-symbols-outlined ml-4" style="font-variation-settings: 'FILL' 0;">help_outline</span>
+<span class="font-label-sm text-label-sm font-body-lg text-body-lg">Support</span>
+</a>
+</li>
+<li>
+<a class="group flex items-center gap-4 cursor-pointer text-on-surface-variant dark:text-outline-variant pl-4 py-3 hover:bg-surface-container-highest dark:hover:bg-surface-variant transition-all duration-300" href="#">
+<span class="material-symbols-outlined ml-4" style="font-variation-settings: 'FILL' 0;">logout</span>
+<span class="font-label-sm text-label-sm font-body-lg text-body-lg">Sign Out</span>
+</a>
+</li>
+</ul>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-1 md:ml-80 min-h-screen flex flex-col">
+<!-- TopNavBar (Mobile only for Nav, but keeping header structure) -->
+<header class="w-full h-20 bg-surface dark:bg-surface flex justify-between items-center px-container-padding max-w-[1440px] mx-auto flat no shadows md:hidden">
+<div class="font-headline-lg text-headline-lg font-medium text-primary dark:text-primary-fixed-dim">
+                Aether Logistics
+            </div>
+<div class="flex gap-4">
+<span class="material-symbols-outlined text-on-surface-variant hover:text-primary cursor-pointer transition-colors duration-200">notifications</span>
+<span class="material-symbols-outlined text-on-surface-variant hover:text-primary cursor-pointer transition-colors duration-200">settings</span>
+<img alt="Chief Logistics Officer" class="w-8 h-8 rounded-full object-cover" data-alt="A small circular profile picture of a professional logistics manager in a bright, modern setting. The style is hyper-realistic corporate photography with soft, flattering lighting and a warm ivory background. The subject conveys quiet confidence." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDWylWp5XgzLCw90puasc55LhnFn0bgS3nJpTCmDZYErRGTj09GMg7eK5SLfnCmDXtepVtwdFyFoO9wtrf8MuVn-0FhAmh-jsPEvpPlI-WDoye4itRWmAd8nVs5TQXCbWP00Q2vVB3mjqaZnZZyLjsEeliMbeCJ9b87VcYEYgQZmzsGNhnN_pYDbKokY9FD3RztmrMEawd3jgdjJnqgdhxrg_eAUkQazHPWWP6Bn9_gbIjbADaCEcUX">
+</div>
+</header>
+<!-- Canvas -->
+<div class="px-container-padding py-12 flex-1 max-w-[1440px] mx-auto w-full">
+<!-- Page Header -->
+<div class="mb-section-margin">
+<h2 class="font-display-md text-display-md text-on-background mb-2">Network Temperature Overview</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl">Real-time telemetry from all active high-value biomedical shipments and stationary cold storage units.</p>
+</div>
+<!-- Asymmetric Layout: Chart (Left) + Status/Insights (Right) -->
+<div class="flex flex-col lg:flex-row gap-panel-gap mb-section-margin">
+<!-- Dominant Chart Panel (Approx 65%) -->
+<div class="lg:w-2/3 bg-[#F5F1EE] rounded-xl p-8 flex flex-col">
+<div class="flex justify-between items-end mb-8">
+<div>
+<h3 class="font-headline-lg text-headline-lg text-on-background">Global Mean Temperature</h3>
+<p class="font-label-sm text-label-sm text-on-surface-variant mt-1 uppercase tracking-wider">Past 24 Hours • Ultra-Low Storage</p>
+</div>
+<div class="text-right pl-6 hairline-l">
+<div class="font-kpi-value text-kpi-value text-on-background">-78.2°C</div>
+<div class="font-label-sm text-label-sm text-secondary">Target: -80.0°C</div>
+</div>
+</div>
+<div class="flex-1 w-full min-h-[400px] relative">
+<canvas id="temperatureChart"></canvas>
+</div>
+</div>
+<!-- Status & Insights Panel (Approx 35%) -->
+<div class="lg:w-1/3 flex flex-col gap-8">
+<!-- Typographic Status -->
+<div class="bg-[#F5F1EE] rounded-xl p-8 flex flex-col justify-center items-center h-64 text-center">
+<p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-4">System Status</p>
+<h3 class="font-display-lg text-display-lg text-primary glow-critical">Critical</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mt-4">Attention required in Sector 4. Excursion detected in Unit B-12.</p>
+</div>
+<!-- Insight Feed -->
+<div class="bg-[#F5F1EE] rounded-xl p-8 flex-1">
+<h4 class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-6">Recent Alerts</h4>
+<div class="flex flex-col gap-6">
+<div class="flex gap-4 hairline-b pb-6">
+<span class="material-symbols-outlined text-primary mt-1">warning</span>
+<div>
+<p class="font-body-md text-body-md text-on-background font-semibold">Temperature Spike Detected</p>
+<p class="font-body-md text-body-md text-on-surface-variant">Freezer B-12 reached -65°C for 4 minutes.</p>
+<p class="font-label-sm text-label-sm text-on-surface-variant mt-2">10:42 AM</p>
+</div>
+</div>
+<div class="flex gap-4">
+<span class="material-symbols-outlined text-secondary mt-1">check_circle</span>
+<div>
+<p class="font-body-md text-body-md text-on-background font-semibold">Maintenance Completed</p>
+<p class="font-body-md text-body-md text-on-surface-variant">Compressor replacement on Unit A-04.</p>
+<p class="font-label-sm text-label-sm text-on-surface-variant mt-2">08:15 AM</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Equipment List Section -->
+<div>
+<h3 class="font-headline-lg text-headline-lg text-on-background mb-8">Active Units</h3>
+<div class="flex flex-col">
+<!-- List Header -->
+<div class="flex justify-between font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider pb-4 hairline-b px-4">
+<div class="w-1/3">Unit ID</div>
+<div class="w-1/3">Current Temp</div>
+<div class="w-1/3 text-right">Status</div>
+</div>
+<!-- List Items -->
+<div class="flex items-center justify-between py-6 px-4 hairline-b hover:bg-[#F5F1EE] transition-colors duration-200">
+<div class="w-1/3 flex items-center gap-4">
+<span class="material-symbols-outlined text-on-surface-variant">kitchen</span>
+<span class="font-body-lg text-body-lg text-on-background">Ultra-Low Freezer B-12</span>
+</div>
+<div class="w-1/3 font-kpi-value text-[24px] leading-[32px] text-primary">
+                            -68.4°C
+                        </div>
+<div class="w-1/3 flex justify-end items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-primary"></div>
+<span class="font-label-sm text-label-sm text-primary uppercase">Excursion</span>
+</div>
+</div>
+<div class="flex items-center justify-between py-6 px-4 hairline-b hover:bg-[#F5F1EE] transition-colors duration-200">
+<div class="w-1/3 flex items-center gap-4">
+<span class="material-symbols-outlined text-on-surface-variant">kitchen</span>
+<span class="font-body-lg text-body-lg text-on-background">Ultra-Low Freezer A-04</span>
+</div>
+<div class="w-1/3 font-kpi-value text-[24px] leading-[32px] text-on-background">
+                            -81.2°C
+                        </div>
+<div class="w-1/3 flex justify-end items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-secondary"></div>
+<span class="font-label-sm text-label-sm text-secondary uppercase">Stable</span>
+</div>
+</div>
+<div class="flex items-center justify-between py-6 px-4 hairline-b hover:bg-[#F5F1EE] transition-colors duration-200">
+<div class="w-1/3 flex items-center gap-4">
+<span class="material-symbols-outlined text-on-surface-variant">local_shipping</span>
+<span class="font-body-lg text-body-lg text-on-background">Mobile Transport M-99</span>
+</div>
+<div class="w-1/3 font-kpi-value text-[24px] leading-[32px] text-on-background">
+                            2.4°C
+                        </div>
+<div class="w-1/3 flex justify-end items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-secondary"></div>
+<span class="font-label-sm text-label-sm text-secondary uppercase">Stable</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<script>
+        // Chart.js implementation for the dominant temperature chart
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('temperatureChart').getContext('2d');
+            
+            // Generate some realistic-looking dummy data
+            const labels = Array.from({length: 24}, (_, i) => `${i}:00`);
+            const baseTemp = -80;
+            const data = labels.map((_, i) => {
+                // Introduce an excursion around hour 16
+                if (i > 14 && i < 18) {
+                    return baseTemp + 15 + Math.random() * 2;
+                }
+                return baseTemp + (Math.random() * 4 - 2);
+            });
+
+            // Gradient fill
+            const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, 'rgba(128, 0, 31, 0.2)'); // Soft primary
+            gradient.addColorStop(1, 'rgba(128, 0, 31, 0.0)');
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Temperature (°C)',
+                        data: data,
+                        borderColor: '#80001f', // primary color
+                        borderWidth: 2,
+                        backgroundColor: gradient,
+                        fill: true,
+                        tension: 0.4, // Smooth curve
+                        pointRadius: 0, // Hide points for a cleaner look
+                        pointHitRadius: 10,
+                        segment: {
+                            // Highlight excursion area in crimson
+                            borderColor: ctx => ctx.p1DataIndex > 14 && ctx.p1DataIndex < 18 ? '#a31e33' : '#80001f',
+                            borderWidth: ctx => ctx.p1DataIndex > 14 && ctx.p1DataIndex < 18 ? 3 : 2
+                        }
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#fff8f6',
+                            titleColor: '#1f1b19',
+                            bodyColor: '#1f1b19',
+                            borderColor: '#e0bfbf',
+                            borderWidth: 1,
+                            padding: 12,
+                            displayColors: false,
+                            callbacks: {
+                                label: function(context) {
+                                    return context.parsed.y.toFixed(1) + ' °C';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false, drawBorder: false },
+                            ticks: {
+                                color: '#8c7070',
+                                maxTicksLimit: 8,
+                                font: { family: 'Manrope', size: 12 }
+                            }
+                        },
+                        y: {
+                            grid: {
+                                color: 'rgba(140, 112, 112, 0.1)',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: '#8c7070',
+                                font: { family: 'Manrope', size: 12 },
+                                callback: function(value) { return value + '°'; }
+                            }
+                        }
+                    },
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    }
+                }
+            });
+        });
+    </script>
+</body></html>

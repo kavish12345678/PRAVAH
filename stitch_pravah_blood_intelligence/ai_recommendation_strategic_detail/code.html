@@ -1,0 +1,244 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>PRAVAH Intelligence - Recommendation Detail</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;family=Noto+Serif:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary": "#44664b",
+                        "surface-dim": "#e2d8d5",
+                        "on-tertiary-fixed": "#2a1800",
+                        "on-tertiary": "#ffffff",
+                        "tertiary-container": "#774b00",
+                        "surface-container-highest": "#ebe0dd",
+                        "on-tertiary-fixed-variant": "#643f00",
+                        "on-secondary": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "primary-fixed": "#ffdada",
+                        "tertiary-fixed": "#ffddb6",
+                        "inverse-on-surface": "#f9efeb",
+                        "on-tertiary-container": "#ffbd65",
+                        "on-primary-fixed-variant": "#8f0b27",
+                        "primary-container": "#a31e33",
+                        "inverse-surface": "#352f2d",
+                        "surface-tint": "#b1293c",
+                        "on-error": "#ffffff",
+                        "on-secondary-fixed-variant": "#2c4e34",
+                        "secondary-fixed-dim": "#aad0ae",
+                        "on-primary": "#ffffff",
+                        "surface-container-low": "#fcf1ee",
+                        "surface-variant": "#ebe0dd",
+                        "secondary-container": "#c5ecc9",
+                        "on-error-container": "#93000a",
+                        "background": "#fff8f6",
+                        "on-surface": "#1f1b19",
+                        "on-secondary-fixed": "#00210c",
+                        "on-background": "#1f1b19",
+                        "outline": "#8c7070",
+                        "outline-variant": "#e0bfbf",
+                        "tertiary-fixed-dim": "#ffb95a",
+                        "surface-container-high": "#f0e6e3",
+                        "on-primary-container": "#ffb7b8",
+                        "tertiary": "#583600",
+                        "surface-bright": "#fff8f6",
+                        "primary": "#80001f",
+                        "surface": "#fff8f6",
+                        "surface-container": "#f6ece8",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary-fixed": "#c5ecc9",
+                        "inverse-primary": "#ffb3b4",
+                        "error": "#ba1a1a",
+                        "on-primary-fixed": "#40000b",
+                        "on-surface-variant": "#594141",
+                        "primary-fixed-dim": "#ffb3b4",
+                        "on-secondary-container": "#4a6c50"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "section-margin": "80px",
+                        "panel-gap": "24px",
+                        "container-padding": "48px",
+                        "unit": "8px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Manrope"],
+                        "display-md": ["Noto Serif"],
+                        "label-sm": ["Manrope"],
+                        "kpi-value": ["Manrope"],
+                        "display-lg": ["Noto Serif"],
+                        "headline-lg-mobile": ["Noto Serif"],
+                        "body-md": ["Manrope"],
+                        "headline-lg": ["Noto Serif"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "display-md": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "label-sm": ["13px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "kpi-value": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.03em", "fontWeight": "700" }],
+                        "display-lg": ["64px", { "lineHeight": "72px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "500" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex flex-col antialiased pb-32">
+<!-- TopNavBar (Shared Component) -->
+<nav class="bg-surface dark:bg-surface flex justify-between items-center w-full px-container-padding py-4 sticky top-0 z-50">
+<div class="flex items-center gap-8">
+<div class="font-display-md text-display-md text-primary dark:text-inverse-primary tracking-tight">
+                Aether Intelligence
+            </div>
+</div>
+<div class="flex items-center gap-6">
+<span class="material-symbols-outlined text-primary hover:text-primary transition-colors duration-200 cursor-pointer" data-icon="search">search</span>
+<div class="flex gap-4">
+<span class="material-symbols-outlined text-on-surface-variant font-medium hover:text-primary transition-colors duration-200 cursor-pointer" data-icon="notifications">notifications</span>
+<span class="material-symbols-outlined text-on-surface-variant font-medium hover:text-primary transition-colors duration-200 cursor-pointer" data-icon="settings">settings</span>
+<span class="material-symbols-outlined text-on-surface-variant font-medium hover:text-primary transition-colors duration-200 cursor-pointer" data-icon="help">help</span>
+</div>
+<div class="w-10 h-10 rounded-full bg-surface-container-high border border-outline-variant overflow-hidden cursor-pointer hover:opacity-80 transition-opacity">
+<img alt="User profile" class="w-full h-full object-cover" data-alt="A small, professional avatar portrait of a medical logistics coordinator in soft, high-key lighting with a minimalist background, fitting a light-mode SaaS UI." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBFRvb61kKhMjaEmlBWyEaBejsCoIy5jLvTzFX6XhNovqVfBgA7xJgJBjWtJ70P1FHrkYRbf3x9KG3NCGqzxjkyygx86NNAyks1cnDyRUIH9YnaETJ21fflIgU_5V1I_mKeb6292mL5vIxHAcUnyrHA38-THtphaOifqG_fN2MXyFexJXMDanoowJK0OCoT8W2hDZXY490G50A_FjdUqvssMfqum6WQt5wqSZI7K4ispCbNd78W_gxs">
+</div>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="flex-1 w-full max-w-[1600px] mx-auto px-container-padding py-section-margin flex flex-col gap-section-margin">
+<!-- Header Zone -->
+<header class="flex flex-col md:flex-row md:items-end justify-between gap-8 border-b border-surface-container-highest pb-12">
+<div class="flex flex-col gap-6 max-w-3xl">
+<div class="inline-flex items-center gap-2 bg-primary/10 text-primary px-3 py-1 rounded-full w-fit">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">warning</span>
+<span class="font-label-sm text-label-sm uppercase tracking-wider">Urgent Recommendation</span>
+</div>
+<h1 class="font-display-lg text-display-lg text-on-background tracking-tight">
+                    REC-7921: Strategic Redirection
+                </h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant">
+                    Immediate action required to prevent critical inventory deficit at City Hospital within the next operational window.
+                </p>
+</div>
+<div class="flex flex-col gap-2 md:text-right border-l md:border-l-0 md:border-r-0 border-outline-variant/30 pl-6 md:pl-0">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Destination Status</span>
+<div class="font-display-md text-display-md text-primary tracking-tight">
+                    85% <span class="font-headline-lg text-headline-lg text-on-background font-normal">Probability of Shortage</span>
+</div>
+</div>
+</header>
+<!-- Asymmetric Layout -->
+<div class="flex flex-col lg:flex-row gap-panel-gap">
+<!-- Left (Wide Column): Causal Intelligence Cascade -->
+<section class="lg:w-2/3 bg-surface-container rounded-3xl p-10 flex flex-col gap-10">
+<h2 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">Causal Intelligence Cascade</h2>
+<div class="flex flex-col gap-8 relative pl-12 border-l border-outline-variant/50 ml-4">
+<!-- Node 1 -->
+<div class="relative">
+<div class="absolute -left-[57px] top-1 w-4 h-4 rounded-full bg-secondary ring-4 ring-surface-container"></div>
+<div class="flex flex-col gap-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">14:00 HRS - Trigger</span>
+<div class="font-body-lg text-body-lg text-on-surface font-medium">Inventory Drop at Northside</div>
+<p class="text-on-surface-variant">Unexpected surge in trauma admissions depleted primary O-Negative reserves by 40%.</p>
+</div>
+</div>
+<!-- Node 2 -->
+<div class="relative">
+<div class="absolute -left-[57px] top-1 w-4 h-4 rounded-full bg-on-tertiary-container ring-4 ring-surface-container"></div>
+<div class="flex flex-col gap-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">15:30 HRS - Correlation</span>
+<div class="font-body-lg text-body-lg text-on-surface font-medium">Demand Spike at City Hospital</div>
+<p class="text-on-surface-variant">Inbound transfers diverted from Northside increasing load on City Hospital.</p>
+</div>
+</div>
+<!-- Node 3 -->
+<div class="relative">
+<div class="absolute -left-[57px] top-1 w-4 h-4 rounded-full bg-primary ring-4 ring-primary/20"></div>
+<div class="flex flex-col gap-1">
+<span class="font-label-sm text-label-sm text-primary uppercase tracking-wider font-bold">18:00 HRS - Projection</span>
+<div class="font-headline-lg text-headline-lg text-primary tracking-tight">Predicted Stock-out in 4h</div>
+<p class="text-on-surface-variant text-lg">Without intervention, City Hospital will reach critical zero-state for O-Negative units.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Right (Narrow Column): Supporting Stats -->
+<section class="lg:w-1/3 flex flex-col gap-panel-gap">
+<div class="bg-surface-container-low rounded-3xl p-10 flex flex-col gap-8 h-full border border-surface-container-highest">
+<h2 class="font-headline-lg text-headline-lg text-on-surface tracking-tight mb-4">Transfer Parameters</h2>
+<div class="flex flex-col gap-6">
+<div class="flex items-start gap-4 pb-6 border-b border-outline-variant/30">
+<span class="material-symbols-outlined text-primary/70 text-3xl mt-1" data-icon="bloodtype">bloodtype</span>
+<div>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider block mb-1">Unit Type</span>
+<div class="font-kpi-value text-kpi-value text-on-surface">O-Negative</div>
+</div>
+</div>
+<div class="flex items-start gap-4 pb-6 border-b border-outline-variant/30">
+<span class="material-symbols-outlined text-secondary/70 text-3xl mt-1" data-icon="inventory_2">inventory_2</span>
+<div>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider block mb-1">Transfer Volume</span>
+<div class="font-kpi-value text-kpi-value text-on-surface">15 Units</div>
+</div>
+</div>
+<div class="flex items-start gap-4">
+<span class="material-symbols-outlined text-on-surface-variant text-3xl mt-1" data-icon="account_balance_wallet">account_balance_wallet</span>
+<div>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider block mb-1">Est. Logistics Cost</span>
+<div class="font-kpi-value text-kpi-value text-on-surface">$142</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Lower Section: Regional Impact Map -->
+<section class="flex flex-col gap-8 pt-8">
+<h2 class="font-headline-lg text-headline-lg text-on-surface tracking-tight border-b border-surface-container-highest pb-4 inline-block w-fit">Regional Impact Map</h2>
+<div class="w-full h-[500px] rounded-3xl overflow-hidden relative bg-surface-container-highest flex items-center justify-center border border-outline-variant/20 shadow-[inset_0_2px_20px_rgba(0,0,0,0.02)]">
+<img alt="Regional Impact Map Visualization" class="w-full h-full object-cover mix-blend-multiply opacity-90" data-alt="A sleek, light-mode data visualization map of a healthcare logistics network. The map uses a soft ivory background (#fff8f6) with delicate, intersecting network lines connecting glowing nodes. Critical nodes glow in deep crimson (#a31e33) while stable nodes are soft teal. The aesthetic is highly professional, clean, and authoritative." src="https://lh3.googleusercontent.com/aida/AEtjO1W0zrln1mmI6jj_JQIg-Q2tn82h3q0gwvm34c6c8Q2Z4k8TbVrWvA62ZW5mGIF_I-iiVmWrUhMlflW2HkfUE1rB7cjGOH6A-NlGFxJ0dChm0Ikwfu_NKW_wYZ88E9SppiW60xFy7W4Gd2fJxUO1e3dXnt1EpG0w10I8EwRyU0v4mUK5orSIOb2Uz5h5FD9n8RVRC3P_7Y8UKASTzfCvPUD_Q8VFqOJ_SFLGhrV5ppIygjq_VSIL6gfa878">
+<!-- Overlay UI on Map -->
+<div class="absolute bottom-6 left-6 bg-surface/90 backdrop-blur-md p-4 rounded-2xl border border-white/50 flex flex-col gap-3">
+<div class="flex items-center gap-3">
+<div class="w-3 h-3 rounded-full bg-primary ring-4 ring-primary/20"></div>
+<span class="font-label-sm text-label-sm text-on-surface uppercase">Critical Path</span>
+</div>
+<div class="flex items-center gap-3">
+<div class="w-3 h-3 rounded-full bg-secondary/50"></div>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Alternative Routes</span>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Action Bar -->
+<div class="fixed bottom-0 left-0 w-full bg-surface/95 backdrop-blur-lg border-t border-surface-container-highest py-6 px-container-padding flex justify-between items-center z-50 shadow-[0_-4px_32px_rgba(0,0,0,0.03)]">
+<button class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider px-6 py-3 hover:text-on-surface transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-lg" data-icon="close">close</span>
+            Dismiss
+        </button>
+<div class="flex gap-4">
+<button class="font-label-sm text-label-sm text-primary border border-primary px-8 py-4 rounded-full uppercase tracking-wider hover:bg-primary/5 transition-colors flex items-center gap-2 bg-transparent">
+<span class="material-symbols-outlined text-lg" data-icon="tune">tune</span>
+                Modify Parameters
+            </button>
+<button class="font-label-sm text-label-sm text-white bg-primary-container px-10 py-4 rounded-full uppercase tracking-wider hover:bg-primary transition-colors flex items-center gap-2 shadow-[0_4px_12px_rgba(163,30,51,0.2)]">
+<span class="material-symbols-outlined text-lg" data-icon="check_circle">check_circle</span>
+                Approve Recommendation
+            </button>
+</div>
+</div>
+</body></html>

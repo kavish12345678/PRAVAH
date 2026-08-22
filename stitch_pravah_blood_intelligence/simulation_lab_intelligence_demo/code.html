@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PRAVAH Intelligence - Simulation Lab</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;family=Noto+Serif:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary": "#ffffff",
+                        "on-primary-fixed-variant": "#8f0b27",
+                        "primary-container": "#a31e33",
+                        "on-primary-container": "#ffb7b8",
+                        "secondary-container": "#c5ecc9",
+                        "surface-tint": "#b1293c",
+                        "on-tertiary-fixed-variant": "#643f00",
+                        "error-container": "#ffdad6",
+                        "surface": "#fff8f6",
+                        "on-secondary": "#ffffff",
+                        "inverse-on-surface": "#f9efeb",
+                        "tertiary-fixed": "#ffddb6",
+                        "inverse-primary": "#ffb3b4",
+                        "surface-variant": "#ebe0dd",
+                        "secondary-fixed": "#c5ecc9",
+                        "on-error": "#ffffff",
+                        "on-secondary-fixed-variant": "#2c4e34",
+                        "inverse-surface": "#352f2d",
+                        "primary-fixed": "#ffdada",
+                        "surface-container": "#f6ece8",
+                        "tertiary-container": "#774b00",
+                        "primary-fixed-dim": "#ffb3b4",
+                        "surface-container-low": "#fcf1ee",
+                        "surface-bright": "#fff8f6",
+                        "outline": "#8c7070",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-fixed": "#40000b",
+                        "outline-variant": "#e0bfbf",
+                        "background": "#fff8f6",
+                        "on-secondary-fixed": "#00210c",
+                        "surface-dim": "#e2d8d5",
+                        "on-secondary-container": "#4a6c50",
+                        "on-background": "#1f1b19",
+                        "tertiary-fixed-dim": "#ffb95a",
+                        "on-error-container": "#93000a",
+                        "surface-container-high": "#f0e6e3",
+                        "surface-container-highest": "#ebe0dd",
+                        "primary": "#80001f",
+                        "on-tertiary-container": "#ffbd65",
+                        "tertiary": "#583600",
+                        "on-surface-variant": "#594141",
+                        "on-tertiary-fixed": "#2a1800",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary-fixed-dim": "#aad0ae",
+                        "secondary": "#44664b",
+                        "error": "#ba1a1a",
+                        "on-surface": "#1f1b19"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "container-padding": "48px",
+                        "panel-gap": "24px",
+                        "section-margin": "80px",
+                        "unit": "8px"
+                    },
+                    "fontFamily": {
+                        "display-md": ["Noto Serif"],
+                        "headline-lg": ["Noto Serif"],
+                        "body-md": ["Manrope"],
+                        "label-sm": ["Manrope"],
+                        "headline-lg-mobile": ["Noto Serif"],
+                        "kpi-value": ["Manrope"],
+                        "body-lg": ["Manrope"],
+                        "display-lg": ["Noto Serif"]
+                    },
+                    "fontSize": {
+                        "display-md": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "500" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "label-sm": ["13px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "500" }],
+                        "kpi-value": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.03em", "fontWeight": "700" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "display-lg": ["64px", { "lineHeight": "72px", "letterSpacing": "-0.02em", "fontWeight": "600" }]
+                    },
+                    "animation": {
+                        'fade-in-up': 'fadeInUp 0.8s ease-out forwards',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    "keyframes": {
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .timeline-step { opacity: 0; }
+        .timeline-step:nth-child(1) { animation-delay: 0.2s; }
+        .timeline-step:nth-child(2) { animation-delay: 0.6s; }
+        .timeline-step:nth-child(3) { animation-delay: 1.0s; }
+        .timeline-step:nth-child(4) { animation-delay: 1.4s; }
+        .timeline-step:nth-child(5) { animation-delay: 1.8s; }
+        .timeline-step:nth-child(6) { animation-delay: 2.2s; }
+        
+        .hairline-b { border-bottom: 1px solid rgba(128, 0, 31, 0.15); }
+        .hairline-l { border-left: 1px solid rgba(128, 0, 31, 0.15); }
+        .hairline-t { border-top: 1px solid rgba(128, 0, 31, 0.15); }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-md flex h-screen overflow-hidden">
+<!-- SideNavBar Wrapper -->
+<div class="hidden md:block w-72 flex-shrink-0 z-40 bg-surface-container-low border-r border-on-surface/10">
+<nav class="flex flex-col h-full p-6">
+<div class="mb-12">
+<div class="font-headline-lg text-headline-lg font-bold text-primary">PRAVAH</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant mt-1">Intelligence Suite</div>
+</div>
+<div class="flex-1 space-y-2">
+<a class="flex items-center gap-4 text-on-surface-variant font-body-md px-4 py-3 hover:bg-primary/5 hover:text-primary transition-all duration-200" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center gap-4 text-primary font-bold bg-primary/5 rounded-lg px-4 py-3 scale-[0.98] transition-transform" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">insights</span>
+<span>Analytics</span>
+</a>
+<a class="flex items-center gap-4 text-on-surface-variant font-body-md px-4 py-3 hover:bg-primary/5 hover:text-primary transition-all duration-200" href="#">
+<span class="material-symbols-outlined">person_search</span>
+<span>Patient Insights</span>
+</a>
+<a class="flex items-center gap-4 text-on-surface-variant font-body-md px-4 py-3 hover:bg-primary/5 hover:text-primary transition-all duration-200" href="#">
+<span class="material-symbols-outlined">dynamic_feed</span>
+<span>Clinical Feed</span>
+</a>
+<a class="flex items-center gap-4 text-on-surface-variant font-body-md px-4 py-3 hover:bg-primary/5 hover:text-primary transition-all duration-200" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+<span>Archive</span>
+</a>
+</div>
+<div class="mt-auto space-y-2 pt-6 hairline-t">
+<a class="flex items-center gap-4 text-on-surface-variant font-body-md px-4 py-3 hover:bg-primary/5 hover:text-primary transition-all duration-200" href="#">
+<span class="material-symbols-outlined">help</span>
+<span>Help</span>
+</a>
+<a class="flex items-center gap-4 text-on-surface-variant font-body-md px-4 py-3 hover:bg-primary/5 hover:text-primary transition-all duration-200" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span>Sign Out</span>
+</a>
+</div>
+<div class="mt-6">
+<button class="w-full py-3 px-6 rounded text-on-primary bg-primary-container font-label-sm text-label-sm hover:opacity-90 transition-opacity">
+                    Contact Support
+                </button>
+</div>
+</nav>
+</div>
+<!-- Main Content Canvas -->
+<main class="flex-1 overflow-y-auto bg-surface relative">
+<!-- Top App Bar equivalent for Mobile padding -->
+<header class="md:hidden flex justify-between items-center w-full px-container-padding h-20 bg-background z-30 sticky top-0">
+<div class="font-headline-lg-mobile text-headline-lg-mobile font-bold text-primary">PRAVAH</div>
+<button class="text-on-surface-variant"><span class="material-symbols-outlined">menu</span></button>
+</header>
+<div class="p-container-padding md:p-section-margin max-w-7xl mx-auto space-y-section-margin">
+<!-- Page Header -->
+<div class="space-y-4">
+<h1 class="font-display-md text-display-md text-on-surface">Simulation Lab</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl">Model complex operational disruptions to evaluate intelligent response protocols and network resilience.</p>
+</div>
+<!-- Scenario Triggers Section -->
+<section class="space-y-8">
+<div class="flex items-center justify-between hairline-b pb-4">
+<h2 class="font-headline-lg text-headline-lg text-on-surface md:text-headline-lg text-headline-lg-mobile">Scenario Triggers</h2>
+<span class="font-label-sm text-label-sm text-on-surface-variant tracking-widest uppercase">Select Vector</span>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-5 gap-panel-gap">
+<!-- Trigger 1 (Active) -->
+<button class="flex flex-col items-start p-6 rounded-lg bg-surface-container-low transition-all duration-300 border border-primary-container ring-1 ring-primary-container/20 group text-left">
+<span class="material-symbols-outlined text-primary-container mb-4 text-3xl" style="font-variation-settings: 'FILL' 1;">thermostat</span>
+<span class="font-label-sm text-label-sm text-primary-container">Vector 01</span>
+<span class="font-body-md text-body-md font-medium text-on-surface mt-1">Temperature Excursion</span>
+</button>
+<!-- Trigger 2 -->
+<button class="flex flex-col items-start p-6 rounded-lg bg-surface-container-low transition-all duration-300 hover:bg-surface-container-high group text-left">
+<span class="material-symbols-outlined text-on-surface-variant mb-4 text-3xl group-hover:text-primary transition-colors">settings_motion_mode</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Vector 02</span>
+<span class="font-body-md text-body-md font-medium text-on-surface mt-1">Agitator Failure</span>
+</button>
+<!-- Trigger 3 -->
+<button class="flex flex-col items-start p-6 rounded-lg bg-surface-container-low transition-all duration-300 hover:bg-surface-container-high group text-left">
+<span class="material-symbols-outlined text-on-surface-variant mb-4 text-3xl group-hover:text-primary transition-colors">warning</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Vector 03</span>
+<span class="font-body-md text-body-md font-medium text-on-surface mt-1">Emergency Demand</span>
+</button>
+<!-- Trigger 4 -->
+<button class="flex flex-col items-start p-6 rounded-lg bg-surface-container-low transition-all duration-300 hover:bg-surface-container-high group text-left">
+<span class="material-symbols-outlined text-on-surface-variant mb-4 text-3xl group-hover:text-primary transition-colors">trending_down</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Vector 04</span>
+<span class="font-body-md text-body-md font-medium text-on-surface mt-1">Inventory Drop</span>
+</button>
+<!-- Trigger 5 -->
+<button class="flex flex-col items-start p-6 rounded-lg bg-surface-container-low transition-all duration-300 hover:bg-surface-container-high group text-left">
+<span class="material-symbols-outlined text-on-surface-variant mb-4 text-3xl group-hover:text-primary transition-colors">trending_up</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Vector 05</span>
+<span class="font-body-md text-body-md font-medium text-on-surface mt-1">Demand Spike</span>
+</button>
+</div>
+</section>
+<!-- Cascading System Response Section (Asymmetric Layout) -->
+<section class="space-y-8">
+<div class="flex items-center justify-between hairline-b pb-4">
+<h2 class="font-headline-lg text-headline-lg text-on-surface md:text-headline-lg text-headline-lg-mobile">Cascading System Response</h2>
+<div class="flex items-center gap-2">
+<span class="relative flex h-3 w-3">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-container opacity-75"></span>
+<span class="relative inline-flex rounded-full h-3 w-3 bg-primary-container"></span>
+</span>
+<span class="font-label-sm text-label-sm text-primary-container tracking-widest uppercase">Live Simulation</span>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24 relative">
+<!-- Decorative central line for desktop -->
+<div class="hidden lg:block absolute left-[35%] top-0 bottom-0 hairline-l -translate-x-1/2"></div>
+<!-- Timeline Content -->
+<div class="lg:col-span-8 lg:col-start-4 space-y-12 py-8 relative z-10">
+<!-- Step 1 -->
+<div class="timeline-step animate-fade-in-up flex flex-col md:flex-row gap-6 items-start relative group">
+<div class="md:w-32 flex-shrink-0 pt-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant block md:text-right">T+0:00:00</span>
+<span class="font-label-sm text-label-sm text-secondary-container bg-secondary/10 px-2 py-1 rounded inline-block mt-1 md:float-right">Telemetry</span>
+</div>
+<div class="hidden md:flex flex-col items-center absolute left-0 md:-left-[6.5rem] lg:-left-[12.5rem] top-1 bottom-0">
+<div class="w-3 h-3 rounded-full bg-surface border border-secondary z-10"></div>
+</div>
+<div class="flex-1 bg-surface-container-low p-6 rounded-lg hairline-l hover:bg-surface-container-high transition-colors">
+<h3 class="font-body-lg text-body-lg font-semibold text-on-surface mb-2">Equipment Health</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Agitator-7 RPM Drop detected below critical threshold (45 RPM) in Storage Unit B.</p>
+</div>
+</div>
+<!-- Step 2 -->
+<div class="timeline-step animate-fade-in-up flex flex-col md:flex-row gap-6 items-start relative group">
+<div class="md:w-32 flex-shrink-0 pt-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant block md:text-right">T+0:00:04</span>
+<span class="font-label-sm text-label-sm text-primary-container bg-primary/10 px-2 py-1 rounded inline-block mt-1 md:float-right">Engine</span>
+</div>
+<div class="hidden md:flex flex-col items-center absolute left-0 md:-left-[6.5rem] lg:-left-[12.5rem] top-1 bottom-0">
+<div class="w-3 h-3 rounded-full bg-surface border border-primary-container z-10 animate-pulse-slow"></div>
+</div>
+<div class="flex-1 bg-surface-container-low p-6 rounded-lg hairline-l hover:bg-surface-container-high transition-colors">
+<h3 class="font-body-lg text-body-lg font-semibold text-on-surface mb-2">AI Intelligence</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Anomaly identified via causal engine. High probability of temperature excursion within 15 minutes.</p>
+</div>
+</div>
+<!-- Step 3 -->
+<div class="timeline-step animate-fade-in-up flex flex-col md:flex-row gap-6 items-start relative group">
+<div class="md:w-32 flex-shrink-0 pt-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant block md:text-right">T+0:00:12</span>
+<span class="font-label-sm text-label-sm text-on-surface bg-surface-variant px-2 py-1 rounded inline-block mt-1 md:float-right">Risk Model</span>
+</div>
+<div class="hidden md:flex flex-col items-center absolute left-0 md:-left-[6.5rem] lg:-left-[12.5rem] top-1 bottom-0">
+<div class="w-3 h-3 rounded-full bg-surface border border-outline z-10"></div>
+</div>
+<div class="flex-1 bg-surface-container-low p-6 rounded-lg hairline-l hover:bg-surface-container-high transition-colors">
+<h3 class="font-body-lg text-body-lg font-semibold text-on-surface mb-2">Risk Assessment</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Regional supply risk escalated to High. 1,200 units of critical inventory flagged as potentially compromised.</p>
+</div>
+</div>
+<!-- Step 4 -->
+<div class="timeline-step animate-fade-in-up flex flex-col md:flex-row gap-6 items-start relative group">
+<div class="md:w-32 flex-shrink-0 pt-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant block md:text-right">T+0:00:25</span>
+<span class="font-label-sm text-label-sm text-on-surface bg-surface-variant px-2 py-1 rounded inline-block mt-1 md:float-right">Predictive</span>
+</div>
+<div class="hidden md:flex flex-col items-center absolute left-0 md:-left-[6.5rem] lg:-left-[12.5rem] top-1 bottom-0">
+<div class="w-3 h-3 rounded-full bg-surface border border-outline z-10"></div>
+</div>
+<div class="flex-1 bg-surface-container-low p-6 rounded-lg hairline-l hover:bg-surface-container-high transition-colors">
+<h3 class="font-body-lg text-body-lg font-semibold text-on-surface mb-2">Demand Forecasting</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Predicted critical shortage in 2h at Northside Clinic based on scheduled procedures and historical run rates.</p>
+</div>
+</div>
+<!-- Step 5 -->
+<div class="timeline-step animate-fade-in-up flex flex-col md:flex-row gap-6 items-start relative group">
+<div class="md:w-32 flex-shrink-0 pt-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant block md:text-right">T+0:00:45</span>
+<span class="font-label-sm text-label-sm text-on-surface bg-surface-variant px-2 py-1 rounded inline-block mt-1 md:float-right">Network</span>
+</div>
+<div class="hidden md:flex flex-col items-center absolute left-0 md:-left-[6.5rem] lg:-left-[12.5rem] top-1 bottom-0">
+<div class="w-3 h-3 rounded-full bg-surface border border-outline z-10"></div>
+</div>
+<div class="flex-1 bg-surface-container-low p-6 rounded-lg hairline-l hover:bg-surface-container-high transition-colors">
+<h3 class="font-body-lg text-body-lg font-semibold text-on-surface mb-2">Network Optimizer</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Optimization sequence initiated. Recommended routing: Redirecting 800 units from City Bank reserve.</p>
+</div>
+</div>
+<!-- Step 6 -->
+<div class="timeline-step animate-fade-in-up flex flex-col md:flex-row gap-6 items-start relative group pb-0">
+<div class="md:w-32 flex-shrink-0 pt-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant block md:text-right">T+0:01:10</span>
+<span class="font-label-sm text-label-sm text-on-surface bg-surface-variant px-2 py-1 rounded inline-block mt-1 md:float-right">Action</span>
+</div>
+<div class="hidden md:flex flex-col items-center absolute left-0 md:-left-[6.5rem] lg:-left-[12.5rem] top-1">
+<div class="w-3 h-3 rounded-full bg-primary border border-primary z-10"></div>
+</div>
+<div class="flex-1 bg-surface-container-highest p-6 rounded-lg hairline-l border-l-[3px] border-l-primary hover:bg-surface-dim transition-colors relative overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent pointer-events-none"></div>
+<h3 class="font-body-lg text-body-lg font-semibold text-on-surface mb-2 relative z-10">Human Review</h3>
+<p class="font-body-md text-body-md text-on-surface-variant relative z-10 mb-6">Transfer recommendation queued for final authorization. ETA for rerouted supply: 1h 15m.</p>
+<button class="relative z-10 bg-primary-container text-on-primary px-6 py-3 font-label-sm text-label-sm rounded hover:bg-primary transition-colors inline-flex items-center gap-2">
+                                    Approve Transfer
+                                    <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+</main>
+</body></html>

@@ -1,0 +1,311 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Network Optimizer - PRAVAH</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;family=Noto+Serif:wght@500;600&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container": "#f6ece8",
+                        "primary-fixed-dim": "#ffb3b4",
+                        "secondary": "#44664b",
+                        "surface": "#fff8f6",
+                        "surface-variant": "#ebe0dd",
+                        "background": "#fff8f6",
+                        "on-surface-variant": "#594141",
+                        "secondary-fixed-dim": "#aad0ae",
+                        "on-primary-fixed": "#40000b",
+                        "surface-tint": "#b1293c",
+                        "outline-variant": "#e0bfbf",
+                        "surface-container-highest": "#ebe0dd",
+                        "outline": "#8c7070",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-fixed-variant": "#8f0b27",
+                        "inverse-primary": "#ffb3b4",
+                        "on-tertiary-fixed": "#2a1800",
+                        "tertiary-container": "#774b00",
+                        "error-container": "#ffdad6",
+                        "error": "#ba1a1a",
+                        "secondary-container": "#c5ecc9",
+                        "tertiary-fixed": "#ffddb6",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-high": "#f0e6e3",
+                        "on-tertiary-fixed-variant": "#643f00",
+                        "on-secondary": "#ffffff",
+                        "tertiary-fixed-dim": "#ffb95a",
+                        "primary-fixed": "#ffdada",
+                        "on-error-container": "#93000a",
+                        "on-secondary-fixed": "#00210c",
+                        "surface-container-low": "#fcf1ee",
+                        "on-secondary-container": "#4a6c50",
+                        "on-primary": "#ffffff",
+                        "surface-bright": "#fff8f6",
+                        "tertiary": "#583600",
+                        "on-surface": "#1f1b19",
+                        "on-tertiary-container": "#ffbd65",
+                        "on-background": "#1f1b19",
+                        "on-primary-container": "#ffb7b8",
+                        "primary-container": "#a31e33",
+                        "on-error": "#ffffff",
+                        "secondary-fixed": "#c5ecc9",
+                        "primary": "#80001f",
+                        "surface-dim": "#e2d8d5",
+                        "on-secondary-fixed-variant": "#2c4e34",
+                        "inverse-on-surface": "#f9efeb",
+                        "inverse-surface": "#352f2d"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "panel-gap": "24px",
+                        "unit": "8px",
+                        "section-margin": "80px",
+                        "container-padding": "48px"
+                    },
+                    "fontFamily": {
+                        "headline-lg-mobile": ["Noto Serif"],
+                        "body-md": ["Manrope"],
+                        "display-lg": ["Noto Serif"],
+                        "headline-lg": ["Noto Serif"],
+                        "label-sm": ["Manrope"],
+                        "body-lg": ["Manrope"],
+                        "kpi-value": ["Manrope"],
+                        "display-md": ["Noto Serif"]
+                    },
+                    "fontSize": {
+                        "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "500" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "display-lg": ["64px", { "lineHeight": "72px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "500" }],
+                        "label-sm": ["13px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "kpi-value": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.03em", "fontWeight": "700" }],
+                        "display-md": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.01em", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .map-layer {
+            background-color: #ebe0dd;
+            background-image: 
+                radial-gradient(circle at 50% 50%, #f6ece8 2px, transparent 2px),
+                linear-gradient(45deg, transparent 48%, rgba(89, 65, 65, 0.05) 49%, rgba(89, 65, 65, 0.05) 51%, transparent 52%),
+                linear-gradient(-45deg, transparent 48%, rgba(89, 65, 65, 0.05) 49%, rgba(89, 65, 65, 0.05) 51%, transparent 52%);
+            background-size: 40px 40px, 80px 80px, 80px 80px;
+        }
+        
+        .route-path {
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            animation: drawRoute 3s ease-out forwards;
+        }
+
+        @keyframes drawRoute {
+            to {
+                stroke-dashoffset: 0;
+            }
+        }
+
+        .pulse-pin {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex">
+<!-- SideNavBar Component -->
+<nav class="h-screen w-80 fixed left-0 top-0 bg-surface-container-low dark:bg-surface-container flex flex-col h-full py-panel-gap z-50">
+<div class="px-6 mb-8">
+<h1 class="font-display-md text-display-md font-semibold text-primary dark:text-primary-fixed-dim">PRAVAH</h1>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Blood Intelligence</p>
+</div>
+<div class="flex-1 overflow-y-auto px-4 space-y-2">
+<a class="flex items-center gap-4 text-on-surface-variant dark:text-on-surface-variant py-3 px-6 hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-all duration-300 active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">dashboard</span>
+<span class="font-body-md text-body-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-4 text-on-surface-variant dark:text-on-surface-variant py-3 px-6 hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-all duration-300 active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">map</span>
+<span class="font-body-md text-body-md">Inventory Map</span>
+</a>
+<a class="flex items-center gap-4 text-primary dark:text-primary-fixed-dim font-semibold py-3 px-6 bg-surface-container-high dark:bg-surface-container-highest rounded-full active:scale-[0.98] transition-transform" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">hub</span>
+<span class="font-body-md text-body-md">Supply Chain</span>
+</a>
+<a class="flex items-center gap-4 text-on-surface-variant dark:text-on-surface-variant py-3 px-6 hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-all duration-300 active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">psychology</span>
+<span class="font-body-md text-body-md">AI Insights</span>
+</a>
+<a class="flex items-center gap-4 text-on-surface-variant dark:text-on-surface-variant py-3 px-6 hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-all duration-300 active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">inventory_2</span>
+<span class="font-body-md text-body-md">Archive</span>
+</a>
+</div>
+<div class="px-6 mt-auto">
+<div class="bg-secondary/10 px-4 py-3 rounded-lg mb-6 flex items-center gap-3">
+<div class="w-2 h-2 rounded-full bg-secondary"></div>
+<span class="font-body-md text-body-md text-secondary">System Status: Stable</span>
+</div>
+<div class="space-y-2">
+<a class="flex items-center gap-4 text-on-surface-variant dark:text-on-surface-variant py-3 px-4 hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-all duration-300 rounded-lg" href="#">
+<span class="material-symbols-outlined">help</span>
+<span class="font-body-md text-body-md">Support</span>
+</a>
+<a class="flex items-center gap-4 text-on-surface-variant dark:text-on-surface-variant py-3 px-4 hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-all duration-300 rounded-lg" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-body-md text-body-md">Settings</span>
+</a>
+</div>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="ml-80 flex-1 flex flex-col h-screen overflow-hidden bg-background">
+<!-- Header Zone -->
+<header class="pt-16 pb-8 px-12 shrink-0 z-10 bg-background relative">
+<div class="max-w-[1400px] mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
+<div class="max-w-3xl">
+<h2 class="font-headline-lg text-headline-lg text-on-background mb-6 leading-tight">
+                        Transfer 12 platelet units — <br>
+<span class="text-on-surface-variant">City Blood Bank</span> → <span class="text-primary-container">Central Hospital</span>
+</h2>
+<!-- Stat Row -->
+<div class="flex flex-wrap gap-12 items-baseline">
+<div class="flex flex-col relative pl-4 before:absolute before:left-0 before:top-1 before:bottom-1 before:w-px before:bg-outline-variant/50">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-2">ETA</span>
+<span class="font-kpi-value text-kpi-value text-on-background">42<span class="text-xl ml-1">min</span></span>
+</div>
+<div class="flex flex-col relative pl-4 before:absolute before:left-0 before:top-1 before:bottom-1 before:w-px before:bg-outline-variant/50">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-2">Units Moved</span>
+<span class="font-kpi-value text-kpi-value text-on-background">12</span>
+</div>
+<div class="flex flex-col relative pl-4 before:absolute before:left-0 before:top-1 before:bottom-1 before:w-px before:bg-outline-variant/50">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-2">Shortage Prevented</span>
+<span class="font-kpi-value text-kpi-value text-on-background">100%</span>
+</div>
+<div class="flex flex-col relative pl-4 before:absolute before:left-0 before:top-1 before:bottom-1 before:w-px before:bg-outline-variant/50">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-2">Wastage Prevented</span>
+<span class="font-kpi-value text-kpi-value text-on-background">4<span class="text-xl ml-1">units</span></span>
+</div>
+</div>
+</div>
+<button class="bg-primary-container text-white px-8 py-4 rounded-full font-body-lg text-body-lg font-medium hover:opacity-90 transition-opacity flex items-center gap-3 whitespace-nowrap shrink-0 shadow-sm">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                    Approve Transfer
+                </button>
+</div>
+<!-- Subtle gradient separator -->
+<div class="absolute bottom-0 left-12 right-12 h-px bg-gradient-to-r from-transparent via-outline-variant/30 to-transparent"></div>
+</header>
+<!-- Asymmetric Map & Details Layout -->
+<div class="flex-1 flex px-12 pb-12 gap-8 overflow-hidden max-w-[1920px] mx-auto w-full">
+<!-- Context Panel (1/3 width) -->
+<div class="w-1/3 flex flex-col gap-6 overflow-y-auto pr-4 hidden lg:flex">
+<div class="bg-surface p-8 rounded-xl border border-outline-variant/20 flex flex-col gap-6">
+<h3 class="font-body-lg text-body-lg font-medium text-on-background border-b border-outline-variant/20 pb-4">Transfer Logic</h3>
+<div class="flex flex-col gap-4">
+<div class="flex gap-4">
+<span class="material-symbols-outlined text-primary-container mt-1">warning</span>
+<div>
+<p class="font-body-md text-body-md text-on-background font-medium">Imminent Shortage</p>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Central Hospital is projecting a severe deficit in Platelet availability within the next 4 hours due to an influx of emergency trauma cases.</p>
+</div>
+</div>
+<div class="w-full h-px bg-outline-variant/20 ml-10 my-2"></div>
+<div class="flex gap-4">
+<span class="material-symbols-outlined text-secondary mt-1">inventory_2</span>
+<div>
+<p class="font-body-md text-body-md text-on-background font-medium">Surplus Identified</p>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">City Blood Bank holds 18 units of Platelets nearing expiration (48h window). Reallocating 12 units prevents local spoilage while securing hospital stock.</p>
+</div>
+</div>
+<div class="w-full h-px bg-outline-variant/20 ml-10 my-2"></div>
+<div class="flex gap-4">
+<span class="material-symbols-outlined text-on-surface-variant mt-1">route</span>
+<div>
+<p class="font-body-md text-body-md text-on-background font-medium">Optimal Route</p>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Current traffic analysis suggests I-95 South corridor is clear. Expected transit time is 42 minutes, well within safety thresholds for cold-chain transport.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-surface p-8 rounded-xl border border-outline-variant/20 flex flex-col gap-4">
+<h3 class="font-body-lg text-body-lg font-medium text-on-background">Vehicle Readiness</h3>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center">
+<span class="material-symbols-outlined text-on-surface-variant">local_shipping</span>
+</div>
+<div>
+<p class="font-body-md text-body-md text-on-background font-medium">Unit TR-04</p>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Cold Chain Certified</p>
+</div>
+</div>
+<div class="bg-secondary/10 text-secondary px-3 py-1 rounded text-sm font-medium">Available</div>
+</div>
+</div>
+</div>
+<!-- Dominant Map Area (2/3 width) -->
+<div class="flex-1 relative rounded-2xl overflow-hidden shadow-sm border border-outline-variant/20 map-layer">
+<!-- Simulated Map Geography / Roads via SVG -->
+<svg class="absolute inset-0 w-full h-full" preserveAspectRatio="xMidYMid slice" viewBox="0 0 800 600">
+<!-- Background Roads -->
+<path d="M-100,100 Q300,150 400,300 T900,400" fill="none" opacity="0.3" stroke="#e0bfbf" stroke-linecap="round" stroke-width="12"></path>
+<path d="M200,-50 Q250,200 400,300 T600,700" fill="none" opacity="0.3" stroke="#e0bfbf" stroke-linecap="round" stroke-width="8"></path>
+<path d="M500,-50 L450,200 L600,400 L850,500" fill="none" opacity="0.2" stroke="#e0bfbf" stroke-linecap="round" stroke-width="6"></path>
+<path d="M-50,400 Q150,450 300,650" fill="none" opacity="0.2" stroke="#e0bfbf" stroke-linecap="round" stroke-width="6"></path>
+<!-- The Recommended Route -->
+<path class="route-path" d="M220,130 Q300,150 400,300 T600,450" fill="none" stroke="#a31e33" stroke-linecap="round" stroke-linejoin="round" stroke-width="4"></path>
+<!-- Source Pin (City Blood Bank) -->
+<g transform="translate(220, 130)">
+<!-- Staged Truck Icon -->
+<g opacity="0.6" transform="translate(-40, -10)">
+<circle cx="0" cy="0" fill="#fff8f6" r="16" stroke="#594141" stroke-width="1.5"></circle>
+<text fill="#594141" font-family="Material Symbols Outlined" font-size="18" x="-9" y="5">local_shipping</text>
+</g>
+<circle class="pulse-pin" cx="0" cy="0" fill="#594141" r="8"></circle>
+<circle cx="0" cy="0" fill="#594141" opacity="0.1" r="24"></circle>
+<rect fill="#fff8f6" height="30" rx="4" stroke="#e0bfbf" stroke-width="1" width="130" x="15" y="-25"></rect>
+<text fill="#1f1b19" font-family="Manrope" font-size="12" font-weight="600" x="25" y="-5">City Blood Bank</text>
+</g>
+<!-- Destination Pin (Central Hospital) -->
+<g transform="translate(600, 450)">
+<circle class="pulse-pin" cx="0" cy="0" fill="#a31e33" r="8"></circle>
+<circle cx="0" cy="0" fill="#a31e33" opacity="0.15" r="32"></circle>
+<circle cx="0" cy="0" fill="none" opacity="0.5" r="16" stroke="#a31e33" stroke-width="2"></circle>
+<rect fill="#fff8f6" height="30" rx="4" stroke="#a31e33" stroke-width="1" width="125" x="-145" y="-35"></rect>
+<text fill="#a31e33" font-family="Manrope" font-size="12" font-weight="600" x="-135" y="-15">Central Hospital</text>
+</g>
+</svg>
+<!-- Map Overlay UI -->
+<div class="absolute top-6 left-6 flex gap-2">
+<button class="w-10 h-10 bg-surface rounded-full shadow-sm border border-outline-variant/20 flex items-center justify-center text-on-surface-variant hover:text-primary-container transition-colors">
+<span class="material-symbols-outlined">add</span>
+</button>
+<button class="w-10 h-10 bg-surface rounded-full shadow-sm border border-outline-variant/20 flex items-center justify-center text-on-surface-variant hover:text-primary-container transition-colors">
+<span class="material-symbols-outlined">remove</span>
+</button>
+</div>
+<div class="absolute bottom-6 right-6 bg-surface/90 backdrop-blur-sm px-4 py-2 rounded-lg border border-outline-variant/20">
+<p class="font-label-sm text-label-sm text-on-surface-variant">Live Traffic: Normal</p>
+</div>
+</div>
+</div>
+</main>
+</body></html>

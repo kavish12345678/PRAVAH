@@ -1,0 +1,303 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>PRAVAH Intelligence | Predict what matters. Move what saves lives.</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;family=Noto+Serif:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-container": "#774b00",
+                        "secondary-fixed-dim": "#aad0ae",
+                        "on-tertiary-container": "#ffbd65",
+                        "on-tertiary-fixed-variant": "#643f00",
+                        "tertiary-fixed": "#ffddb6",
+                        "tertiary": "#583600",
+                        "primary-container": "#a31e33",
+                        "secondary-container": "#c5ecc9",
+                        "surface": "#fff8f6",
+                        "on-background": "#1f1b19",
+                        "inverse-surface": "#352f2d",
+                        "surface-container-lowest": "#ffffff",
+                        "background": "#fff8f6",
+                        "on-primary-fixed-variant": "#8f0b27",
+                        "on-tertiary": "#ffffff",
+                        "on-surface": "#1f1b19",
+                        "primary": "#80001f",
+                        "primary-fixed": "#ffdada",
+                        "outline": "#8c7070",
+                        "surface-tint": "#b1293c",
+                        "primary-fixed-dim": "#ffb3b4",
+                        "surface-bright": "#fff8f6",
+                        "secondary": "#44664b",
+                        "on-primary-fixed": "#40000b",
+                        "on-secondary-container": "#4a6c50",
+                        "surface-dim": "#e2d8d5",
+                        "on-primary": "#ffffff",
+                        "on-tertiary-fixed": "#2a1800",
+                        "on-error-container": "#93000a",
+                        "surface-variant": "#ebe0dd",
+                        "tertiary-fixed-dim": "#ffb95a",
+                        "inverse-on-surface": "#f9efeb",
+                        "on-primary-container": "#ffb7b8",
+                        "surface-container-highest": "#ebe0dd",
+                        "on-surface-variant": "#594141",
+                        "on-secondary-fixed": "#00210c",
+                        "secondary-fixed": "#c5ecc9",
+                        "on-secondary": "#ffffff",
+                        "surface-container-high": "#f0e6e3",
+                        "outline-variant": "#e0bfbf",
+                        "error": "#ba1a1a",
+                        "surface-container-low": "#fcf1ee",
+                        "on-error": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "surface-container": "#f6ece8",
+                        "inverse-primary": "#ffb3b4",
+                        "on-secondary-fixed-variant": "#2c4e34"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "container-padding": "48px",
+                        "unit": "8px",
+                        "section-margin": "80px",
+                        "panel-gap": "24px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Noto Serif"],
+                        "body-md": ["Manrope"],
+                        "headline-lg-mobile": ["Noto Serif"],
+                        "headline-lg": ["Noto Serif"],
+                        "body-lg": ["Manrope"],
+                        "label-sm": ["Manrope"],
+                        "display-md": ["Noto Serif"],
+                        "kpi-value": ["Manrope"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["64px", {"lineHeight": "72px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "500"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "500"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "label-sm": ["13px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "display-md": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "kpi-value": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.03em", "fontWeight": "700"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #FBF7F4;
+            color: #1f1b19;
+            overflow-x: hidden;
+        }
+        .hero-bg-overlay {
+            background: linear-gradient(180deg, rgba(251, 247, 244, 0.8) 0%, rgba(251, 247, 244, 1) 100%);
+        }
+        .glass-panel {
+            background: rgba(245, 241, 238, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(140, 112, 112, 0.1);
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col font-body-md text-body-md">
+<!-- TopNavBar Component -->
+<nav class="fixed top-0 left-0 w-full z-50 bg-surface/80 backdrop-blur-md transition-all duration-500 ease-in-out">
+<div class="flex justify-between items-center w-full px-container-padding py-6 max-w-screen-2xl mx-auto">
+<div class="font-display-md text-display-md font-bold text-primary">PRAVAH</div>
+<div class="hidden md:flex space-x-8">
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-300" href="#capabilities">Capabilities</a>
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-300" href="#intelligence">Intelligence</a>
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-300" href="#network">Network</a>
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-300" href="#resources">Resources</a>
+</div>
+<button class="hidden md:block bg-primary-container text-on-primary px-6 py-3 rounded-full font-label-sm uppercase tracking-wider hover:bg-primary transition-colors duration-300">
+                Get Started
+            </button>
+<button class="md:hidden text-primary">
+<span class="material-symbols-outlined text-3xl">menu</span>
+</button>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="flex-grow pt-[104px]"> <!-- Offset for fixed nav -->
+<!-- Hero Section -->
+<section class="relative min-h-[85vh] flex items-center justify-center pt-section-margin pb-section-margin overflow-hidden">
+<!-- Background Image with Opacity -->
+<div class="absolute inset-0 z-0">
+<div class="w-full h-full bg-cover bg-center" data-alt="A modern, sterile healthcare logistics center with glowing digital overlays showing blood supply chains and temperature monitoring nodes. The lighting is bright, clean, and cool, contrasting with the deep reds of the blood units. A white delivery van is visible in the background." style="background-image: url(&quot;https://lh3.googleusercontent.com/aida-public/AB6AXuDEqmBxcgCPCWucKO-cYNC9JKuw8UM_1kWpa463TdEhtcSH0gtgui_gBNT-mDP_psn5ekSkdnLM0hOeBJS4prGfxPLsC_Orxk-FhSsBL0y9nUI-5UzHwaebItF8hHr55vgipMpJWvDlaoAT8MZVl5MX288g0tZcDvqPY-rwqJ0FLeSJxIYflmB7ESrP4KiIWle8XfTJs3OaUpcZ6ElswN0yCUHQ6fd8Dz7d5vABIVKbvyKz5BU4jB6UwrWJAe00Gj0GSA&quot;); opacity: 1;"></div>
+</div>
+<div class="absolute inset-0 z-0 hero-bg-overlay"></div>
+<div class="relative z-10 w-full max-w-screen-2xl mx-auto px-container-padding flex flex-col items-center text-center">
+<!-- Floating Status Chips -->
+<div class="flex flex-wrap justify-center gap-4 mb-8">
+<div class="glass-panel px-6 py-2 rounded-full flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-secondary"></div>
+<span class="font-label-sm text-on-surface">Active Network: 2,847 Units Monitored</span>
+</div>
+<div class="glass-panel px-6 py-2 rounded-full flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></div>
+<span class="font-label-sm text-on-surface">AI Prediction: 6 Shortage Zones Detected</span>
+</div>
+</div>
+<!-- Headline -->
+<h1 class="font-display-lg text-display-lg text-primary max-w-4xl mx-auto mb-6">
+                    Predict what matters. <br>
+                    Move what saves lives.
+                </h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl mx-auto mb-12">
+                    Orchestrating the nation's blood supply with predictive intelligence. PRAVAH anticipates need, monitors viability, and routes resources before a crisis hits.
+                </p>
+<!-- Action -->
+<div class="flex gap-4">
+<button class="bg-primary-container text-on-primary px-8 py-4 rounded-full font-label-sm uppercase tracking-wider hover:bg-primary transition-colors duration-300">
+                        Explore the Network
+                    </button>
+<button class="bg-transparent border border-primary text-primary px-8 py-4 rounded-full font-label-sm uppercase tracking-wider hover:bg-surface-variant transition-colors duration-300">
+                        View Live Data
+                    </button>
+</div>
+</div>
+</section>
+<!-- Capabilities Section (Z-Pattern) -->
+<section class="py-section-margin bg-surface" id="capabilities">
+<div class="max-w-screen-2xl mx-auto px-container-padding">
+<div class="text-center mb-section-margin">
+<h2 class="font-display-md text-display-md text-on-surface mb-4">Orchestrating Life-Saving Logistics</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-3xl mx-auto">
+                        Our platform connects every node in the blood supply chain, ensuring viability and availability through continuous monitoring and predictive algorithms.
+                    </p>
+</div>
+<!-- Feature 1: Left Text, Right Image -->
+<div class="flex flex-col md:flex-row items-center gap-panel-gap mb-section-margin">
+<div class="w-full md:w-5/12">
+<h3 class="font-headline-lg text-headline-lg text-primary mb-4">Predictive Inventory</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-6">
+                            Shift from reactive ordering to proactive management. Our AI analyzes historical usage, local events, and real-time network data to forecast demand for specific blood types down to the facility level, up to 72 hours in advance.
+                        </p>
+<ul class="space-y-4">
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary mt-1">check_circle</span>
+<div>
+<h4 class="font-label-sm text-on-surface">Demand Forecasting</h4>
+<p class="text-sm text-on-surface-variant">Anticipate spikes in need before inventory drops.</p>
+</div>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary mt-1">check_circle</span>
+<div>
+<h4 class="font-label-sm text-on-surface">Wastage Reduction</h4>
+<p class="text-sm text-on-surface-variant">Optimize stock levels to minimize expirations.</p>
+</div>
+</li>
+</ul>
+</div>
+<div class="w-full md:w-7/12 bg-surface-container rounded-xl overflow-hidden shadow-sm flex items-center justify-center p-8 min-h-[400px]">
+<!-- Abstract Data Viz Placeholder instead of literal image -->
+<div class="w-full h-full flex flex-col items-end justify-end space-y-2 opacity-80">
+<div class="w-3/4 h-12 bg-surface-tint/20 rounded-l-full relative overflow-hidden"><div class="absolute top-0 right-0 h-full w-1/3 bg-primary-container"></div></div>
+<div class="w-full h-12 bg-surface-tint/10 rounded-l-full relative overflow-hidden"><div class="absolute top-0 right-0 h-full w-1/2 bg-primary-container/80"></div></div>
+<div class="w-2/3 h-12 bg-surface-tint/20 rounded-l-full relative overflow-hidden"><div class="absolute top-0 right-0 h-full w-1/4 bg-primary-container/60"></div></div>
+<div class="w-5/6 h-12 bg-surface-tint/10 rounded-l-full relative overflow-hidden"><div class="absolute top-0 right-0 h-full w-2/5 bg-primary-container/40"></div></div>
+</div>
+</div>
+</div>
+<!-- Feature 2: Right Text, Left Image -->
+<div class="flex flex-col md:flex-row-reverse items-center gap-panel-gap mb-section-margin">
+<div class="w-full md:w-5/12 pl-0 md:pl-12">
+<h3 class="font-headline-lg text-headline-lg text-primary mb-4">Network Optimization</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-6">
+                            View the entire supply chain as a single, fluid network. When a shortage threatens one region, PRAVAH automatically identifies surplus in neighboring nodes and orchestrates rapid transfers.
+                        </p>
+<ul class="space-y-4">
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary mt-1">check_circle</span>
+<div>
+<h4 class="font-label-sm text-on-surface">Dynamic Routing</h4>
+<p class="text-sm text-on-surface-variant">Automated transport requests based on real-time traffic and urgency.</p>
+</div>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary mt-1">check_circle</span>
+<div>
+<h4 class="font-label-sm text-on-surface">Cross-Facility Pooling</h4>
+<p class="text-sm text-on-surface-variant">Break down silos between independent hospital systems.</p>
+</div>
+</li>
+</ul>
+</div>
+<div class="w-full md:w-7/12 rounded-xl overflow-hidden bg-surface-container relative min-h-[400px]">
+<div class="w-full h-full absolute inset-0 bg-cover bg-center" data-alt="A minimalist data visualization showing a network graph with nodes connected by thin lines. Some nodes glow red indicating critical status, while others are a calm teal. The background is a soft ivory, conveying a premium, technical aesthetic." style="background-image: url('https://lh3.googleusercontent.com/aida/AEtjO1W0zrln1mmI6jj_JQIg-Q2tn82h3q0gwvm34c6c8Q2Z4k8TbVrWvA62ZW5mGIF_I-iiVmWrUhMlflW2HkfUE1rB7cjGOH6A-NlGFxJ0dChm0Ikwfu_NKW_wYZ88E9SppiW60xFy7W4Gd2fJxUO1e3dXnt1EpG0w10I8EwRyU0v4mUK5orSIOb2Uz5h5FD9n8RVRC3P_7Y8UKASTzfCvPUD_Q8VFqOJ_SFLGhrV5ppIygjq_VSIL6gfa878')"></div>
+</div>
+</div>
+<!-- Feature 3: Left Text, Right Image -->
+<div class="flex flex-col md:flex-row items-center gap-panel-gap">
+<div class="w-full md:w-5/12">
+<h3 class="font-headline-lg text-headline-lg text-primary mb-4">Equipment Intelligence</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-6">
+                            Blood is only viable if stored correctly. PRAVAH integrates directly with IoT sensors in smart fridges and transport coolers to ensure an unbroken cold chain.
+                        </p>
+<div class="glass-panel p-6 rounded-lg mt-6 border-l-4 border-l-primary-container">
+<h4 class="font-label-sm text-on-surface mb-2">Live Alert Example</h4>
+<p class="text-sm text-on-surface-variant">"Temperature fluctuation detected in Transport Unit B-42. Estimated deviation threshold in 14 minutes. Rerouting recommended."</p>
+</div>
+</div>
+<div class="w-full md:w-7/12 bg-surface-container rounded-xl overflow-hidden min-h-[400px] flex items-center justify-center p-12">
+<div class="w-full grid grid-cols-2 gap-4">
+<!-- Bento style stats -->
+<div class="bg-surface p-6 rounded-lg shadow-sm border border-outline-variant/20 flex flex-col justify-between h-32">
+<span class="font-label-sm text-on-surface-variant">Avg Temp Variance</span>
+<span class="font-kpi-value text-primary">0.2°C</span>
+</div>
+<div class="bg-surface p-6 rounded-lg shadow-sm border border-outline-variant/20 flex flex-col justify-between h-32">
+<span class="font-label-sm text-on-surface-variant">Active Sensors</span>
+<span class="font-kpi-value text-primary">12k+</span>
+</div>
+<div class="bg-surface p-6 rounded-lg shadow-sm border border-outline-variant/20 flex flex-col justify-between h-32 col-span-2">
+<span class="font-label-sm text-on-surface-variant">Cold Chain Integrity</span>
+<div class="flex items-center gap-4 mt-2">
+<div class="flex-grow h-2 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-secondary w-[99.8%]"></div>
+</div>
+<span class="font-kpi-value text-secondary text-2xl">99.8%</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer Component -->
+<footer class="w-full bg-surface-container border-t border-outline-variant/10 mt-auto">
+<div class="flex flex-col md:flex-row justify-between items-center w-full px-container-padding py-section-margin max-w-screen-2xl mx-auto">
+<div class="font-display-md text-display-md font-bold text-primary mb-8 md:mb-0">
+                PRAVAH
+            </div>
+<div class="flex flex-wrap justify-center md:justify-end gap-x-8 gap-y-4">
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors duration-200 opacity-100 hover:opacity-80" href="#">Privacy Policy</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors duration-200 opacity-100 hover:opacity-80" href="#">Terms of Service</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors duration-200 opacity-100 hover:opacity-80" href="#">Support</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors duration-200 opacity-100 hover:opacity-80" href="#">Contact</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors duration-200 opacity-100 hover:opacity-80" href="#">Compliance</a>
+</div>
+<div class="w-full md:w-auto text-center mt-8 md:mt-12 font-body-md text-body-md text-on-surface-variant text-sm">
+                © 2024 PRAVAH Intelligence. All rights reserved.
+            </div>
+</div>
+</footer>
+
+
+</body></html>

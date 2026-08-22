@@ -1,0 +1,469 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Equipment Health - PRAVAH</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&amp;family=Noto+Serif:wght@500;600&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-bright": "#fff8f6",
+                        "on-secondary-fixed": "#00210c",
+                        "on-error-container": "#93000a",
+                        "on-tertiary": "#ffffff",
+                        "outline": "#8c7070",
+                        "surface-tint": "#b1293c",
+                        "surface-variant": "#ebe0dd",
+                        "on-primary-container": "#ffb7b8",
+                        "background": "#fff8f6",
+                        "primary-fixed-dim": "#ffb3b4",
+                        "primary-container": "#a31e33",
+                        "on-surface": "#1f1b19",
+                        "secondary-fixed-dim": "#aad0ae",
+                        "error-container": "#ffdad6",
+                        "on-tertiary-container": "#ffbd65",
+                        "surface-container-highest": "#ebe0dd",
+                        "on-secondary": "#ffffff",
+                        "secondary-fixed": "#c5ecc9",
+                        "surface-container": "#f6ece8",
+                        "on-primary": "#ffffff",
+                        "outline-variant": "#e0bfbf",
+                        "error": "#ba1a1a",
+                        "surface": "#fff8f6",
+                        "primary": "#80001f",
+                        "tertiary-container": "#774b00",
+                        "tertiary-fixed": "#ffddb6",
+                        "tertiary": "#583600",
+                        "primary-fixed": "#ffdada",
+                        "tertiary-fixed-dim": "#ffb95a",
+                        "on-primary-fixed-variant": "#8f0b27",
+                        "secondary": "#44664b",
+                        "on-background": "#1f1b19",
+                        "surface-dim": "#e2d8d5",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary-container": "#4a6c50",
+                        "surface-container-high": "#f0e6e3",
+                        "on-surface-variant": "#594141",
+                        "on-error": "#ffffff",
+                        "on-tertiary-fixed": "#2a1800",
+                        "inverse-primary": "#ffb3b4",
+                        "inverse-on-surface": "#f9efeb",
+                        "surface-container-low": "#fcf1ee",
+                        "on-primary-fixed": "#40000b",
+                        "on-tertiary-fixed-variant": "#643f00",
+                        "on-secondary-fixed-variant": "#2c4e34",
+                        "inverse-surface": "#352f2d",
+                        "secondary-container": "#c5ecc9"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "container-padding": "48px",
+                        "panel-gap": "24px",
+                        "section-margin": "80px",
+                        "unit": "8px"
+                    },
+                    "fontFamily": {
+                        "headline-lg-mobile": ["Noto Serif"],
+                        "display-md": ["Noto Serif"],
+                        "headline-lg": ["Noto Serif"],
+                        "display-lg": ["Noto Serif"],
+                        "body-lg": ["Manrope"],
+                        "label-sm": ["Manrope"],
+                        "body-md": ["Manrope"],
+                        "kpi-value": ["Manrope"]
+                    },
+                    "fontSize": {
+                        "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "500"}],
+                        "display-md": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "500"}],
+                        "display-lg": ["64px", {"lineHeight": "72px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "label-sm": ["13px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "kpi-value": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.03em", "fontWeight": "700"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        .filled-icon {
+            font-variation-settings: 'FILL' 1, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        
+        /* Subtle hairline utilities */
+        .hairline-b { border-bottom: 1px solid rgba(31, 27, 25, 0.1); }
+        .hairline-t { border-top: 1px solid rgba(31, 27, 25, 0.1); }
+        .hairline-l { border-left: 1px solid rgba(31, 27, 25, 0.1); }
+        
+        /* Sparkline animations */
+        @keyframes drawLine {
+            to { stroke-dashoffset: 0; }
+        }
+        .sparkline-path {
+            stroke-dasharray: 200;
+            stroke-dashoffset: 200;
+            animation: drawLine 2s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="bg-surface-bright text-on-surface font-body-md antialiased selection:bg-primary-fixed selection:text-on-primary-fixed">
+<div class="flex min-h-screen relative w-full">
+<!-- SideNavBar -->
+<nav class="bg-surface-container dark:bg-surface-container-lowest h-screen w-80 fixed left-0 top-0 overflow-y-auto flex flex-col py-8 gap-panel-gap hidden md:flex z-40 border-r border-outline-variant/30">
+<div class="px-6 mb-8">
+<h1 class="font-headline-lg text-headline-lg text-primary tracking-tight">PRAVAH</h1>
+<p class="font-label-sm text-label-sm text-on-surface-variant mt-1 uppercase tracking-wider">Logistics Intel</p>
+</div>
+<ul class="flex flex-col w-full flex-grow">
+<!-- Inactive Tabs -->
+<li>
+<a class="text-on-surface-variant px-6 py-4 flex items-center gap-4 hover:bg-surface-container-high dark:hover:bg-surface-container-low transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-body-md">Dashboard</span>
+</a>
+</li>
+<li>
+<a class="text-on-surface-variant px-6 py-4 flex items-center gap-4 hover:bg-surface-container-high dark:hover:bg-surface-container-low transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="inventory_2">inventory_2</span>
+<span class="font-body-md">Inventory</span>
+</a>
+</li>
+<li>
+<a class="text-on-surface-variant px-6 py-4 flex items-center gap-4 hover:bg-surface-container-high dark:hover:bg-surface-container-low transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="warning">warning</span>
+<span class="font-body-md">Risk Intelligence</span>
+</a>
+</li>
+<li>
+<a class="text-on-surface-variant px-6 py-4 flex items-center gap-4 hover:bg-surface-container-high dark:hover:bg-surface-container-low transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="ac_unit">ac_unit</span>
+<span class="font-body-md">Cold-Chain</span>
+</a>
+</li>
+<!-- Active Tab -->
+<li>
+<a class="text-on-primary-fixed-variant font-bold border-l-4 border-primary px-6 py-4 bg-primary-fixed/20 flex items-center gap-4 hover:bg-surface-container-high transition-colors duration-200" href="#">
+<span class="material-symbols-outlined filled-icon" data-icon="medical_services">medical_services</span>
+<span class="font-body-md">Equipment Health</span>
+</a>
+</li>
+</ul>
+<div class="mt-auto px-6 pt-8 hairline-t w-[calc(100%-3rem)] mx-auto">
+<ul class="flex flex-col w-full">
+<li>
+<a class="text-on-surface-variant py-3 flex items-center gap-4 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
+<span class="font-label-sm uppercase">Support</span>
+</a>
+</li>
+<li>
+<a class="text-on-surface-variant py-3 flex items-center gap-4 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span class="font-label-sm uppercase">Sign Out</span>
+</a>
+</li>
+</ul>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="flex-1 md:ml-80 flex flex-col min-h-screen">
+<!-- TopNavBar -->
+<header class="bg-surface dark:bg-surface-dim w-full h-20 sticky top-0 z-50 flex justify-between items-center px-container-padding transition-all">
+<div class="flex items-center gap-4">
+<!-- Mobile Menu Trigger -->
+<button class="md:hidden text-on-surface hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="menu">menu</span>
+</button>
+<!-- Brand for Mobile -->
+<h2 class="font-display-md text-display-md text-primary dark:text-primary-fixed tracking-tight md:hidden">PRAVAH</h2>
+</div>
+<div class="flex items-center gap-6 ml-auto">
+<button class="text-on-surface-variant font-medium hover:bg-surface-container-high transition-colors duration-200 p-2 rounded-full">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="text-on-surface-variant font-medium hover:bg-surface-container-high transition-colors duration-200 p-2 rounded-full">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+<div class="w-10 h-10 rounded-full bg-surface-container-highest border border-outline-variant overflow-hidden ml-2">
+<img alt="Medical Logistics Officer Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCCgYDHeeTEXSzVQ6Eg_PBo_CyjezC-SWCXytE0RiwgiA8QF-ceB4t3aNRlPr9V7iSn1Jsv1aYD-jWoTLasW6jK_w5sPLdc2pprsDHjitaUccrPfW27BwElN43t2tBW645CwWDKl6qJhjUwDkGwufw1OHkJNI2ya61evahyeP_fMSFdF-E66FDaXouSN8cWFZ1a4i5MUdpFzETrlgGpO0xMu2JLGQJCMuQP4XwrprQOVd27ufbT-DRW">
+</div>
+</div>
+</header>
+<!-- Page Content -->
+<div class="p-container-padding flex-1 flex flex-col gap-section-margin max-w-7xl">
+<!-- Page Header -->
+<div class="flex flex-col gap-4">
+<p class="font-label-sm text-on-surface-variant uppercase tracking-widest">Global Overview</p>
+<h2 class="font-display-md text-display-md text-on-surface">Equipment Health</h2>
+</div>
+<!-- Causal Chain Visualization Section -->
+<section class="flex flex-col gap-8">
+<header class="flex flex-col gap-2">
+<div class="flex items-center gap-3">
+<span class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></span>
+<p class="font-label-sm text-primary uppercase tracking-widest">Live Impact Analysis</p>
+</div>
+<h3 class="font-headline-lg text-headline-lg text-on-surface max-w-3xl">Agitator-7 Motor Failure</h3>
+</header>
+<!-- The Flow Container -->
+<div class="w-full overflow-x-auto pb-8 pt-4">
+<div class="flex items-start min-w-[900px] relative px-4">
+<!-- Connecting Line (SVG Background Track) -->
+<svg class="absolute top-1/2 left-0 w-full h-[2px] -translate-y-1/2 z-0 opacity-20 pointer-events-none" preserveAspectRatio="none">
+<path d="M 50 0 C 200 0, 300 0, 850 0" fill="none" stroke="#80001f" stroke-dasharray="8 8" stroke-width="2"></path>
+</svg>
+<!-- Node 1: Equipment -->
+<div class="flex flex-col gap-4 flex-1 relative z-10 pr-8">
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center border border-outline-variant/50">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="precision_manufacturing">precision_manufacturing</span>
+</div>
+<div>
+<p class="font-label-sm text-on-surface-variant uppercase mb-1">Source Event</p>
+<p class="font-body-md font-bold text-on-surface">Agitator-7 Stalled</p>
+<p class="font-body-md text-on-surface-variant text-sm mt-1">RPM drop below 500 threshold.</p>
+</div>
+</div>
+<!-- Connection Arrow -->
+<div class="flex items-center justify-center h-12 relative z-10 px-4 text-outline-variant">
+<span class="material-symbols-outlined text-sm" data-icon="arrow_forward_ios">arrow_forward_ios</span>
+</div>
+<!-- Node 2: Affected Inventory -->
+<div class="flex flex-col gap-4 flex-1 relative z-10 px-4">
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center border border-outline-variant/50">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="vaccines">vaccines</span>
+</div>
+<div>
+<p class="font-label-sm text-on-surface-variant uppercase mb-1">Affected Entity</p>
+<p class="font-body-md font-bold text-on-surface">Lot #88A Suspension</p>
+<p class="font-body-md text-on-surface-variant text-sm mt-1">12,000 units dependent on active mixing.</p>
+</div>
+</div>
+<!-- Connection Arrow -->
+<div class="flex items-center justify-center h-12 relative z-10 px-4 text-outline-variant">
+<span class="material-symbols-outlined text-sm" data-icon="arrow_forward_ios">arrow_forward_ios</span>
+</div>
+<!-- Node 3: Storage Risk -->
+<div class="flex flex-col gap-4 flex-1 relative z-10 px-4">
+<div class="w-12 h-12 rounded-full bg-error-container/20 flex items-center justify-center border border-error/30">
+<span class="material-symbols-outlined text-error" data-icon="thermostat">thermostat</span>
+</div>
+<div>
+<p class="font-label-sm text-error uppercase mb-1">Escalating Risk</p>
+<p class="font-body-md font-bold text-on-surface">Sedimentation Imminent</p>
+<p class="font-body-md text-on-surface-variant text-sm mt-1">Estimated 45 mins until unrecoverable separation.</p>
+</div>
+</div>
+<!-- Connection Arrow -->
+<div class="flex items-center justify-center h-12 relative z-10 px-4 text-outline-variant">
+<span class="material-symbols-outlined text-sm" data-icon="arrow_forward_ios">arrow_forward_ios</span>
+</div>
+<!-- Node 4: Predicted Shortage -->
+<div class="flex flex-col gap-4 flex-1 relative z-10 pl-4">
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center border border-outline-variant/50">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="trending_down">trending_down</span>
+</div>
+<div>
+<p class="font-label-sm text-on-surface-variant uppercase mb-1">Downstream Impact</p>
+<p class="font-body-md font-bold text-on-surface">-15% Regional Supply</p>
+<p class="font-body-md text-on-surface-variant text-sm mt-1">Deficit projected for Northeast sector by 08:00.</p>
+</div>
+</div>
+<!-- Node 5: Action (Offset visually to denote resolution path) -->
+<div class="flex flex-col gap-4 flex-1 relative z-10 pl-12">
+<button class="w-full text-left bg-primary-container hover:bg-primary transition-colors text-on-primary p-6 rounded-lg shadow-sm group">
+<div class="flex justify-between items-center mb-4">
+<p class="font-label-sm uppercase tracking-widest opacity-80">Recommended Protocol</p>
+<span class="material-symbols-outlined group-hover:translate-x-1 transition-transform" data-icon="arrow_forward">arrow_forward</span>
+</div>
+<p class="font-headline-lg text-xl mb-2">Initiate Backup Mixer B</p>
+<p class="font-body-md text-sm opacity-90">Auto-route Lot #88A immediately.</p>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Equipment List Section (Asymmetric / Minimalist) -->
+<section class="flex flex-col gap-8">
+<header class="flex justify-between items-end hairline-b pb-4">
+<h3 class="font-headline-lg text-headline-lg text-on-surface">Active Diagnostics</h3>
+<div class="flex gap-4">
+<button class="font-label-sm text-on-surface-variant hover:text-primary uppercase tracking-widest transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="filter_list">filter_list</span> Filter
+                            </button>
+</div>
+</header>
+<div class="flex flex-col w-full">
+<!-- List Item 1: Critical (Agitator-7) -->
+<div class="group flex flex-col md:flex-row items-start md:items-center py-8 hairline-b hover:bg-surface-container-lowest transition-colors px-4 -mx-4 gap-6 md:gap-12 relative overflow-hidden">
+<!-- Subtle highlight for critical row -->
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-error opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<!-- Identifier & Status -->
+<div class="w-full md:w-1/4 flex flex-col gap-2">
+<div class="flex items-center gap-3">
+<h4 class="font-headline-lg text-xl text-on-surface">Agitator-7</h4>
+<span class="px-2 py-1 rounded-sm bg-error-container/20 text-error font-label-sm uppercase tracking-wider text-[10px]">Critical</span>
+</div>
+<p class="font-body-md text-on-surface-variant text-sm">Mixing Vessel Alpha</p>
+</div>
+<!-- Metrics Cluster -->
+<div class="w-full md:flex-1 grid grid-cols-2 md:grid-cols-3 gap-8 items-center">
+<!-- Motor Status -->
+<div class="flex flex-col gap-1">
+<p class="font-label-sm text-on-surface-variant uppercase text-xs">Motor Torque</p>
+<p class="font-body-md font-bold text-error flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]" data-icon="error">error</span>
+                                        Overload
+                                    </p>
+</div>
+<!-- RPM Sparkline -->
+<div class="flex flex-col gap-2">
+<div class="flex justify-between items-end">
+<p class="font-label-sm text-on-surface-variant uppercase text-xs">RPM Trend</p>
+<p class="font-body-md font-bold text-on-surface">120 <span class="text-xs font-normal text-on-surface-variant">/ 800</span></p>
+</div>
+<div class="h-8 w-full relative">
+<svg class="w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 30">
+<polyline class="sparkline-path" fill="none" points="0,5 20,5 30,10 40,5 50,8 60,25 70,28 80,26 100,28" stroke="#ba1a1a" stroke-width="1.5"></polyline>
+<!-- Baseline -->
+<line opacity="0.3" stroke="#1f1b19" stroke-dasharray="2 2" stroke-width="0.5" x1="0" x2="100" y1="5" y2="5"></line>
+</svg>
+</div>
+</div>
+<!-- Vibration Sparkline -->
+<div class="flex flex-col gap-2">
+<div class="flex justify-between items-end">
+<p class="font-label-sm text-on-surface-variant uppercase text-xs">Vibration (mm/s)</p>
+<p class="font-body-md font-bold text-on-surface">8.4 <span class="text-xs font-normal text-on-surface-variant text-error">High</span></p>
+</div>
+<div class="h-8 w-full relative">
+<svg class="w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 30">
+<polyline class="sparkline-path" fill="none" points="0,20 10,18 20,22 30,15 40,25 50,10 60,28 70,5 80,29 100,2" stroke="#80001f" stroke-width="1.5"></polyline>
+</svg>
+</div>
+</div>
+</div>
+<!-- Action -->
+<div class="w-full md:w-auto flex justify-end">
+<button class="p-3 rounded-full hover:bg-surface-container transition-colors text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+</div>
+<!-- List Item 2: Stable (Ultra-Low Freezer) -->
+<div class="group flex flex-col md:flex-row items-start md:items-center py-8 hairline-b hover:bg-surface-container-lowest transition-colors px-4 -mx-4 gap-6 md:gap-12 relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-secondary opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div class="w-full md:w-1/4 flex flex-col gap-2">
+<div class="flex items-center gap-3">
+<h4 class="font-headline-lg text-xl text-on-surface">Freezer B-12</h4>
+<span class="px-2 py-1 rounded-sm bg-secondary-container/20 text-secondary font-label-sm uppercase tracking-wider text-[10px]">Stable</span>
+</div>
+<p class="font-body-md text-on-surface-variant text-sm">Ultra-Low Storage Zone 2</p>
+</div>
+<div class="w-full md:flex-1 grid grid-cols-2 md:grid-cols-3 gap-8 items-center">
+<div class="flex flex-col gap-1">
+<p class="font-label-sm text-on-surface-variant uppercase text-xs">Compressor</p>
+<p class="font-body-md text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-secondary" data-icon="check_circle">check_circle</span>
+                                        Nominal
+                                    </p>
+</div>
+<div class="flex flex-col gap-2">
+<div class="flex justify-between items-end">
+<p class="font-label-sm text-on-surface-variant uppercase text-xs">Temp Trend</p>
+<p class="font-body-md font-bold text-on-surface">-80.2° <span class="text-xs font-normal text-on-surface-variant">C</span></p>
+</div>
+<div class="h-8 w-full relative">
+<svg class="w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 30">
+<polyline class="sparkline-path" fill="none" points="0,15 20,16 40,14 60,15 80,16 100,15" stroke="#44664b" stroke-width="1.5"></polyline>
+<line opacity="0.3" stroke="#1f1b19" stroke-dasharray="2 2" stroke-width="0.5" x1="0" x2="100" y1="15" y2="15"></line>
+</svg>
+</div>
+</div>
+<div class="flex flex-col gap-2">
+<div class="flex justify-between items-end">
+<p class="font-label-sm text-on-surface-variant uppercase text-xs">Power Draw</p>
+<p class="font-body-md font-bold text-on-surface">3.2 <span class="text-xs font-normal text-on-surface-variant">kW</span></p>
+</div>
+<div class="h-8 w-full relative">
+<svg class="w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 30">
+<polyline class="sparkline-path" fill="none" points="0,20 20,22 40,18 60,20 80,21 100,19" stroke="#44664b" stroke-width="1.5"></polyline>
+</svg>
+</div>
+</div>
+</div>
+<div class="w-full md:w-auto flex justify-end">
+<button class="p-3 rounded-full hover:bg-surface-container transition-colors text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+</div>
+<!-- List Item 3: Warning (Centrifuge-3) -->
+<div class="group flex flex-col md:flex-row items-start md:items-center py-8 hairline-b hover:bg-surface-container-lowest transition-colors px-4 -mx-4 gap-6 md:gap-12 relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-tertiary-fixed-dim opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div class="w-full md:w-1/4 flex flex-col gap-2">
+<div class="flex items-center gap-3">
+<h4 class="font-headline-lg text-xl text-on-surface">Centrifuge-3</h4>
+<span class="px-2 py-1 rounded-sm bg-tertiary-container/10 text-tertiary-container font-label-sm uppercase tracking-wider text-[10px]">Warning</span>
+</div>
+<p class="font-body-md text-on-surface-variant text-sm">Prep Lab Floor 2</p>
+</div>
+<div class="w-full md:flex-1 grid grid-cols-2 md:grid-cols-3 gap-8 items-center">
+<div class="flex flex-col gap-1">
+<p class="font-label-sm text-on-surface-variant uppercase text-xs">Rotor Balance</p>
+<p class="font-body-md text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-tertiary-fixed-dim" data-icon="warning_amber">warning_amber</span>
+                                        Slight Imbalance
+                                    </p>
+</div>
+<div class="flex flex-col gap-2">
+<div class="flex justify-between items-end">
+<p class="font-label-sm text-on-surface-variant uppercase text-xs">RPM Trend</p>
+<p class="font-body-md font-bold text-on-surface">4,950 <span class="text-xs font-normal text-on-surface-variant">/ 5000</span></p>
+</div>
+<div class="h-8 w-full relative">
+<svg class="w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 30">
+<polyline class="sparkline-path" fill="none" points="0,5 20,6 40,5 60,8 80,12 100,10" stroke="#ffb95a" stroke-width="1.5"></polyline>
+<line opacity="0.3" stroke="#1f1b19" stroke-dasharray="2 2" stroke-width="0.5" x1="0" x2="100" y1="5" y2="5"></line>
+</svg>
+</div>
+</div>
+<div class="flex flex-col gap-2">
+<div class="flex justify-between items-end">
+<p class="font-label-sm text-on-surface-variant uppercase text-xs">Vibration (mm/s)</p>
+<p class="font-body-md font-bold text-on-surface">4.1 <span class="text-xs font-normal text-on-surface-variant">Elevated</span></p>
+</div>
+<div class="h-8 w-full relative">
+<svg class="w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 30">
+<polyline class="sparkline-path" fill="none" points="0,25 20,23 40,20 60,15 80,10 100,12" stroke="#ffb95a" stroke-width="1.5"></polyline>
+</svg>
+</div>
+</div>
+</div>
+<div class="w-full md:w-auto flex justify-end">
+<button class="p-3 rounded-full hover:bg-surface-container transition-colors text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+</div>
+</main>
+</div>
+</body></html>

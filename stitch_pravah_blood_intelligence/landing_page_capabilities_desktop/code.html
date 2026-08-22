@@ -1,0 +1,343 @@
+<!DOCTYPE html><html class="light" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>PRAVAH - From Data to Decision</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&amp;family=Noto+Serif:wght@500;600&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-error": "#ffffff",
+                      "inverse-surface": "#352f2d",
+                      "secondary-fixed-dim": "#aad0ae",
+                      "error": "#ba1a1a",
+                      "on-tertiary-fixed-variant": "#643f00",
+                      "surface-variant": "#ebe0dd",
+                      "primary": "#80001f",
+                      "on-secondary": "#ffffff",
+                      "tertiary-fixed": "#ffddb6",
+                      "on-primary": "#ffffff",
+                      "on-primary-container": "#ffb7b8",
+                      "on-tertiary-fixed": "#2a1800",
+                      "error-container": "#ffdad6",
+                      "outline-variant": "#e0bfbf",
+                      "primary-container": "#a31e33",
+                      "on-secondary-fixed": "#00210c",
+                      "surface": "#fff8f6",
+                      "surface-dim": "#e2d8d5",
+                      "surface-container-highest": "#ebe0dd",
+                      "surface-bright": "#fff8f6",
+                      "background": "#fff8f6",
+                      "primary-fixed-dim": "#ffb3b4",
+                      "secondary": "#44664b",
+                      "on-secondary-container": "#4a6c50",
+                      "surface-tint": "#b1293c",
+                      "on-secondary-fixed-variant": "#2c4e34",
+                      "primary-fixed": "#ffdada",
+                      "tertiary-container": "#774b00",
+                      "surface-container-high": "#f0e6e3",
+                      "on-tertiary": "#ffffff",
+                      "secondary-fixed": "#c5ecc9",
+                      "surface-container-low": "#fcf1ee",
+                      "on-error-container": "#93000a",
+                      "inverse-primary": "#ffb3b4",
+                      "surface-container-lowest": "#ffffff",
+                      "tertiary": "#583600",
+                      "on-background": "#1f1b19",
+                      "surface-container": "#f6ece8",
+                      "on-primary-fixed": "#40000b",
+                      "on-primary-fixed-variant": "#8f0b27",
+                      "secondary-container": "#c5ecc9",
+                      "on-tertiary-container": "#ffbd65",
+                      "inverse-on-surface": "#f9efeb",
+                      "outline": "#8c7070",
+                      "on-surface-variant": "#594141",
+                      "on-surface": "#1f1b19",
+                      "tertiary-fixed-dim": "#ffb95a"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "container-padding": "48px",
+                      "unit": "8px",
+                      "panel-gap": "24px",
+                      "section-margin": "80px"
+              },
+              "fontFamily": {
+                      "headline-lg-mobile": ["Noto Serif"],
+                      "display-lg": ["Noto Serif"],
+                      "display-md": ["Noto Serif"],
+                      "kpi-value": ["Manrope"],
+                      "label-sm": ["Manrope"],
+                      "body-lg": ["Manrope"],
+                      "body-md": ["Manrope"],
+                      "headline-lg": ["Noto Serif"]
+              },
+              "fontSize": {
+                      "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "500"}],
+                      "display-lg": ["64px", {"lineHeight": "72px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                      "display-md": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                      "kpi-value": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.03em", "fontWeight": "700"}],
+                      "label-sm": ["13px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                      "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                      "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "500"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.fill-1 {
+            font-variation-settings: 'FILL' 1;
+        }
+        
+        /* Custom Base Background override as per prompt */
+        body {
+            background-color: #FBF7F4; 
+        }
+        .panel-bg {
+            background-color: #F5F1EE;
+        }
+        .hairline-b {
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        .hairline-l {
+            border-left: 1px solid rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="text-on-background font-body-md antialiased overflow-x-hidden">
+<!-- TopNavBar (Shared Component Shell) -->
+<header class="w-full top-0 sticky z-50 bg-surface dark:bg-surface-dim border-b border-outline-variant/20">
+<div class="flex justify-between items-center w-full px-container-padding py-6 max-w-[1440px] mx-auto">
+<!-- Brand -->
+<div class="flex items-center gap-2">
+<span class="font-display-md text-display-md font-semibold tracking-tight text-primary dark:text-primary-fixed">PRAVAH</span>
+</div>
+<!-- Desktop Navigation -->
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-on-surface-variant dark:text-on-surface-variant/80 hover:text-primary dark:hover:text-primary-fixed transition-colors font-body-md text-body-md" href="#">Inventory</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant/80 hover:text-primary dark:hover:text-primary-fixed transition-colors font-body-md text-body-md" href="#">Logistics</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant/80 hover:text-primary dark:hover:text-primary-fixed transition-colors font-body-md text-body-md" href="#">Analytics</a>
+<a class="text-primary dark:text-primary-fixed border-b-2 border-primary dark:border-primary-fixed pb-1 font-semibold font-body-md text-body-md" href="#">Forecasts</a>
+</nav>
+<!-- Actions -->
+<div class="flex items-center gap-4">
+<div class="hidden md:flex gap-4">
+<span class="material-symbols-outlined cursor-pointer active:opacity-80 transition-opacity text-on-surface-variant hover:text-primary" data-icon="notifications">notifications</span>
+<span class="material-symbols-outlined cursor-pointer active:opacity-80 transition-opacity text-on-surface-variant hover:text-primary" data-icon="account_circle">account_circle</span>
+</div>
+<button class="bg-primary-container text-on-primary-container font-label-sm text-label-sm px-6 py-3 rounded hover:opacity-90 transition-opacity">
+                    Emergency Request
+                </button>
+</div>
+</div>
+</header>
+<main class="max-w-[1440px] mx-auto px-container-padding py-section-margin">
+<!-- Header Section -->
+<div class="max-w-3xl mb-24">
+<h1 class="font-display-lg text-display-lg md:text-display-lg text-headline-lg-mobile font-headline-lg-mobile text-on-background mb-6">From Data to Decision</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant">
+                Transforming raw logistical inputs into life-saving intelligence. Our platform seamlessly connects every stage of the supply chain, moving from passive monitoring to active optimization.
+            </p>
+</div>
+<!-- The Flow Section -->
+<section class="mb-section-margin relative">
+<div class="flex flex-col md:flex-row justify-between items-center relative z-10 w-full px-4 md:px-0 gap-8 md:gap-0">
+<!-- Line -->
+<div class="hidden md:block absolute top-1/2 left-0 w-full h-[1px] bg-outline-variant/30 -translate-y-1/2 z-0"></div>
+<div class="block md:hidden absolute left-[15px] top-0 h-full w-[1px] bg-outline-variant/30 z-0"></div>
+<!-- Stage 1 -->
+<div class="flex flex-row md:flex-col items-center gap-4 md:gap-3 w-full md:w-auto relative z-10 group">
+<div class="w-8 h-8 rounded-full border border-outline bg-[#FBF7F4] flex items-center justify-center transition-colors group-hover:border-primary">
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant" data-icon="visibility">visibility</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Monitor</span>
+</div>
+<!-- Stage 2 -->
+<div class="flex flex-row md:flex-col items-center gap-4 md:gap-3 w-full md:w-auto relative z-10 group">
+<div class="w-8 h-8 rounded-full border border-outline bg-[#FBF7F4] flex items-center justify-center transition-colors group-hover:border-primary">
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant" data-icon="query_stats">query_stats</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Analyze</span>
+</div>
+<!-- Stage 3 (Active) -->
+<div class="flex flex-row md:flex-col items-center gap-4 md:gap-3 w-full md:w-auto relative z-10">
+<div class="w-10 h-10 rounded-full bg-primary-container border-2 border-[#FBF7F4] ring-1 ring-primary-container flex items-center justify-center shadow-sm shadow-primary-container/20">
+<span class="material-symbols-outlined text-[20px] text-on-primary-container fill-1" data-icon="auto_graph" data-weight="fill">auto_graph</span>
+</div>
+<span class="font-label-sm text-label-sm text-primary-container font-bold">Predict</span>
+</div>
+<!-- Stage 4 -->
+<div class="flex flex-row md:flex-col items-center gap-4 md:gap-3 w-full md:w-auto relative z-10 group">
+<div class="w-8 h-8 rounded-full border border-outline bg-[#FBF7F4] flex items-center justify-center transition-colors group-hover:border-primary">
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant" data-icon="tune">tune</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Optimize</span>
+</div>
+<!-- Stage 5 -->
+<div class="flex flex-row md:flex-col items-center gap-4 md:gap-3 w-full md:w-auto relative z-10 group">
+<div class="w-8 h-8 rounded-full border border-outline bg-[#FBF7F4] flex items-center justify-center transition-colors group-hover:border-primary">
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant" data-icon="bolt">bolt</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Act</span>
+</div>
+</div>
+</section>
+<!-- Capability Showcase -->
+<div class="space-y-section-margin">
+<!-- Block 1: Predict Shortages (Text Left, Image Right) -->
+<section class="grid grid-cols-1 md:grid-cols-12 gap-panel-gap items-center">
+<div class="md:col-span-5 space-y-6">
+<h2 class="font-headline-lg text-headline-lg text-on-background">Predict Shortages</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">
+                        Leverage historical data and real-time consumption rates to forecast critical blood type shortages before they occur. Our predictive models provide actionable lead times, allowing facilities to replenish inventory proactively.
+                    </p>
+<button class="text-primary font-label-sm text-label-sm flex items-center gap-2 hover:opacity-80 transition-opacity">
+                        Explore Forecasting Models <span class="material-symbols-outlined text-[16px]" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+<div class="md:col-span-7 panel-bg rounded-xl p-8 relative overflow-hidden group">
+<!-- Subtle decorative background element -->
+<div class="absolute -right-20 -top-20 w-64 h-64 bg-primary-fixed-dim/20 rounded-full blur-3xl group-hover:bg-primary-fixed-dim/30 transition-colors duration-700"></div>
+<!-- Mini UI Snippet -->
+<div class="bg-surface-container-lowest rounded-lg border border-outline-variant/30 p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative z-10">
+<div class="flex justify-between items-end hairline-b pb-4 mb-4">
+<div>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider block mb-1">O-Negative Forecast</span>
+<span class="font-kpi-value text-kpi-value text-primary-container">48hrs</span>
+</div>
+<span class="bg-error/10 text-error font-label-sm text-label-sm px-3 py-1 rounded-full flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]" data-icon="warning">warning</span> Critical
+                            </span>
+</div>
+<div class="h-32 w-full flex items-end gap-2">
+<!-- Faux Bar Chart -->
+<div class="w-1/6 bg-secondary/20 h-full rounded-t"></div>
+<div class="w-1/6 bg-secondary/20 h-4/5 rounded-t"></div>
+<div class="w-1/6 bg-secondary/20 h-3/5 rounded-t"></div>
+<div class="w-1/6 bg-primary-container/40 h-2/5 rounded-t"></div>
+<div class="w-1/6 bg-primary-container/70 h-1/5 rounded-t relative">
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-inverse-surface text-inverse-on-surface text-[10px] py-1 px-2 rounded whitespace-nowrap">Predicted Drop</div>
+</div>
+<div class="w-1/6 bg-error h-[5%] rounded-t"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- Block 2: Monitor Cold-Chain (Image Left, Text Right) -->
+<section class="grid grid-cols-1 md:grid-cols-12 gap-panel-gap items-center">
+<div class="md:col-span-7 order-2 md:order-1 panel-bg rounded-xl p-8 relative overflow-hidden group">
+<!-- Subtle decorative background element -->
+<div class="absolute -left-20 -bottom-20 w-64 h-64 bg-secondary-fixed-dim/20 rounded-full blur-3xl group-hover:bg-secondary-fixed-dim/30 transition-colors duration-700"></div>
+<!-- Mini UI Snippet -->
+<div class="bg-surface-container-lowest rounded-lg border border-outline-variant/30 p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative z-10">
+<div class="flex justify-between items-center mb-6">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Unit #B-774 Temperature</span>
+<span class="bg-secondary/10 text-secondary font-label-sm text-label-sm px-3 py-1 rounded-full">Stable</span>
+</div>
+<div class="flex items-center gap-6">
+<div class="relative w-24 h-24">
+<!-- Simple CSS donut chart representation -->
+<svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+<path class="text-outline-variant/30" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3"></path>
+<path class="text-secondary" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="80, 100" stroke-width="3"></path>
+</svg>
+<div class="absolute inset-0 flex items-center justify-center font-kpi-value text-[24px]">4.2°</div>
+</div>
+<div class="space-y-2 flex-1 hairline-l pl-6">
+<div class="flex justify-between">
+<span class="text-on-surface-variant text-[12px]">Target Range</span>
+<span class="text-on-surface text-[12px] font-semibold">2°C - 6°C</span>
+</div>
+<div class="flex justify-between">
+<span class="text-on-surface-variant text-[12px]">Duration in Transit</span>
+<span class="text-on-surface text-[12px] font-semibold">04h 12m</span>
+</div>
+<div class="w-full bg-surface-variant h-1 rounded mt-2">
+<div class="bg-secondary w-3/4 h-full rounded"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="md:col-span-5 order-1 md:order-2 space-y-6">
+<h2 class="font-headline-lg text-headline-lg text-on-background">Monitor Cold-Chain</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">
+                        Continuous IoT sensor integration ensures absolute compliance with storage protocols. Instantly identify temperature deviations during transit or static storage to prevent spoilage of sensitive components.
+                    </p>
+<button class="text-primary font-label-sm text-label-sm flex items-center gap-2 hover:opacity-80 transition-opacity">
+                        View Sensor Integration <span class="material-symbols-outlined text-[16px]" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</section>
+<!-- Block 3: Detect Equipment Failure (Text Left, Image Right) -->
+<section class="grid grid-cols-1 md:grid-cols-12 gap-panel-gap items-center">
+<div class="md:col-span-5 space-y-6">
+<h2 class="font-headline-lg text-headline-lg text-on-background">Detect Equipment Failure</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">
+                        Move from reactive repairs to predictive maintenance. By analyzing power draw and compressor cycles, our system flags impending refrigerator failures before they compromise critical inventory.
+                    </p>
+<button class="text-primary font-label-sm text-label-sm flex items-center gap-2 hover:opacity-80 transition-opacity">
+                        Learn About Diagnostics <span class="material-symbols-outlined text-[16px]" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+<div class="md:col-span-7 panel-bg rounded-xl p-8 relative overflow-hidden group">
+<div class="absolute -right-20 -top-20 w-64 h-64 bg-tertiary-fixed-dim/20 rounded-full blur-3xl group-hover:bg-tertiary-fixed-dim/30 transition-colors duration-700"></div>
+<!-- Mini UI Snippet -->
+<div class="bg-surface-container-lowest rounded-lg border border-outline-variant/30 p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative z-10 max-w-sm ml-auto">
+<div class="flex items-start gap-4 mb-4">
+<div class="w-10 h-10 rounded bg-tertiary-fixed text-on-tertiary-fixed flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="kitchen">kitchen</span>
+</div>
+<div>
+<h4 class="font-label-sm text-label-sm text-on-background">Storage Unit Alpha-1</h4>
+<p class="text-[12px] text-on-surface-variant">Compressor Anomaly Detected</p>
+</div>
+</div>
+<div class="bg-surface-variant/30 p-4 rounded mb-4">
+<div class="flex justify-between items-center mb-2">
+<span class="text-[12px] text-on-surface-variant">Failure Probability</span>
+<span class="text-[12px] font-bold text-tertiary">78%</span>
+</div>
+<div class="w-full bg-outline-variant/30 h-1 rounded">
+<div class="bg-tertiary w-[78%] h-full rounded"></div>
+</div>
+</div>
+<button class="w-full py-2 border border-primary text-primary font-label-sm text-label-sm rounded hover:bg-primary/5 transition-colors">Dispatch Technician</button>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- Footer (Shared Component Shell) -->
+<footer class="bg-surface-container dark:bg-inverse-surface border-t border-outline-variant/10 mt-section-margin">
+<div class="flex flex-col md:flex-row justify-between items-center w-full px-container-padding py-section-margin max-w-[1440px] mx-auto gap-panel-gap">
+<div class="font-headline-lg text-headline-lg text-primary dark:text-primary-fixed mb-4 md:mb-0">
+                PRAVAH
+            </div>
+<div class="flex flex-wrap justify-center gap-6">
+<a class="text-on-surface-variant dark:text-surface-variant/70 hover:text-primary dark:hover:text-primary-fixed transition-all duration-200 font-label-sm text-label-sm" href="#">Privacy Policy</a>
+<a class="text-on-surface-variant dark:text-surface-variant/70 hover:text-primary dark:hover:text-primary-fixed transition-all duration-200 font-label-sm text-label-sm" href="#">Terms of Service</a>
+<a class="text-on-surface-variant dark:text-surface-variant/70 hover:text-primary dark:hover:text-primary-fixed transition-all duration-200 font-label-sm text-label-sm" href="#">Security Architecture</a>
+<a class="text-on-surface-variant dark:text-surface-variant/70 hover:text-primary dark:hover:text-primary-fixed transition-all duration-200 font-label-sm text-label-sm" href="#">Contact Support</a>
+</div>
+<div class="text-on-surface-variant dark:text-surface-variant/70 font-body-md text-body-md text-center md:text-right mt-4 md:mt-0">
+                © 2024 PRAVAH Intelligence. Precision Blood Logistics.
+            </div>
+</div>
+</footer>
+</body></html>

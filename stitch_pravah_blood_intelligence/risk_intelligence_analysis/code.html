@@ -1,0 +1,291 @@
+<!DOCTYPE html><html class="light" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>PRAVAH Intelligence - Risk Analysis</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&amp;family=Noto+Serif:wght@500;600&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-container": "#a31e33",
+                        "on-tertiary-fixed-variant": "#643f00",
+                        "surface-variant": "#ebe0dd",
+                        "surface-bright": "#fff8f6",
+                        "surface": "#fff8f6",
+                        "surface-dim": "#e2d8d5",
+                        "tertiary-fixed": "#ffddb6",
+                        "outline": "#8c7070",
+                        "outline-variant": "#e0bfbf",
+                        "on-primary-container": "#ffb7b8",
+                        "inverse-on-surface": "#f9efeb",
+                        "surface-container-highest": "#ebe0dd",
+                        "tertiary-fixed-dim": "#ffb95a",
+                        "on-primary-fixed-variant": "#8f0b27",
+                        "surface-container": "#f6ece8",
+                        "background": "#fff8f6",
+                        "primary-fixed": "#ffdada",
+                        "error": "#ba1a1a",
+                        "surface-container-low": "#fcf1ee",
+                        "on-secondary-fixed-variant": "#2c4e34",
+                        "surface-tint": "#b1293c",
+                        "on-error-container": "#93000a",
+                        "secondary-container": "#c5ecc9",
+                        "inverse-surface": "#352f2d",
+                        "on-background": "#1f1b19",
+                        "inverse-primary": "#ffb3b4",
+                        "secondary-fixed-dim": "#aad0ae",
+                        "on-surface": "#1f1b19",
+                        "on-secondary-container": "#4a6c50",
+                        "on-tertiary": "#ffffff",
+                        "on-tertiary-container": "#ffbd65",
+                        "on-error": "#ffffff",
+                        "on-surface-variant": "#594141",
+                        "on-primary": "#ffffff",
+                        "tertiary": "#583600",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary-container": "#774b00",
+                        "surface-container-high": "#f0e6e3",
+                        "on-tertiary-fixed": "#2a1800",
+                        "secondary-fixed": "#c5ecc9",
+                        "secondary": "#44664b",
+                        "on-primary-fixed": "#40000b",
+                        "error-container": "#ffdad6",
+                        "primary": "#80001f",
+                        "on-secondary": "#ffffff",
+                        "on-secondary-fixed": "#00210c",
+                        "primary-fixed-dim": "#ffb3b4"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "panel-gap": "24px",
+                        "container-padding": "48px",
+                        "unit": "8px",
+                        "section-margin": "80px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Noto Serif"],
+                        "display-md": ["Noto Serif"],
+                        "body-md": ["Manrope"],
+                        "kpi-value": ["Manrope"],
+                        "headline-lg-mobile": ["Noto Serif"],
+                        "display-lg": ["Noto Serif"],
+                        "body-lg": ["Manrope"],
+                        "label-sm": ["Manrope"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "500" }],
+                        "display-md": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "kpi-value": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.03em", "fontWeight": "700" }],
+                        "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "500" }],
+                        "display-lg": ["64px", { "lineHeight": "72px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "label-sm": ["13px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { background-color: #FBF7F4; }
+        .bg-fbf7f4 { background-color: #FBF7F4; }
+        .bg-f5f1ee { background-color: #F5F1EE; }
+        .hairline-b { border-bottom: 1px solid rgba(0,0,0,0.1); }
+        .hairline-l { border-left: 1px solid rgba(0,0,0,0.1); }
+        .soft-shadow-hover:hover { box-shadow: 0 8px 32px 0 rgba(31, 27, 25, 0.04); }
+    </style>
+</head>
+<body class="bg-fbf7f4 text-on-surface font-body-md antialiased min-h-screen flex flex-col md:flex-row">
+<!-- SideNav (Hidden on Mobile) -->
+<nav class="hidden md:flex flex-col h-screen w-72 bg-surface-container-low border-r border-outline-variant/10 p-6 pt-24 fixed left-0 top-0 z-40">
+<div class="mb-12">
+<h1 class="font-headline-lg text-headline-lg text-primary tracking-tight">System Active</h1>
+<p class="font-body-md text-on-surface-variant/80 mt-2">Risk Level: Stable</p>
+</div>
+<div class="flex-1 flex flex-col gap-2"><a class="flex items-center gap-unit p-3 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-all duration-300" href="#"><span class="material-symbols-outlined" data-icon="dashboard">dashboard</span><span class="font-body-md">Dashboard</span></a><a class="flex items-center gap-unit p-3 rounded-lg text-primary font-semibold bg-primary-container/10" href="#"><span class="material-symbols-outlined" data-icon="monitoring">monitoring</span><span class="font-body-md">Risk Analysis</span></a><a class="flex items-center gap-unit p-3 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-all duration-300" href="#"><span class="material-symbols-outlined" data-icon="hub">hub</span><span class="font-body-md">Network Map</span></a><a class="flex items-center gap-unit p-3 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-all duration-300" href="#"><span class="material-symbols-outlined" data-icon="notifications_active">notifications_active</span><span class="font-body-md">Alerts</span></a><a class="flex items-center gap-unit p-3 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-all duration-300" href="#"><span class="material-symbols-outlined" data-icon="history">history</span><span class="font-body-md">Audit Log</span></a></div>
+<div class="mt-auto flex flex-col gap-2">
+<button class="bg-primary-container text-white py-3 px-6 rounded-lg font-body-md font-semibold w-full hover:opacity-90 transition-opacity">Generate Report</button>
+<div class="h-px bg-outline-variant/20 my-4"></div>
+<a class="flex items-center gap-unit p-3 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-all duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
+<span class="font-body-md">Support</span>
+</a>
+<a class="flex items-center gap-unit p-3 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-all duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="description">description</span>
+<span class="font-body-md">Documentation</span>
+</a>
+</div>
+</nav>
+<!-- TopNavBar (Hidden on Desktop) -->
+<header class="md:hidden flex justify-between items-center px-6 h-20 w-full bg-surface border-b border-outline-variant/15 fixed top-0 z-40">
+<h1 class="font-display-md text-headline-lg-mobile font-bold text-primary">PRAVAH Intelligence</h1>
+<div class="flex gap-4">
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer" data-icon="notifications">notifications</span>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer" data-icon="settings">settings</span>
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="flex-1 md:ml-72 pt-24 md:pt-12 px-6 md:px-container-padding pb-24 relative overflow-hidden">
+<!-- Background Integrated Graphic -->
+<div class="absolute top-0 right-0 w-2/3 h-[500px] opacity-30 pointer-events-none z-0" style="background-image: url('https://lh3.googleusercontent.com/aida/AP1WRLvWxkoysYv8HofYvrGU1uRrxu99heMzyvZS1N5A4IUm7AKmblZEJyA6M6K34zvEw-2N2j3_eUvpIxw7w21ss4zWLEfVhnuMVGH7NvWCEcv4iroFsFtXDgKfDjkuUThTJ_HsSD2pFa2MoukkuXe5_2t1_5MN5nKRiFMsPGcjub4bSuknlnmLOwttK2jkaSA1ipWo4_hnPTk8QRZ0YVFNfYGXaFvklB1ij5ba8DJtdMD0-uZAyQVN2PXolgw'); background-size: cover; background-position: center right; mix-blend-mode: multiply;"></div>
+<div class="relative z-10 max-w-7xl mx-auto space-y-section-margin">
+<!-- Header -->
+<header>
+<h2 class="font-display-md text-display-md text-on-surface">Risk Intelligence</h2>
+<p class="font-body-lg text-on-surface-variant mt-4 max-w-2xl">Real-time dynamic risk distribution across the network. Monitoring stability, anomalies, and critical vulnerabilities.</p>
+</header>
+<!-- Upper Section: Risk Distribution -->
+<section class="bg-f5f1ee rounded-xl p-8 md:p-12 soft-shadow-hover transition-all duration-300 border border-outline-variant/10">
+<h3 class="font-label-sm text-on-surface-variant uppercase tracking-widest mb-12">Network Risk Distribution</h3>
+<div class="flex flex-col gap-6">
+<div class="flex justify-between items-end px-2">
+<div>
+<span class="font-kpi-value text-secondary">62%</span>
+<span class="font-label-sm text-on-surface-variant block mt-1">Stable</span>
+</div>
+<div>
+<span class="font-kpi-value text-tertiary-fixed-dim">21%</span>
+<span class="font-label-sm text-on-surface-variant block mt-1 text-center">Attention</span>
+</div>
+<div>
+<span class="font-kpi-value text-primary-fixed-dim">12%</span>
+<span class="font-label-sm text-on-surface-variant block mt-1 text-center">High Risk</span>
+</div>
+<div class="text-right">
+<span class="font-kpi-value text-primary-container">5%</span>
+<span class="font-label-sm text-primary-container block mt-1">Critical</span>
+</div>
+</div>
+<div class="h-4 flex rounded-full overflow-hidden w-full bg-surface-variant">
+<div class="bg-secondary h-full" style="width: 62%;"></div>
+<div class="bg-tertiary-fixed-dim h-full" style="width: 21%;"></div>
+<div class="bg-primary-fixed-dim h-full" style="width: 12%;"></div>
+<div class="bg-primary-container h-full" style="width: 5%;"></div>
+</div>
+</div>
+</section>
+<!-- Grid Layout for Middle & Lower Sections -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-panel-gap">
+<!-- Middle Section: Affected Locations -->
+<section class="lg:col-span-7 bg-f5f1ee rounded-xl p-8 md:p-12 border border-outline-variant/10">
+<div class="flex justify-between items-center mb-8">
+<h3 class="font-label-sm text-on-surface-variant uppercase tracking-widest">Critical Affected Units</h3>
+<button class="text-primary font-label-sm hover:underline">View All</button>
+</div>
+<div class="space-y-0">
+<!-- Row 1 -->
+<div class="group flex items-center justify-between py-6 hairline-b cursor-pointer transition-colors hover:bg-surface-variant/30 px-4 -mx-4 rounded-lg">
+<div class="flex items-center gap-4">
+<div class="w-2 h-2 rounded-full bg-primary-container"></div>
+<div>
+<h4 class="font-headline-lg text-body-lg font-semibold text-on-surface group-hover:text-primary transition-colors">Central Metro Hospital</h4>
+<p class="font-body-md text-on-surface-variant mt-1">RBC Shortage</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant opacity-0 group-hover:opacity-100 transition-opacity" data-icon="chevron_right">chevron_right</span>
+</div>
+<!-- Row 2 -->
+<div class="group flex items-center justify-between py-6 hairline-b cursor-pointer transition-colors hover:bg-surface-variant/30 px-4 -mx-4 rounded-lg">
+<div class="flex items-center gap-4">
+<div class="w-2 h-2 rounded-full bg-primary-container"></div>
+<div>
+<h4 class="font-headline-lg text-body-lg font-semibold text-on-surface group-hover:text-primary transition-colors">Northern Valley Clinic</h4>
+<p class="font-body-md text-on-surface-variant mt-1">Platelet Supply Critical</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant opacity-0 group-hover:opacity-100 transition-opacity" data-icon="chevron_right">chevron_right</span>
+</div>
+<!-- Row 3 -->
+<div class="group flex items-center justify-between py-6 cursor-pointer transition-colors hover:bg-surface-variant/30 px-4 -mx-4 rounded-lg">
+<div class="flex items-center gap-4">
+<div class="w-2 h-2 rounded-full bg-primary-fixed-dim"></div>
+<div>
+<h4 class="font-headline-lg text-body-lg font-semibold text-on-surface group-hover:text-primary transition-colors">Westside General</h4>
+<p class="font-body-md text-on-surface-variant mt-1">Transit Delay &gt; 4hrs</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant opacity-0 group-hover:opacity-100 transition-opacity" data-icon="chevron_right">chevron_right</span>
+</div>
+</div>
+</section>
+<!-- Lower Section: Deep Dive (Asymmetric Layout) -->
+<section class="lg:col-span-5 bg-f5f1ee rounded-xl p-8 md:p-12 border border-outline-variant/10 relative overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-b from-transparent to-surface-variant/20 pointer-events-none"></div>
+<h3 class="font-label-sm text-on-surface-variant uppercase tracking-widest mb-2 relative z-10">AI Decision Logic</h3>
+<div class="flex justify-between items-center mb-8 relative z-10"><h4 class="font-headline-lg text-headline-lg text-on-surface">Contributing Factors</h4><button class="flex items-center gap-1 text-primary font-label-sm hover:underline"><span class="material-symbols-outlined text-sm" data-icon="history">history</span>View History</button></div>
+<p class="font-body-md text-on-surface-variant mb-10 relative z-10 hairline-l pl-4 border-outline-variant/30">
+                        Analysis for <strong class="text-on-surface font-semibold">Central Metro Hospital</strong> indicating severe RBC shortage within 12 hours.
+                    </p>
+<div class="space-y-6 relative z-10">
+<!-- Factor 1 -->
+<div>
+<div class="flex justify-between text-sm mb-2">
+<span class="font-body-md text-on-surface font-semibold">High Predicted Demand<span class="material-symbols-outlined text-[14px] ml-1 align-middle cursor-help text-on-surface-variant/60" title="Data source: Historical trends and current booking data">info</span></span>
+<span class="font-label-sm text-primary-container">45% Impact</span>
+</div>
+<div class="h-2 w-full bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-primary-container rounded-full" style="width: 45%;"></div>
+</div>
+</div>
+<!-- Factor 2 -->
+<div>
+<div class="flex justify-between text-sm mb-2">
+<span class="font-body-md text-on-surface font-semibold">Low Regional Inventory<span class="material-symbols-outlined text-[14px] ml-1 align-middle cursor-help text-on-surface-variant/60" title="Data source: Historical trends and current booking data">info</span></span>
+<span class="font-label-sm text-primary-fixed-dim text-primary">30% Impact</span>
+</div>
+<div class="h-2 w-full bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-primary-fixed-dim rounded-full" style="width: 30%;"></div>
+</div>
+</div>
+<!-- Factor 3 -->
+<div>
+<div class="flex justify-between text-sm mb-2">
+<span class="font-body-md text-on-surface font-semibold">Upcoming Expiry<span class="material-symbols-outlined text-[14px] ml-1 align-middle cursor-help text-on-surface-variant/60" title="Data source: Historical trends and current booking data">info</span></span>
+<span class="font-label-sm text-tertiary-fixed-dim text-on-tertiary-fixed-variant">15% Impact</span>
+</div>
+<div class="h-2 w-full bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-tertiary-fixed-dim rounded-full" style="width: 15%;"></div>
+</div>
+</div>
+<!-- Factor 4 -->
+<div>
+<div class="flex justify-between text-sm mb-2">
+<span class="font-body-md text-on-surface font-semibold">Equipment Anomaly<span class="material-symbols-outlined text-[14px] ml-1 align-middle cursor-help text-on-surface-variant/60" title="Data source: Historical trends and current booking data">info</span></span>
+<span class="font-label-sm text-on-surface-variant">7% Impact</span>
+</div>
+<div class="h-2 w-full bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-outline-variant rounded-full" style="width: 7%;"></div>
+</div>
+</div>
+<!-- Factor 5 -->
+<div>
+<div class="flex justify-between text-sm mb-2">
+<span class="font-body-md text-on-surface font-semibold">Temperature Excursion<span class="material-symbols-outlined text-[14px] ml-1 align-middle cursor-help text-on-surface-variant/60" title="Data source: Historical trends and current booking data">info</span></span>
+<span class="font-label-sm text-on-surface-variant">3% Impact</span>
+</div>
+<div class="h-2 w-full bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-outline-variant rounded-full" style="width: 3%;"></div>
+</div>
+</div>
+</div>
+<div class="mt-12 pt-6 hairline-b border-t border-outline-variant/10 relative z-10 flex gap-4">
+<button class="bg-primary-container text-white py-3 px-6 rounded-lg font-body-md font-semibold hover:opacity-90 transition-opacity">Initiate Transfer</button>
+<button class="border border-primary text-primary py-3 px-6 rounded-lg font-body-md font-semibold hover:bg-primary/5 transition-colors">Details</button>
+</div>
+</section>
+</div>
+</div>
+</main>
+
+
+</body></html>

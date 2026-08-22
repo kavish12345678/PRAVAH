@@ -1,0 +1,329 @@
+<!DOCTYPE html><html class="light" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>PRAVAH Intelligence - Transfer Center</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;family=Noto+Serif:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-tint": "#b1293c",
+                        "primary-container": "#a31e33",
+                        "surface-container-low": "#fcf1ee",
+                        "surface-dim": "#e2d8d5",
+                        "on-primary-fixed": "#40000b",
+                        "on-secondary-fixed-variant": "#2c4e34",
+                        "on-surface-variant": "#594141",
+                        "inverse-surface": "#352f2d",
+                        "on-surface": "#1f1b19",
+                        "primary-fixed": "#ffdada",
+                        "outline-variant": "#e0bfbf",
+                        "on-primary-container": "#ffb7b8",
+                        "on-background": "#1f1b19",
+                        "secondary-fixed": "#c5ecc9",
+                        "on-error": "#ffffff",
+                        "error": "#ba1a1a",
+                        "on-tertiary-fixed-variant": "#643f00",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container": "#f6ece8",
+                        "surface-variant": "#ebe0dd",
+                        "inverse-on-surface": "#f9efeb",
+                        "on-error-container": "#93000a",
+                        "on-primary": "#ffffff",
+                        "surface-bright": "#fff8f6",
+                        "secondary-fixed-dim": "#aad0ae",
+                        "surface": "#fff8f6",
+                        "secondary-container": "#c5ecc9",
+                        "outline": "#8c7070",
+                        "tertiary-fixed": "#ffddb6",
+                        "surface-container-highest": "#ebe0dd",
+                        "on-tertiary-container": "#ffbd65",
+                        "on-tertiary-fixed": "#2a1800",
+                        "on-secondary-container": "#4a6c50",
+                        "surface-container-high": "#f0e6e3",
+                        "primary": "#80001f",
+                        "tertiary-container": "#774b00",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-fixed": "#00210c",
+                        "tertiary-fixed-dim": "#ffb95a",
+                        "tertiary": "#583600",
+                        "on-primary-fixed-variant": "#8f0b27",
+                        "on-secondary": "#ffffff",
+                        "secondary": "#44664b",
+                        "error-container": "#ffdad6",
+                        "primary-fixed-dim": "#ffb3b4",
+                        "inverse-primary": "#ffb3b4",
+                        "background": "#fff8f6"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    spacing: {
+                        "unit": "8px",
+                        "section-margin": "80px",
+                        "panel-gap": "24px",
+                        "container-padding": "48px"
+                    },
+                    fontFamily: {
+                        "body-md": ["Manrope"],
+                        "display-md": ["Noto Serif"],
+                        "label-sm": ["Manrope"],
+                        "headline-lg": ["Noto Serif"],
+                        "display-lg": ["Noto Serif"],
+                        "body-lg": ["Manrope"],
+                        "headline-lg-mobile": ["Noto Serif"],
+                        "kpi-value": ["Manrope"]
+                    },
+                    fontSize: {
+                        "body-md": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+                        "display-md": ["48px", { lineHeight: "56px", letterSpacing: "-0.01em", fontWeight: "600" }],
+                        "label-sm": ["13px", { lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "600" }],
+                        "headline-lg": ["32px", { lineHeight: "40px", fontWeight: "500" }],
+                        "display-lg": ["64px", { lineHeight: "72px", letterSpacing: "-0.02em", fontWeight: "600" }],
+                        "body-lg": ["18px", { lineHeight: "28px", fontWeight: "400" }],
+                        "headline-lg-mobile": ["28px", { lineHeight: "36px", fontWeight: "500" }],
+                        "kpi-value": ["40px", { lineHeight: "48px", letterSpacing: "-0.03em", fontWeight: "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.fill {
+            font-variation-settings: 'FILL' 1;
+        }
+        
+        /* Custom Stepper Styles */
+        .stepper-line {
+            position: absolute;
+            top: 50%;
+            left: 12px;
+            right: 12px;
+            height: 2px;
+            background-color: #e2d8d5; /* surface-dim */
+            z-index: 0;
+            transform: translateY(-50%);
+        }
+        .stepper-progress {
+            position: absolute;
+            top: 50%;
+            left: 12px;
+            height: 2px;
+            background-color: #a31e33; /* primary-container */
+            z-index: 1;
+            transform: translateY(-50%);
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body-md min-h-screen flex antialiased">
+<!-- SideNavBar -->
+<nav class="hidden md:flex flex-col h-screen w-80 fixed left-0 top-0 py-panel-gap bg-surface-container-low border-r border-surface-variant z-40">
+<div class="px-8 mb-12">
+<h1 class="font-display-md text-display-md font-semibold text-primary">PRAVAH</h1>
+<p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mt-1">Blood Intelligence</p>
+</div>
+<div class="flex-1 px-4 space-y-2">
+<a class="flex items-center gap-4 text-on-surface-variant py-3 px-6 hover:bg-surface-container-high transition-all duration-300 rounded-full" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center gap-4 text-on-surface-variant py-3 px-6 hover:bg-surface-container-high transition-all duration-300 rounded-full" href="#">
+<span class="material-symbols-outlined">map</span>
+<span>Inventory Map</span>
+</a>
+<a class="flex items-center gap-4 text-primary font-semibold py-3 px-6 bg-surface-container-high rounded-full" href="#">
+<span class="material-symbols-outlined fill">hub</span>
+<span>Supply Chain</span>
+</a>
+<a class="flex items-center gap-4 text-on-surface-variant py-3 px-6 hover:bg-surface-container-high transition-all duration-300 rounded-full" href="#">
+<span class="material-symbols-outlined">psychology</span>
+<span>AI Insights</span>
+</a>
+<a class="flex items-center gap-4 text-on-surface-variant py-3 px-6 hover:bg-surface-container-high transition-all duration-300 rounded-full" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+<span>Archive</span>
+</a>
+</div>
+<div class="px-8 mt-auto mb-8">
+<div class="flex items-center gap-2 text-secondary font-label-sm text-label-sm">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+                System Status: Stable
+            </div>
+</div>
+<div class="px-4 border-t border-surface-variant pt-4 space-y-2">
+<a class="flex items-center gap-4 text-on-surface-variant py-3 px-6 hover:bg-surface-container-high transition-all duration-300 rounded-full" href="#">
+<span class="material-symbols-outlined">help</span>
+<span>Support</span>
+</a>
+<a class="flex items-center gap-4 text-on-surface-variant py-3 px-6 hover:bg-surface-container-high transition-all duration-300 rounded-full" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span>Settings</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-1 md:ml-80 flex flex-col min-h-screen">
+<!-- TopNavBar (Mobile mainly, but provides header context) -->
+<header class="flex justify-between items-center w-full px-container-padding max-w-[1920px] mx-auto h-20 bg-surface md:bg-transparent z-30 sticky top-0 md:static">
+<div class="flex items-center md:hidden">
+<h2 class="font-display-md text-[32px] font-semibold text-primary tracking-tight">PRAVAH</h2>
+</div>
+<div class="hidden md:flex gap-8">
+<!-- TopNav links suppressed on Desktop when SideNav is active to avoid duplication, 
+                     but keeping the structural shell for actions -->
+</div>
+<div class="flex items-center gap-4 ml-auto">
+<button class="bg-primary-container text-white px-6 py-2 rounded-full font-label-sm text-label-sm hover:bg-primary transition-colors">
+                    Emergency Alert
+                </button>
+<button class="text-on-surface-variant hover:text-primary transition-colors p-2">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<div class="w-10 h-10 rounded-full bg-surface-variant overflow-hidden cursor-pointer border border-surface-dim">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="A macro photograph of a pristine, abstract white marble texture with subtle, elegant grey veining, illuminated by soft, diffuse studio lighting. The aesthetic is extremely high-end, clean, and modern, fitting for a minimalist user profile avatar placeholder in a premium digital application." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDv755CoRek2iOB7Mbfrv_SuYWl7ZkUyhsBLA8036ujRsreb61FzwxO46V5YARG7d9Q_xFJTjPvZAI5u132OsQ7kI4p5kRkeq7o3TJg8hd-v8hkwOjvcuFqrY0H5lypgc4Jl_O4BOUdCDGlPmpZfb8Si5_0z8ZaK8H_pS4jMYjKHh8qaCG_8f9W0x37LQSPcIv4OYR1L2a9MCkWyvsbA4INAjSlz81mmz8OOeCksXVl1hyXvqcpxOAg">
+</div>
+</div>
+</header>
+<!-- Canvas -->
+<div class="flex-1 px-container-padding py-8 max-w-[1920px] mx-auto w-full">
+<header class="mb-12 flex justify-between items-end">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface mb-2">Transfer Center</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl">
+                        Monitor active, pending, and completed blood unit transfers across the regional network.
+                    </p>
+</div>
+<div class="flex gap-4">
+<button class="flex items-center gap-2 border border-primary text-primary px-6 py-3 rounded-full font-label-sm text-label-sm hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined text-[18px]">filter_list</span>
+                        Filter
+                    </button>
+<button class="flex items-center gap-2 bg-primary-container text-white px-6 py-3 rounded-full font-label-sm text-label-sm hover:bg-primary transition-colors">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                        New Transfer
+                    </button>
+</div>
+</header>
+<!-- Intelligence Filters/Tabs -->
+<div class="flex gap-8 border-b border-surface-dim mb-8">
+<button class="pb-4 font-label-sm text-label-sm text-primary border-b-2 border-primary">ACTIVE (12)</button>
+<button class="pb-4 font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface transition-colors">PENDING (4)</button>
+<button class="pb-4 font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface transition-colors">COMPLETED</button>
+</div>
+<!-- Transfer List -->
+<div class="flex flex-col gap-2">
+<!-- Table Header (Editorial style) -->
+<div class="grid grid-cols-12 gap-6 px-6 py-4 border-b border-surface-dim font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">
+<div class="col-span-3">Unit / ID</div>
+<div class="col-span-4">Route</div>
+<div class="col-span-4">Status &amp; Progress</div>
+<div class="col-span-1 text-right">ETA</div>
+</div>
+<!-- Row 1: In Transit -->
+<div class="grid grid-cols-12 gap-6 items-center px-6 py-6 bg-surface hover:bg-surface-container-low transition-colors group border-b border-surface-variant/30">
+<div class="col-span-3 flex items-start gap-4">
+<div class="w-12 h-12 rounded-full bg-primary-fixed/20 flex items-center justify-center text-primary-container shrink-0">
+<span class="material-symbols-outlined">bloodtype</span>
+</div>
+<div>
+<div class="font-body-lg text-body-lg font-medium text-on-surface">O-Negative Whole Blood</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant mt-1">TRX-8921-A</div>
+</div>
+</div>
+<div class="col-span-4">
+<div class="flex items-center gap-3">
+<div class="font-body-md text-on-surface">Central Metro Hosp.</div>
+<span class="material-symbols-outlined text-surface-dim text-[16px]">arrow_forward</span>
+<div class="font-body-md text-on-surface font-medium">Northside Clinic</div>
+</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant mt-2">Requested: 08:30 AM</div>
+</div>
+<div class="col-span-4 pr-8">
+<div class="flex justify-between mb-3 font-label-sm text-[11px] text-on-surface-variant uppercase">
+<span>Rec</span>
+<span>App</span>
+<span>Prep</span>
+<span class="text-primary font-bold">Transit</span>
+<span>Del</span>
+</div>
+<div class="relative h-6 w-full flex justify-between items-center">
+<div class="stepper-line"></div>
+<div class="stepper-progress" style="width: 75%;"></div>
+<!-- Dots -->
+<div class="w-3 h-3 rounded-full bg-primary-container z-10 ring-4 ring-surface group-hover:ring-surface-container-low"></div>
+<div class="w-3 h-3 rounded-full bg-primary-container z-10 ring-4 ring-surface group-hover:ring-surface-container-low"></div>
+<div class="w-3 h-3 rounded-full bg-primary-container z-10 ring-4 ring-surface group-hover:ring-surface-container-low"></div>
+<div class="w-4 h-4 rounded-full bg-primary-container z-10 ring-4 ring-surface group-hover:ring-surface-container-low shadow-[0_0_12px_rgba(163,30,51,0.4)] animate-pulse"></div>
+<div class="w-3 h-3 rounded-full bg-surface-dim z-10 ring-4 ring-surface group-hover:ring-surface-container-low border border-surface-variant"></div>
+</div>
+</div>
+<div class="col-span-1 text-right">
+<div class="font-body-lg text-body-lg font-medium text-primary-container">14m</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant mt-1">Away</div>
+</div>
+</div>
+<!-- Row 2: Approved / Prep -->
+<div class="grid grid-cols-12 gap-6 items-center px-6 py-6 bg-surface hover:bg-surface-container-low transition-colors group border-b border-surface-variant/30">
+<div class="col-span-3 flex items-start gap-4">
+<div class="w-12 h-12 rounded-full bg-tertiary-fixed/40 flex items-center justify-center text-tertiary-container shrink-0">
+<span class="material-symbols-outlined">science</span>
+</div>
+<div>
+<div class="font-body-lg text-body-lg font-medium text-on-surface">Platelets (Irradiated)</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant mt-1">TRX-8922-B</div>
+</div>
+</div>
+<div class="col-span-4">
+<div class="flex items-center gap-3">
+<div class="font-body-md text-on-surface">Regional Blood Center</div>
+<span class="material-symbols-outlined text-surface-dim text-[16px]">arrow_forward</span>
+<div class="font-body-md text-on-surface font-medium">Children's Hosp.</div>
+</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant mt-2">Requested: 09:15 AM</div>
+</div>
+<div class="col-span-4 pr-8">
+<div class="flex justify-between mb-3 font-label-sm text-[11px] text-on-surface-variant uppercase">
+<span>Rec</span>
+<span>App</span>
+<span class="text-tertiary-container font-bold">Prep</span>
+<span>Transit</span>
+<span>Del</span>
+</div>
+<div class="relative h-6 w-full flex justify-between items-center">
+<div class="stepper-line"></div>
+<div class="stepper-progress bg-tertiary-container" style="width: 50%;"></div>
+<!-- Dots -->
+<div class="w-3 h-3 rounded-full bg-tertiary-container z-10 ring-4 ring-surface group-hover:ring-surface-container-low"></div>
+<div class="w-3 h-3 rounded-full bg-tertiary-container z-10 ring-4 ring-surface group-hover:ring-surface-container-low"></div>
+<div class="w-4 h-4 rounded-full bg-tertiary-container z-10 ring-4 ring-surface group-hover:ring-surface-container-low shadow-[0_0_12px_rgba(119,75,0,0.3)] animate-pulse"></div>
+<div class="w-3 h-3 rounded-full bg-surface-dim z-10 ring-4 ring-surface group-hover:ring-surface-container-low border border-surface-variant"></div>
+<div class="w-3 h-3 rounded-full bg-surface-dim z-10 ring-4 ring-surface group-hover:ring-surface-container-low border border-surface-variant"></div>
+</div>
+</div>
+<div class="col-span-1 text-right">
+<div class="font-body-lg text-body-lg font-medium text-on-surface">45m</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant mt-1">Est</div>
+</div>
+</div>
+</div>
+<!-- Load More -->
+<div class="mt-8 text-center">
+<button class="font-label-sm text-label-sm text-primary hover:text-primary-container transition-colors tracking-widest uppercase">
+                    Load More Transfers
+                </button>
+</div>
+</div>
+</main>
+</body></html>

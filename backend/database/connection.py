@@ -26,7 +26,6 @@ def _create_resilient_engine():
     if DATABASE_URL and "postgresql" in DATABASE_URL:
         try:
             pg_engine = create_engine(DATABASE_URL, connect_args={"connect_timeout": 2})
-            # Test immediate connectivity
             with pg_engine.connect() as conn:
                 conn.execute(text("SELECT 1"))
             logger.info("Connected successfully to PostgreSQL database.")
@@ -36,8 +35,15 @@ def _create_resilient_engine():
 
     sqlite_engine = create_engine(
         FALLBACK_SQLITE_URL,
-        connect_args={"check_same_thread": False},
+        connect_args={"check_same_thread": False, "timeout": 30},
     )
+    try:
+        with sqlite_engine.connect() as conn:
+            conn.execute(text("PRAGMA journal_mode=WAL;"))
+            conn.execute(text("PRAGMA busy_timeout=30000;"))
+    except Exception as e:
+        logger.warning(f"Failed setting PRAGMA journal_mode=WAL: {e}")
+
     return sqlite_engine
 
 
@@ -45,31 +51,9 @@ engine = _create_resilient_engine()
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
-def initialize_database():
-    """Ensure all database tables and demo seed records exist."""
-    from database.models import BloodBank
-    from database.seed_data import seed_demo_data
-
+def init_db():
+    """Create all tables."""
     Base.metadata.create_all(bind=engine)
-    db = SessionLocal()
-    try:
-        bank_count = db.query(BloodBank).count()
-        if bank_count == 0:
-            logger.info("No records found in database. Auto-seeding PRAVAH demo records...")
-            seed_demo_data()
-    except Exception as e:
-        logger.warning(f"Auto-seed check failed ({e}). Re-creating tables and seeding...")
-        Base.metadata.create_all(bind=engine)
-        seed_demo_data()
-    finally:
-        db.close()
-
-
-# Auto-initialize database schema and seeds on startup
-try:
-    initialize_database()
-except Exception as e:
-    logger.error(f"Database initialization exception: {e}")
 
 
 def get_db() -> Generator[Session, None, None]:

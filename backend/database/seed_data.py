@@ -1,22 +1,20 @@
-"""PRAVAH National Dataset Ingestion & Seeding Engine.
+"""National dataset seeding for PRAVAH.
 
-Loads the full 4,390 blood banks, inventory batches, cold-chain telemetry alerts,
-demand forecasts, unit risk scores, and 1,815 redistribution recommendations
-from 'data/processed/' (sih datacollection 2).
+Ingests authoritative data from sih datacollection 2/data/processed/ and sih datacollection 2/models/.
 """
-
-from __future__ import annotations
 
 import json
 import logging
 from datetime import date, datetime, timedelta
 from pathlib import Path
+from typing import Dict
 
+import joblib
 import numpy as np
 import pandas as pd
 from sqlalchemy import delete, func, select
 
-from database.connection import Base, SessionLocal, engine
+from database.connection import SessionLocal, init_db
 from database.models import (
     AuditLog,
     BloodBank,
@@ -30,52 +28,53 @@ from database.models import (
 )
 
 logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
 
 BACKEND_DIR = Path(__file__).resolve().parent.parent
 PROJECT_ROOT = BACKEND_DIR.parent
 
-DATA_PROCESSED_DIRS = [
-    PROJECT_ROOT / "data" / "processed",
+POSSIBLE_DATA_DIRS = [
     PROJECT_ROOT / "sih datacollection 2" / "data" / "processed",
+    PROJECT_ROOT / "data" / "processed",
+    BACKEND_DIR / "data" / "processed",
 ]
+DATA_DIR = next((d for d in POSSIBLE_DATA_DIRS if d.exists()), PROJECT_ROOT / "data" / "processed")
 
-DATA_DIR = next((d for d in DATA_PROCESSED_DIRS if d.exists()), PROJECT_ROOT / "data" / "processed")
+POSSIBLE_MODEL_DIRS = [
+    PROJECT_ROOT / "sih datacollection 2" / "models",
+    PROJECT_ROOT / "models",
+]
+MODEL_DIR = next((d for d in POSSIBLE_MODEL_DIRS if d.exists()), PROJECT_ROOT / "sih datacollection 2" / "models")
 
 
 def load_national_blood_banks(session, df_banks: pd.DataFrame) -> dict[int, BloodBank]:
-    """Ingests all 4,390 public blood banks across all states and districts in India."""
-    existing_count = session.scalar(select(func.count()).select_from(BloodBank)) or 0
-    if existing_count >= len(df_banks):
-        logger.info(f"Blood banks already seeded ({existing_count:,} banks).")
-        return {b.id: b for b in session.scalars(select(BloodBank)).all()}
-
-    session.execute(delete(BloodBank))
-    banks_to_insert: list[BloodBank] = []
+    """Upserts blood bank facilities."""
+    existing_banks = {b.id: b for b in session.scalars(select(BloodBank)).all()}
+    banks_to_add: list[BloodBank] = []
 
     for _, row in df_banks.iterrows():
         bank_id = int(row["bank_id"])
-        name = str(row["name"]).strip()
-        city = f"{row['city']}, {row['state']}" if pd.notna(row.get("state")) else str(row["city"])
-        lat = float(row["latitude"]) if pd.notna(row["latitude"]) else 20.5937
-        lon = float(row["longitude"]) if pd.notna(row["longitude"]) else 78.9629
-        capacity = 5000 if "Hub" in name or "AIIMS" in name or "Medical" in name else 2500
+        if bank_id in existing_banks:
+            continue
 
-        banks_to_insert.append(
-            BloodBank(
-                id=bank_id,
-                name=name,
-                city=city,
-                latitude=lat,
-                longitude=lon,
-                capacity=capacity,
-                status="ACTIVE",
-            )
+        bank_obj = BloodBank(
+            id=bank_id,
+            name=str(row["name"]).strip(),
+            state=str(row.get("state", "Unknown")),
+            district=str(row.get("district", "Unknown")),
+            city=str(row.get("city", "Unknown")),
+            latitude=float(row.get("latitude", 20.5937)),
+            longitude=float(row.get("longitude", 78.9629)),
+            category=str(row.get("category", "Government")),
         )
+        banks_to_add.append(bank_obj)
+        existing_banks[bank_id] = bank_obj
 
-    session.bulk_save_objects(banks_to_insert)
-    session.commit()
-    logger.info(f"Seeded {len(banks_to_insert):,} blood banks across all 36 Indian States/UTs.")
-    return {b.id: b for b in session.scalars(select(BloodBank)).all()}
+    if banks_to_add:
+        session.bulk_save_objects(banks_to_add)
+        session.commit()
+
+    return existing_banks
 
 
 def load_national_dataset_records(session) -> dict[str, int]:
@@ -87,6 +86,7 @@ def load_national_dataset_records(session) -> dict[str, int]:
     inventory_path = DATA_DIR / "platelet_inventory.csv"
     alerts_path = DATA_DIR / "cold_chain_alerts.csv"
     equipment_path = DATA_DIR / "equipment.csv"
+    model_path = MODEL_DIR / "expiry_risk_model.joblib"
 
     counts = {
         "blood_banks": 0,
@@ -111,32 +111,86 @@ def load_national_dataset_records(session) -> dict[str, int]:
     today = date.today()
     now = datetime.now()
 
-    # 2. Load Inventory Batches (representative active batch cohort across all banks)
-    if inventory_path.exists():
-        df_inv = pd.read_csv(inventory_path)
-        # Sample latest active cohort across banks (~4,500 active batches)
-        df_inv_sample = df_inv.sample(n=min(5000, len(df_inv)), random_state=42).copy()
-        
+    # Load expiry risk model artifact for direct live scoring
+    prob_model = None
+    feature_cols = []
+    if model_path.exists():
+        try:
+            artifact = joblib.load(model_path)
+            prob_model = artifact.get("prob_model")
+            feature_cols = artifact.get("features", [])
+        except Exception as e:
+            logger.warning(f"Could not load model artifact: {e}")
+
+    # 2. Load Inventory Batches & Unit Expiry Risks directly from unit_expiry_risk_features.csv
+    if unit_risk_path.exists():
+        df_risk = pd.read_csv(unit_risk_path)
+        # Filter to valid blood banks and sample up to 5,000 distinct unit records
+        df_risk_valid = df_risk[df_risk["bank_id"].isin(valid_bank_ids)].copy()
+        if len(df_risk_valid) > 5000:
+            df_risk_sample = df_risk_valid.head(5000).copy()
+        else:
+            df_risk_sample = df_risk_valid.copy()
+
+        # Run direct model inference if model is loaded
+        if prob_model is not None and feature_cols:
+            type_mapping = {"RDP": 0, "SDP": 1, "Platelet Concentrate": 2, "PLATELETS": 0, "Packed RBC": 0, "Whole Blood": 0, "Plasma": 0}
+            tier_mapping = {"peripheral_center": 0, "district_center": 1, "urban_referral": 2, "metro_tertiary_hub": 3}
+            status_mapping = {"OK": 0, "WARNING": 1, "CRITICAL": 2, "AVAILABLE": 0, "LOW": 1, "NEAR_EXPIRY": 2}
+
+            df_risk_sample["platelet_type_code"] = df_risk_sample["platelet_type"].map(type_mapping).fillna(0).astype(int)
+            df_risk_sample["tier_code"] = df_risk_sample["facility_tier"].map(tier_mapping).fillna(1).astype(int)
+            df_risk_sample["status_code"] = df_risk_sample["status"].map(status_mapping).fillna(0).astype(int)
+
+            X_mat = df_risk_sample[feature_cols].fillna(0)
+            model_scores = prob_model.predict(X_mat)
+        else:
+            model_scores = df_risk_sample.get("expiry_risk_probability", [0.25] * len(df_risk_sample)).values
+
         session.execute(delete(Inventory))
+        session.execute(delete(RiskPrediction))
+
         inv_objs: list[Inventory] = []
-        inv_id = 1
+        risk_objs: list[RiskPrediction] = []
+        bg_list = ["O+", "A+", "B+", "AB+", "O-", "A-", "B-", "AB-"]
 
-        for _, row in df_inv_sample.iterrows():
+        for idx, (_, row) in enumerate(df_risk_sample.iterrows()):
+            inv_id = idx + 1
             b_id = int(row["bank_id"])
-            if b_id not in valid_bank_ids:
-                continue
-
-            comp = str(row["platelet_type"])
-            qty = int(row["quantity"])
-            
-            # Generate realistic collection and expiry dates anchored to today
-            days_left = (inv_id % 5) + 1
-            exp_d = today + timedelta(days=days_left)
-            coll_d = exp_d - timedelta(days=5)
-
-            status = "NEAR_EXPIRY" if days_left <= 2 else ("SURPLUS" if qty >= 35 else ("LOW" if qty <= 5 else "AVAILABLE"))
-            bg_list = ["O+", "A+", "B+", "AB+", "O-", "A-", "B-", "AB-"]
+            comp = str(row.get("platelet_type", "Platelets"))
+            qty = int(row.get("represented_units", 8))
             bg = bg_list[inv_id % len(bg_list)]
+
+            # Parse authentic dates from timestamps or calculate accurately
+            rem_hours = float(row.get("remaining_shelf_life_hours", 72.0))
+            coll_ts = row.get("collection_timestamp")
+            exp_ts = row.get("expiry_timestamp")
+
+            if pd.notna(exp_ts):
+                try:
+                    exp_d = pd.to_datetime(exp_ts).date()
+                except Exception:
+                    exp_d = today + timedelta(days=max(1, int(rem_hours / 24.0)))
+            else:
+                exp_d = today + timedelta(days=max(1, int(rem_hours / 24.0)))
+
+            if pd.notna(coll_ts):
+                try:
+                    coll_d = pd.to_datetime(coll_ts).date()
+                except Exception:
+                    coll_d = exp_d - timedelta(days=5)
+            else:
+                coll_d = exp_d - timedelta(days=5)
+
+            # Accurate status
+            if rem_hours <= 48:
+                status = "NEAR_EXPIRY"
+            elif qty >= 20:
+                status = "SURPLUS"
+            elif qty <= 4:
+                status = "LOW"
+            else:
+                status = "AVAILABLE"
 
             inv_objs.append(
                 Inventory(
@@ -150,11 +204,43 @@ def load_national_dataset_records(session) -> dict[str, int]:
                     status=status,
                 )
             )
-            inv_id += 1
+
+            # Score & Explainability
+            pred_score = round(float(model_scores[idx]), 4)
+            pred_score = max(0.01, min(0.999, pred_score))
+            level = "HIGH" if pred_score >= 0.65 else ("MEDIUM" if pred_score >= 0.35 else "LOW")
+
+            features_list = []
+            if rem_hours <= 48:
+                features_list.append(f"Low remaining shelf life ({rem_hours:.1f}h)")
+            if float(row.get("cumulative_excursion_minutes", 0)) > 0 or float(row.get("max_temperature_exposure", 22.0)) > 24.0:
+                features_list.append(f"Cold-chain stress ({row.get('max_temperature_exposure', 22.0):.1f}°C)")
+            if float(row.get("agitation_off_minutes", 0)) > 0:
+                features_list.append("Agitation interruption")
+            if float(row.get("wastage_risk_score", 0)) > 0.4:
+                features_list.append("Local inventory exceeds projected demand")
+            if float(row.get("health_score", 95.0)) < 80.0:
+                features_list.append(f"Degraded equipment health ({row.get('health_score', 80.0):.1f}%)")
+            if not features_list:
+                features_list.append("Standard shelf-life aging")
+
+            risk_objs.append(
+                RiskPrediction(
+                    id=inv_id,
+                    inventory_id=inv_id,
+                    risk_score=pred_score,
+                    risk_level=level,
+                    contributing_features=json.dumps(features_list),
+                    model_version="expiry-risk-gbdt-v1",
+                    created_at=now,
+                )
+            )
 
         session.bulk_save_objects(inv_objs)
+        session.bulk_save_objects(risk_objs)
         session.commit()
         counts["inventory"] = len(inv_objs)
+        counts["risk_predictions"] = len(risk_objs)
 
     # 3. Load Demand Forecasts from Prediction Targets
     if targets_path.exists():
@@ -172,8 +258,8 @@ def load_national_dataset_records(session) -> dict[str, int]:
             if b_id not in valid_bank_ids:
                 continue
 
-            pred_24 = float(row["demand_next_24h"])
-            pred_72 = float(row["demand_next_72h"])
+            pred_24 = round(float(row["demand_next_24h"]), 1)
+            pred_72 = round(float(row["demand_next_72h"]), 1)
 
             forecast_objs.append(
                 DemandForecast(
@@ -204,46 +290,7 @@ def load_national_dataset_records(session) -> dict[str, int]:
         session.commit()
         counts["demand_forecasts"] = len(forecast_objs)
 
-    # 4. Load Unit Expiry Risks
-    if unit_risk_path.exists():
-        df_risk = pd.read_csv(unit_risk_path, nrows=min(len(inv_objs), 5000))
-        session.execute(delete(RiskPrediction))
-        risk_objs: list[RiskPrediction] = []
-
-        for idx, inv_item in enumerate(inv_objs):
-            row = df_risk.iloc[idx % len(df_risk)]
-            prob = float(row.get("expiry_risk_probability", row.get("combined_unit_risk_score", 0.35)))
-            level = str(row.get("risk_band", "MEDIUM")).upper()
-            if level not in ["LOW", "MEDIUM", "HIGH"]:
-                level = "HIGH" if prob >= 0.65 else ("MEDIUM" if prob >= 0.35 else "LOW")
-
-            features = []
-            if row.get("remaining_shelf_life_hours", 100) <= 48:
-                features.append(f"Low remaining shelf life ({row.get('remaining_shelf_life_hours', 36):.0f}h)")
-            if row.get("cumulative_excursion_minutes", 0) > 0:
-                features.append(f"Cold-chain excursion ({row.get('cumulative_excursion_minutes', 30):.0f}m)")
-            if row.get("agitation_off_minutes", 0) > 0:
-                features.append("Agitation interruption")
-            if not features:
-                features.append("Standard shelf-life aging")
-
-            risk_objs.append(
-                RiskPrediction(
-                    id=idx + 1,
-                    inventory_id=inv_item.id,
-                    risk_score=round(prob, 4),
-                    risk_level=level,
-                    contributing_features=json.dumps(features),
-                    model_version="expiry-risk-gbdt-v1",
-                    created_at=now,
-                )
-            )
-
-        session.bulk_save_objects(risk_objs)
-        session.commit()
-        counts["risk_predictions"] = len(risk_objs)
-
-    # 5. Load National Redistribution Recommendations (1,815 Routes)
+    # 4. Load National Redistribution Recommendations
     if recs_path.exists():
         df_recs = pd.read_csv(recs_path)
         session.execute(delete(TransferRecommendation))
@@ -259,9 +306,10 @@ def load_national_dataset_records(session) -> dict[str, int]:
             qty = int(row["recommended_units"])
             dist = float(row["distance_km"])
             tt = int(row["travel_time_min"])
-            priority = str(row.get("priority", "High"))
-            src_name = bank_map[src].name.split(",")[0]
-            dst_name = bank_map[dst].name.split(",")[0]
+            reason = str(row.get("reason", "Balance surplus against stockout risk"))
+
+            src_name = bank_map[src].name
+            dst_name = bank_map[dst].name
 
             rec_objs.append(
                 TransferRecommendation(
@@ -274,7 +322,7 @@ def load_national_dataset_records(session) -> dict[str, int]:
                     route=f"{src_name} → {dst_name} ({dist:.1f} km, {tt}m)",
                     vehicle="Refrigerated Van",
                     status="PENDING" if rec_id % 4 != 0 else "APPROVED",
-                    created_at=now - timedelta(minutes=rec_id * 2),
+                    created_at=now - timedelta(hours=rec_id % 72),
                 )
             )
             rec_id += 1
@@ -283,7 +331,7 @@ def load_national_dataset_records(session) -> dict[str, int]:
         session.commit()
         counts["transfer_recommendations"] = len(rec_objs)
 
-    # 6. Load Equipment Records
+    # 5. Load Equipment Records
     if equipment_path.exists():
         df_eq = pd.read_csv(equipment_path)
         session.execute(delete(Equipment))
@@ -295,19 +343,13 @@ def load_national_dataset_records(session) -> dict[str, int]:
             if b_id not in valid_bank_ids:
                 continue
 
-            eq_type = str(row.get("equipment_type", "Platelet Incubator/Agitator"))
-            health = float(row.get("health_score", 0.92))
-            if health > 1.0:
-                health = health / 100.0
-            st = str(row.get("status", "OPERATIONAL"))
-
             eq_objs.append(
                 Equipment(
                     id=eq_id,
                     bank_id=b_id,
-                    equipment_type=eq_type,
-                    health_score=round(health, 2),
-                    status=st,
+                    equipment_type=str(row.get("equipment_type", "Platelet Incubator")),
+                    health_score=float(row.get("health_score", 90.0)) / 100.0,
+                    status=str(row.get("status", "OK")),
                 )
             )
             eq_id += 1
@@ -316,24 +358,44 @@ def load_national_dataset_records(session) -> dict[str, int]:
         session.commit()
         counts["equipment"] = len(eq_objs)
 
+    # 6. Seed Initial Audit Logs from Real Transfers
+    session.execute(delete(AuditLog))
+    approved_transfers = session.scalars(
+        select(TransferRecommendation).where(TransferRecommendation.status == "APPROVED").limit(20)
+    ).all()
+
+    audit_objs = [
+        AuditLog(
+            id=idx + 1,
+            timestamp=t.created_at,
+            action="TRANSFER_APPROVED",
+            user="National Logistics Officer",
+            recommendation_id=t.id,
+            source_bank_id=t.source_bank_id,
+            destination_bank_id=t.destination_bank_id,
+            quantity=t.quantity,
+            approval_status="APPROVED",
+        )
+        for idx, t in enumerate(approved_transfers)
+    ]
+    if audit_objs:
+        session.bulk_save_objects(audit_objs)
+        session.commit()
+
+    logger.info(f"National dataset successfully loaded: {counts}")
     return counts
 
 
-def seed_demo_data() -> dict[str, int]:
-    """Master seeding entrypoint called during initialization."""
-    Base.metadata.create_all(bind=engine)
-    session = SessionLocal()
+def seed_database():
+    """Main database initialization and seeding entry point."""
+    init_db()
+    db = SessionLocal()
     try:
-        counts = load_national_dataset_records(session)
-        logger.info(f"PRAVAH National Dataset Seeding complete: {counts}")
-        return counts
+        counts = load_national_dataset_records(db)
+        print(f"PRAVAH database initialized and seeded with real project data: {counts}")
     finally:
-        session.close()
+        db.close()
 
 
 if __name__ == "__main__":
-    print("=" * 60)
-    print("Seeding PRAVAH National Dataset from sih datacollection 2")
-    print("=" * 60)
-    res = seed_demo_data()
-    print(json.dumps(res, indent=2))
+    seed_database()

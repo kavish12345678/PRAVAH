@@ -1,10 +1,13 @@
 import { useCallback, useEffect, useState } from 'react'
 
 import type {
+  AuditItem,
   DashboardSummary,
   ForecastItem,
   IntelligenceStatus,
   InventoryItem,
+  ModelMetricsResponse,
+  ProvenanceResponse,
   RiskItem,
   TransferItem,
   TransferStatusUpdate,
@@ -17,7 +20,10 @@ export interface PravahData {
   forecasts: ForecastItem[]
   risks: RiskItem[]
   transfers: TransferItem[]
+  auditLogs: AuditItem[]
   intelligence: IntelligenceStatus | null
+  metrics: ModelMetricsResponse | null
+  provenance: ProvenanceResponse | null
 }
 
 const SCAN_STEPS = [
@@ -36,28 +42,55 @@ export function usePravahData() {
     forecasts: [],
     risks: [],
     transfers: [],
+    auditLogs: [],
     intelligence: null,
+    metrics: null,
+    provenance: null,
   })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [scanning, setScanning] = useState(false)
   const [scanStep, setScanStep] = useState(0)
   const [lastRunMessage, setLastRunMessage] = useState<string | null>(null)
+  const [lastSynced, setLastSynced] = useState<string>(() => new Date().toLocaleTimeString())
 
   const refresh = useCallback(async () => {
     setError(null)
     try {
-      const [summary, inventory, forecasts, risks, transfers, intelligence] =
-        await Promise.all([
-          api.fetchDashboardSummary(),
-          api.fetchInventory(),
-          api.fetchForecasts(),
-          api.fetchRisk(),
-          api.fetchTransfers(),
-          api.fetchIntelligenceStatus(),
-        ])
+      const [
+        summary,
+        inventory,
+        forecasts,
+        risks,
+        transfers,
+        auditLogs,
+        intelligence,
+        metrics,
+        provenance,
+      ] = await Promise.all([
+        api.fetchDashboardSummary(),
+        api.fetchInventory(),
+        api.fetchForecasts(),
+        api.fetchRisk(),
+        api.fetchTransfers(),
+        api.fetchAuditLogs(),
+        api.fetchIntelligenceStatus(),
+        api.fetchModelMetrics(),
+        api.fetchProvenance(),
+      ])
 
-      setData({ summary, inventory, forecasts, risks, transfers, intelligence })
+      setData({
+        summary,
+        inventory,
+        forecasts,
+        risks,
+        transfers,
+        auditLogs,
+        intelligence,
+        metrics,
+        provenance,
+      })
+      setLastSynced(new Date().toLocaleTimeString())
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load data')
     } finally {
@@ -76,7 +109,7 @@ export function usePravahData() {
 
     for (let i = 0; i < SCAN_STEPS.length; i++) {
       setScanStep(i)
-      await new Promise((resolve) => setTimeout(resolve, 650))
+      await new Promise((resolve) => setTimeout(resolve, 300))
     }
 
     try {
@@ -116,6 +149,7 @@ export function usePravahData() {
     scanStep,
     scanSteps: SCAN_STEPS,
     lastRunMessage,
+    lastSynced,
     refresh,
     runIntelligence,
     updateTransferStatus,

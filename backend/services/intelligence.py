@@ -191,9 +191,10 @@ def run_intelligence_pipeline(db: Session) -> dict:
     surplus_pool: list[dict] = []
 
     for item in inventory:
-        days_left = max(0.1, (item.expiry_date - today).days)
-        remaining_hours = days_left * 24.0
-        age_hours = max(0.0, 120.0 - remaining_hours)
+        total_shelf_life_days = max(1, (item.expiry_date - item.collection_date).days if item.expiry_date and item.collection_date else 5)
+        days_left = max(0, (item.expiry_date - today).days if item.expiry_date else 3)
+        remaining_hours = max(1.0, float(days_left * 24.0 + (item.id % 24)))
+        age_hours = max(0.0, float(total_shelf_life_days * 24.0 - remaining_hours))
 
         telemetry_info = bank_anomaly_status.get(item.bank_id, {})
         excursion_min = 45.0 if telemetry_info.get("status") == "ANOMALY" else 0.0
@@ -202,6 +203,7 @@ def run_intelligence_pipeline(db: Session) -> dict:
         health = float(telemetry_info.get("avg_health", 0.95) * 100.0)
 
         forecast_info = demand_lookup.get((item.bank_id, item.component, item.blood_group), {"24h": 10, "72h": 25})
+        wastage_score = 0.65 if remaining_hours <= 48 and item.quantity > forecast_info["24h"] else 0.15
 
         risk_res = expiry_service.score_unit(
             platelet_type=item.component,
@@ -210,9 +212,10 @@ def run_intelligence_pipeline(db: Session) -> dict:
             age_hours=age_hours,
             remaining_shelf_life_hours=remaining_hours,
             current_stock=item.quantity,
-            expiring_48h=item.quantity if days_left <= 2 else 0,
+            expiring_48h=item.quantity if remaining_hours <= 48 else 0,
             demand_next_24h=forecast_info["24h"],
             demand_next_72h=forecast_info["72h"],
+            wastage_risk_score=wastage_score,
             cumulative_excursion_minutes=excursion_min,
             max_temperature_exposure=max_temp,
             agitation_off_minutes=agitation_off,
