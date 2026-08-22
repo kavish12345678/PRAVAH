@@ -37,18 +37,18 @@ export function SyringeSplashScreen({ onComplete }: SyringeSplashScreenProps) {
   const triggerPhase2 = () => {
     setPhase2(true)
 
-    // Show logo reveal after 2800ms
+    // Show logo reveal promptly on time (1000ms after droplet release)
     setTimeout(() => {
       setShowLogo(true)
-    }, 2800)
+    }, 1000)
 
-    // Complete splash screen and transition to landing page after 4200ms
+    // Complete splash screen and transition to landing page
     setTimeout(() => {
       setIsFadingOut(true)
       setTimeout(() => {
         onComplete()
-      }, 700)
-    }, 4200)
+      }, 600)
+    }, 2800)
   }
 
   // Auto-start prompt pulse or click anywhere
@@ -148,7 +148,7 @@ export function SyringeSplashScreen({ onComplete }: SyringeSplashScreenProps) {
       {/* Logo Reveal */}
       <div
         id="logo-reveal"
-        className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none transition-opacity duration-1000 z-50 ${
+        className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none transition-all duration-700 z-50 ${
           showLogo ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
         }`}
       >
@@ -157,10 +157,10 @@ export function SyringeSplashScreen({ onComplete }: SyringeSplashScreenProps) {
           alt="PRAVAH"
           className="w-16 h-16 mx-auto object-contain drop-shadow-md mb-3"
         />
-        <h1 className="font-serif text-5xl sm:text-6xl font-extrabold mb-2 tracking-tight text-white drop-shadow-md">
+        <h1 className="font-serif text-5xl sm:text-6xl font-extrabold mb-2 tracking-tight text-[#1b1b1c]">
           PRAVAH
         </h1>
-        <p className="font-serif text-xl sm:text-2xl italic text-white/90 drop-shadow-sm">
+        <p className="font-serif text-xl sm:text-2xl italic text-[#574241] font-semibold">
           The Lifeline in Motion
         </p>
       </div>
