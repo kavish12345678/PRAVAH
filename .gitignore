@@ -4,3 +4,14 @@ __pycache__/
 .env
 node_modules/
 .DS_Store
+# Local database
+backend/pravah.db
+
+# Frontend build output
+frontend/dist/
+
+# Original SIH data-collection workspace
+sih datacollection 2/
+
+# Temporary data backup
+data_backup/

@@ -1,10 +1,18 @@
-"""Rule-based PRAVAH intelligence pipeline (replaceable by ML later)."""
+"""PRAVAH AI & ML Intelligence Engine.
+
+Integrates:
+- Model 1: Demand Forecasting (24h/72h GBDT Regressors)
+- Model 2: Expiry & Wastage Risk Model Family (GBDT Regressor + Classifier)
+- Model 3: Cold-Chain & Equipment Anomaly Detector (Isolation Forest)
+- Optimization Engine: Min-Cost Linear Programming (LP) network flow redistribution
+"""
 
 from __future__ import annotations
 
 import json
+import math
 from collections import defaultdict
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 
 from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
@@ -19,280 +27,293 @@ from database.models import (
     TransferRecommendation,
     UsageHistory,
 )
+from services.ml_service import anomaly_service, demand_service, expiry_service, optimization_service
 
-ENGINE_VERSION = "rule-based-demo-v1"
+ENGINE_VERSION = "pravah-ai-gbdt-lp-v1"
 DEMO_VEHICLE = "Refrigerated Van"
-TEMP_MIN_C = 2.0
-TEMP_MAX_C = 8.0
 
 
-def _risk_level(score: float) -> str:
-    if score >= 0.70:
-        return "HIGH"
-    if score >= 0.40:
-        return "MEDIUM"
-    return "LOW"
+def _haversine_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+    """Computes great circle distance between two points in km."""
+    r = 6371.0
+    phi1 = math.radians(lat1)
+    phi2 = math.radians(lat2)
+    delta_phi = math.radians(lat2 - lat1)
+    delta_lambda = math.radians(lon2 - lon1)
+
+    a = (
+        math.sin(delta_phi / 2.0) ** 2
+        + math.cos(phi1) * math.cos(phi2) * math.sin(delta_lambda / 2.0) ** 2
+    )
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+    return r * c * 1.28  # road factor
 
 
-def _days_to_expiry(expiry_date: date, today: date) -> int:
-    return (expiry_date - today).days
+def _build_transport_edges(banks: dict[int, BloodBank]) -> list[dict]:
+    """Derive feasible transport edges between blood bank locations."""
+    bank_list = list(banks.values())
+    edges = []
 
-
-def _latest_forecast(
-    forecasts: list[DemandForecast],
-    bank_id: int,
-    component: str,
-    blood_group: str,
-) -> DemandForecast | None:
-    """Most recent forecast for a bank/component/blood_group combination."""
-    matches = [
-        f
-        for f in forecasts
-        if f.bank_id == bank_id
-        and f.component == component
-        and f.blood_group == blood_group
-    ]
-    if not matches:
-        return None
-    return max(matches, key=lambda f: f.forecast_date)
-
-
-def _latest_temperature(
-    telemetry: list[ColdChainTelemetry], bank_id: int
-) -> float | None:
-    """Most recent cold-chain reading for a bank."""
-    readings = [t for t in telemetry if t.bank_id == bank_id]
-    if not readings:
-        return None
-    return max(readings, key=lambda t: t.timestamp).temperature
-
-
-def _calculate_risk(
-    item: Inventory,
-    today: date,
-    forecast: DemandForecast | None,
-    temperature: float | None,
-) -> tuple[float, list[str]]:
-    """
-    Transparent demo risk scoring.
-    Each rule adds to the score; capped at 1.0.
-    """
-    score = 0.0
-    features: list[str] = []
-
-    days_left = _days_to_expiry(item.expiry_date, today)
-    if days_left <= 2:
-        score += 0.50
-        features.append(f"near_expiry({days_left}d)")
-    elif days_left <= 5:
-        score += 0.30
-        features.append(f"expiring_soon({days_left}d)")
-
-    if item.quantity <= 5:
-        score += 0.20
-        features.append(f"very_low_stock({item.quantity})")
-    elif item.quantity <= 10:
-        score += 0.20
-        features.append(f"low_stock({item.quantity})")
-
-    if forecast and item.quantity < forecast.predicted_demand:
-        score += 0.10
-        features.append(
-            f"below_forecast_demand({item.quantity}<{forecast.predicted_demand})"
-        )
-
-    if temperature is not None and (temperature < TEMP_MIN_C or temperature > TEMP_MAX_C):
-        score += 0.15
-        features.append(f"temperature_stress({temperature}C)")
-
-    return min(score, 1.0), features
-
-
-def _aggregate_inventory(inventory: list[Inventory]) -> dict[tuple[int, str, str], int]:
-    """Sum available quantity by bank, component, and blood group."""
-    totals: dict[tuple[int, str, str], int] = defaultdict(int)
-    for item in inventory:
-        if item.status != "AVAILABLE" and item.status not in {"LOW", "SURPLUS", "NEAR_EXPIRY"}:
-            continue
-        key = (item.bank_id, item.component, item.blood_group)
-        totals[key] += item.quantity
-    return totals
-
-
-def _detect_shortages_and_surpluses(
-    inventory_totals: dict[tuple[int, str, str], int],
-    forecasts: list[DemandForecast],
-) -> tuple[list[dict], list[dict], int, int]:
-    """
-    Compare aggregated inventory against most recent demand forecast.
-    SHORTAGE: inventory < demand
-    SURPLUS:  inventory > demand * 1.5
-    """
-    shortages: list[dict] = []
-    surpluses: list[dict] = []
-    shortage_keys: set[tuple[int, str, str]] = set()
-    surplus_keys: set[tuple[int, str, str]] = set()
-
-    for (bank_id, component, blood_group), quantity in inventory_totals.items():
-        forecast = _latest_forecast(forecasts, bank_id, component, blood_group)
-        if forecast is None:
-            continue
-
-        demand = forecast.predicted_demand
-
-        if quantity < demand:
-            amount = demand - quantity
-            shortages.append(
-                {
-                    "bank_id": bank_id,
-                    "component": component,
-                    "blood_group": blood_group,
-                    "shortage": amount,
-                    "demand": demand,
-                    "inventory": quantity,
-                }
-            )
-            shortage_keys.add((bank_id, component, blood_group))
-
-        if quantity > demand * 1.5:
-            amount = quantity - demand * 1.5
-            surpluses.append(
-                {
-                    "bank_id": bank_id,
-                    "component": component,
-                    "blood_group": blood_group,
-                    "surplus": amount,
-                    "demand": demand,
-                    "inventory": quantity,
-                }
-            )
-            surplus_keys.add((bank_id, component, blood_group))
-
-    return shortages, surpluses, len(shortage_keys), len(surplus_keys)
-
-
-def _match_transfers(
-    shortages: list[dict],
-    surpluses: list[dict],
-    banks: dict[int, BloodBank],
-    now: datetime,
-) -> list[TransferRecommendation]:
-    """
-    Match surplus banks to shortage banks with the same component and blood group.
-    Transfer quantity = min(source_surplus, destination_shortage).
-    """
-    # Track remaining surplus per source location (mutable copy)
-    surplus_pool = {
-        (s["bank_id"], s["component"], s["blood_group"]): s["surplus"]
-        for s in surpluses
-    }
-
-    recommendations: list[TransferRecommendation] = []
-
-    for shortage in shortages:
-        key = (shortage["component"], shortage["blood_group"])
-        remaining_shortage = shortage["shortage"]
-
-        for source_key, available in list(surplus_pool.items()):
-            source_bank_id, component, blood_group = source_key
-            if component != shortage["component"] or blood_group != shortage["blood_group"]:
-                continue
-            if source_bank_id == shortage["bank_id"]:
-                continue
-            if available <= 0 or remaining_shortage <= 0:
+    for src in bank_list:
+        for dst in bank_list:
+            if src.id == dst.id:
                 continue
 
-            transfer_qty = int(min(available, remaining_shortage))
-            if transfer_qty <= 0:
-                continue
+            dist_km = _haversine_distance(src.latitude, src.longitude, dst.latitude, dst.longitude)
+            # Express refrigerated air/road logistics: 180 km/h effective corridor speed + 40m handling
+            travel_time_min = max(45, int((dist_km / 180.0) * 60.0) + 40)
 
-            source_bank = banks[source_bank_id]
-            dest_bank = banks[shortage["bank_id"]]
+            edges.append({
+                "source_bank": src.id,
+                "destination_bank": dst.id,
+                "distance_km": round(dist_km, 2),
+                "travel_time_min": travel_time_min,
+                "capacity": 60,
+                "vehicle": DEMO_VEHICLE,
+                "refrigerated": True,
+            })
 
-            recommendations.append(
-                TransferRecommendation(
-                    source_bank_id=source_bank_id,
-                    destination_bank_id=shortage["bank_id"],
-                    component=component,
-                    blood_group=blood_group,
-                    quantity=transfer_qty,
-                    route=f"{source_bank.city} → {dest_bank.city}",
-                    vehicle=DEMO_VEHICLE,
-                    status="PENDING",
-                    created_at=now,
-                )
-            )
-
-            surplus_pool[source_key] = available - transfer_qty
-            remaining_shortage -= transfer_qty
-
-    return recommendations
+    return edges
 
 
 def run_intelligence_pipeline(db: Session) -> dict:
-    """Run the full rule-based intelligence pipeline in a single transaction."""
+    """Run the complete ML intelligence pipeline and LP optimization."""
     today = date.today()
     now = datetime.now()
 
-    # --- Step 1-5: Read current state ---
+    # 1. Fetch current database state
     inventory = list(db.scalars(select(Inventory)).all())
-    forecasts = list(db.scalars(select(DemandForecast)).all())
-    db.scalars(select(UsageHistory)).all()  # loaded for future ML; not used in rules yet
     telemetry = list(db.scalars(select(ColdChainTelemetry)).all())
-    db.scalars(select(Equipment)).all()  # loaded for future ML; not used in rules yet
+    equipment_records = list(db.scalars(select(Equipment)).all())
+    usage_records = list(db.scalars(select(UsageHistory)).all())
     banks = {b.id: b for b in db.scalars(select(BloodBank)).all()}
 
-    # --- Step 6: Generate risk predictions ---
-    # Clear previous demo predictions so the endpoint is rerunnable.
-    db.execute(
-        delete(RiskPrediction).where(RiskPrediction.model_version == ENGINE_VERSION)
-    )
+    # Map telemetry and equipment health per bank
+    bank_telemetry: dict[int, list[ColdChainTelemetry]] = defaultdict(list)
+    for t in telemetry:
+        bank_telemetry[t.bank_id].append(t)
+
+    bank_equipment: dict[int, list[Equipment]] = defaultdict(list)
+    for eq in equipment_records:
+        bank_equipment[eq.bank_id].append(eq)
+
+    # 2. Run Model 3: Cold Chain & Equipment Anomaly Detector
+    bank_anomaly_status: dict[int, dict] = {}
+    for bank_id, t_list in bank_telemetry.items():
+        if not t_list:
+            continue
+        sorted_t = sorted(t_list, key=lambda x: x.timestamp)
+        temps = [t.temperature for t in sorted_t[-10:]]
+        agitation_on = sorted_t[-1].agitation_status
+        eq_list = bank_equipment.get(bank_id, [])
+        avg_health = float(sum(e.health_score for e in eq_list) / len(eq_list)) if eq_list else 0.95
+
+        anomaly_res = anomaly_service.score_telemetry_waveform(
+            temperatures=temps,
+            agitation_status=agitation_on,
+        )
+        bank_anomaly_status[bank_id] = {
+            "anomaly_score": anomaly_res["anomaly_score"],
+            "status": anomaly_res["status"],
+            "avg_health": avg_health,
+            "latest_temp": sorted_t[-1].temperature,
+            "agitation_on": agitation_on,
+        }
+
+    # 3. Run Model 1: Demand Forecasting (24h & 72h)
+    # Clear old forecasts generated by previous intelligence runs
+    db.execute(delete(DemandForecast).where(DemandForecast.model_version.like("%gbdt%")))
+
+    forecast_records: list[DemandForecast] = []
+    demand_lookup: dict[tuple[int, str, str], dict[str, int]] = {}
+
+    components = sorted({item.component for item in inventory} or ["Whole Blood", "Packed RBC", "Platelets", "Plasma"])
+    blood_groups = sorted({item.blood_group for item in inventory} or ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"])
+
+    for bank_id, bank in banks.items():
+        for comp in components:
+            for bg in blood_groups:
+                # Find matching inventory
+                matching_items = [i for i in inventory if i.bank_id == bank_id and i.component == comp and i.blood_group == bg]
+                curr_stock = sum(i.quantity for i in matching_items)
+                expiring_soon = sum(
+                    i.quantity for i in matching_items
+                    if (i.expiry_date - today).days <= 2
+                )
+
+                # Recent usage
+                recent_usage = [
+                    u.units_used for u in usage_records
+                    if u.bank_id == bank_id and u.component == comp and u.blood_group == bg
+                ]
+                last_usage = recent_usage[-1] if recent_usage else 8
+
+                pred_24, pred_72 = demand_service.predict_horizons(
+                    current_stock=curr_stock,
+                    expiring_48h=expiring_soon,
+                    platelet_requests=last_usage,
+                    platelet_issued=last_usage,
+                    district_bank_count=len(banks),
+                    state_bank_count=len(banks) * 5,
+                )
+
+                demand_lookup[(bank_id, comp, bg)] = {"24h": pred_24, "72h": pred_72}
+
+                # Persist 1-day, 3-day, 7-day forecast records
+                forecast_records.append(
+                    DemandForecast(
+                        bank_id=bank_id,
+                        component=comp,
+                        blood_group=bg,
+                        forecast_date=today + timedelta(days=1),
+                        predicted_demand=float(pred_24),
+                        model_version=f"{ENGINE_VERSION}-24h",
+                    )
+                )
+                forecast_records.append(
+                    DemandForecast(
+                        bank_id=bank_id,
+                        component=comp,
+                        blood_group=bg,
+                        forecast_date=today + timedelta(days=3),
+                        predicted_demand=float(pred_72),
+                        model_version=f"{ENGINE_VERSION}-72h",
+                    )
+                )
+
+    db.add_all(forecast_records)
+
+    # 4. Run Model 2: Expiry & Wastage Risk Model Family
+    db.execute(delete(RiskPrediction).where(RiskPrediction.model_version.like("%gbdt%")))
 
     risk_predictions: list[RiskPrediction] = []
+    shortage_pool: list[dict] = []
+    surplus_pool: list[dict] = []
+
     for item in inventory:
-        forecast = _latest_forecast(
-            forecasts, item.bank_id, item.component, item.blood_group
+        days_left = max(0.1, (item.expiry_date - today).days)
+        remaining_hours = days_left * 24.0
+        age_hours = max(0.0, 120.0 - remaining_hours)
+
+        telemetry_info = bank_anomaly_status.get(item.bank_id, {})
+        excursion_min = 45.0 if telemetry_info.get("status") == "ANOMALY" else 0.0
+        max_temp = telemetry_info.get("latest_temp", 22.0)
+        agitation_off = 0.0 if telemetry_info.get("agitation_on", True) else 30.0
+        health = float(telemetry_info.get("avg_health", 0.95) * 100.0)
+
+        forecast_info = demand_lookup.get((item.bank_id, item.component, item.blood_group), {"24h": 10, "72h": 25})
+
+        risk_res = expiry_service.score_unit(
+            platelet_type=item.component,
+            status=item.status,
+            represented_units=item.quantity,
+            age_hours=age_hours,
+            remaining_shelf_life_hours=remaining_hours,
+            current_stock=item.quantity,
+            expiring_48h=item.quantity if days_left <= 2 else 0,
+            demand_next_24h=forecast_info["24h"],
+            demand_next_72h=forecast_info["72h"],
+            cumulative_excursion_minutes=excursion_min,
+            max_temperature_exposure=max_temp,
+            agitation_off_minutes=agitation_off,
+            health_score=health,
         )
-        temperature = _latest_temperature(telemetry, item.bank_id)
-        score, features = _calculate_risk(item, today, forecast, temperature)
 
         risk_predictions.append(
             RiskPrediction(
                 inventory_id=item.id,
-                risk_score=round(score, 2),
-                risk_level=_risk_level(score),
-                contributing_features=json.dumps(features),
+                risk_score=risk_res["risk_score"],
+                risk_level=risk_res["risk_level"],
+                contributing_features=json.dumps(risk_res["contributing_features"]),
                 model_version=ENGINE_VERSION,
                 created_at=now,
             )
         )
 
+        # Inventory balance vs 72h demand
+        demand_72 = forecast_info["72h"]
+        if item.quantity < demand_72:
+            shortage_pool.append({
+                "bank_id": item.bank_id,
+                "component": item.component,
+                "blood_group": item.blood_group,
+                "shortage": demand_72 - item.quantity,
+            })
+        elif item.quantity > int(demand_72 * 1.4):
+            surplus_pool.append({
+                "bank_id": item.bank_id,
+                "component": item.component,
+                "blood_group": item.blood_group,
+                "surplus": item.quantity - int(demand_72 * 1.4),
+            })
+
     db.add_all(risk_predictions)
 
-    # --- Step 7: Detect shortages and surpluses ---
-    inventory_totals = _aggregate_inventory(inventory)
-    shortages, surpluses, shortages_detected, surplus_locations = (
-        _detect_shortages_and_surpluses(inventory_totals, forecasts)
-    )
-
-    # --- Step 8-9: Match transfers and persist ---
-    # Clear previous demo PENDING recommendations so the endpoint is rerunnable.
+    # 5. Run Optimization Engine (LP Network Flow Solver)
     db.execute(
         delete(TransferRecommendation).where(
-            TransferRecommendation.status == "PENDING",
-            TransferRecommendation.vehicle == DEMO_VEHICLE,
+            TransferRecommendation.status == "PENDING"
         )
     )
 
-    transfers = _match_transfers(shortages, surpluses, banks, now)
-    db.add_all(transfers)
+    transport_edges = _build_transport_edges(banks)
 
+    # Solve by component and blood group
+    transfers: list[TransferRecommendation] = []
+    for comp in components:
+        for bg in blood_groups:
+            comp_donors = {
+                s["bank_id"]: s["surplus"]
+                for s in surplus_pool
+                if s["component"] == comp and s["blood_group"] == bg
+            }
+            comp_recipients = {
+                s["bank_id"]: s["shortage"]
+                for s in shortage_pool
+                if s["component"] == comp and s["blood_group"] == bg
+            }
+
+            if not comp_donors or not comp_recipients:
+                continue
+
+            comp_edges = [
+                dict(e, component=comp, blood_group=bg)
+                for e in transport_edges
+            ]
+
+            optimal_routes = optimization_service.solve_network_flow(
+                donors=comp_donors,
+                recipients=comp_recipients,
+                transport_edges=comp_edges,
+            )
+
+            for route in optimal_routes:
+                src_bank = banks[route["source_bank"]]
+                dst_bank = banks[route["destination_bank"]]
+                transfers.append(
+                    TransferRecommendation(
+                        source_bank_id=route["source_bank"],
+                        destination_bank_id=route["destination_bank"],
+                        component=route["component"],
+                        blood_group=route["blood_group"],
+                        quantity=route["quantity"],
+                        route=f"{src_bank.city} → {dst_bank.city} ({route['distance_km']} km, {route['travel_time_min']}m)",
+                        vehicle=DEMO_VEHICLE,
+                        status="PENDING",
+                        created_at=now,
+                    )
+                )
+
+    db.add_all(transfers)
     db.commit()
 
     return {
         "status": "success",
+        "engine": "PRAVAH AI & ML Optimization Engine",
+        "version": ENGINE_VERSION,
+        "demand_forecasts_created": len(forecast_records),
         "risk_predictions_created": len(risk_predictions),
         "transfer_recommendations_created": len(transfers),
-        "shortages_detected": shortages_detected,
-        "surplus_locations": surplus_locations,
+        "shortages_detected": len(shortage_pool),
+        "surplus_locations": len(surplus_pool),
     }

@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Literal
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -38,7 +38,10 @@ def _serialize_transfer(
 
 
 @router.get("")
-def list_transfers(db: Session = Depends(get_db)):
+def list_transfers(
+    limit: int = Query(default=100, ge=1, le=1000),
+    db: Session = Depends(get_db),
+):
     source_bank = BloodBank.__table__.alias("source_bank")
     destination_bank = BloodBank.__table__.alias("destination_bank")
 
@@ -53,7 +56,8 @@ def list_transfers(db: Session = Depends(get_db)):
             destination_bank,
             TransferRecommendation.destination_bank_id == destination_bank.c.id,
         )
-        .order_by(TransferRecommendation.created_at.desc())
+        .order_by(TransferRecommendation.quantity.desc(), TransferRecommendation.created_at.desc())
+        .limit(limit)
     ).all()
 
     return [

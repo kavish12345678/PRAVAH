@@ -13,12 +13,13 @@ def list_inventory(
     blood_group: str | None = Query(default=None),
     component: str | None = Query(default=None),
     bank_id: int | None = Query(default=None),
+    limit: int = Query(default=100, ge=1, le=1000),
     db: Session = Depends(get_db),
 ):
     query = (
         select(Inventory, BloodBank.name)
         .join(BloodBank, Inventory.bank_id == BloodBank.id)
-        .order_by(BloodBank.name, Inventory.component, Inventory.blood_group)
+        .order_by(Inventory.expiry_date.asc(), BloodBank.name)
     )
 
     if blood_group is not None:
@@ -28,6 +29,7 @@ def list_inventory(
     if bank_id is not None:
         query = query.where(Inventory.bank_id == bank_id)
 
+    query = query.limit(limit)
     rows = db.execute(query).all()
 
     return [

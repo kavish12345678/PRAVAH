@@ -1,0 +1,220 @@
+{
+  "sources": {
+    "blood_bank_network": [
+      "Local SIH processed e-RaktKosh snapshot: C:/Users/Harsh/Downloads/SIH/SIH/data/processed/platelet_blood_banks.csv",
+      "India OGD Blood Bank Directory catalog: https://www.data.gov.in/catalog/blood-bank-directory-national-health-portal",
+      "e-RaktKosh public portal: https://eraktkosh.mohfw.gov.in/",
+      "Kaggle India Blood Bank Directory reference dataset used by the SIH pipeline for coordinate enrichment."
+    ],
+    "constraints": [
+      "WHO guidance: platelet storage at 20-24 C, continuous gentle agitation, normally not more than five days.",
+      "WHO blood cold chain manual and clinical-use guidance."
+    ],
+    "equipment": [
+      "AIIMS public tenders for platelet incubator/agitator purchases.",
+      "Public platelet incubator tender specifications using 22 C +/- 2 C, alarms/data logging, and backup requirements."
+    ],
+    "calibration": [
+      "Telangana statewide blood component study: platelet discard ratio approximately 17.0 percent.",
+      "Karnataka/coastal Karnataka platelet discard papers used as regional pattern evidence, mapped by facility tier rather than copied as exact rates.",
+      "Dhote et al. 2023 seasonal dengue/malaria demand signal represented as 16.6 percent monsoon multiplier.",
+      "National Health Profile/NHM public health infrastructure data identified as recommended future source for stronger state/district bed-count calibration."
+    ]
+  },
+  "field_provenance": {
+    "blood_banks": {
+      "bank_id": "REAL_PUBLIC",
+      "name": "REAL_PUBLIC",
+      "state": "REAL_PUBLIC",
+      "district": "REAL_PUBLIC",
+      "city": "REAL_PUBLIC",
+      "latitude": "REAL_PUBLIC_OR_SYNTHETIC_DERIVED_IMPUTED",
+      "longitude": "REAL_PUBLIC_OR_SYNTHETIC_DERIVED_IMPUTED",
+      "category": "REAL_PUBLIC"
+    },
+    "platelet_inventory": {
+      "inventory_id": "SYNTHETIC_CALIBRATED",
+      "bank_id": "REAL_PUBLIC_IDENTIFIER_IN_SYNTHETIC_TABLE",
+      "date": "SYNTHETIC_CALIBRATED",
+      "platelet_type": "AUTHORITATIVE_RULE_PLUS_SYNTHETIC_CALIBRATED",
+      "quantity": "SYNTHETIC_CALIBRATED",
+      "collection_date": "SYNTHETIC_CALIBRATED",
+      "expiry_date": "AUTHORITATIVE_RULE_PLUS_SYNTHETIC_CALIBRATED"
+    },
+    "platelet_demand": {
+      "bank_id": "REAL_PUBLIC_IDENTIFIER_IN_SYNTHETIC_TABLE",
+      "date": "SYNTHETIC_CALIBRATED",
+      "platelet_requests": "SYNTHETIC_CALIBRATED",
+      "platelet_issued": "SYNTHETIC_CALIBRATED",
+      "platelet_transfused": "SYNTHETIC_CALIBRATED",
+      "platelet_returned": "SYNTHETIC_CALIBRATED",
+      "emergency_requests": "SYNTHETIC_CALIBRATED",
+      "routine_requests": "SYNTHETIC_CALIBRATED",
+      "unfulfilled_requests": "SYNTHETIC_CALIBRATED"
+    },
+    "cold_chain": {
+      "bank_id": "REAL_PUBLIC_IDENTIFIER_IN_SYNTHETIC_TABLE",
+      "timestamp": "SYNTHETIC_ASSUMPTION",
+      "temperature": "SYNTHETIC_ASSUMPTION",
+      "agitation_status": "AUTHORITATIVE_RULE_PLUS_SYNTHETIC_ASSUMPTION",
+      "excursion_flag": "AUTHORITATIVE_RULE_PLUS_SYNTHETIC_ASSUMPTION"
+    },
+    "equipment": {
+      "equipment_id": "SYNTHETIC_ASSUMPTION",
+      "bank_id": "REAL_PUBLIC",
+      "equipment_type": "AUTHORITATIVE_RULE",
+      "manufacturer": "REAL_PUBLIC_EXAMPLE_MODEL",
+      "model": "REAL_PUBLIC_EXAMPLE_MODEL",
+      "timestamp": "SYNTHETIC_ASSUMPTION",
+      "health_score": "SYNTHETIC_ASSUMPTION",
+      "status": "SYNTHETIC_ASSUMPTION"
+    },
+    "transport": {
+      "source_bank": "REAL_PUBLIC",
+      "destination_bank": "REAL_PUBLIC",
+      "distance_km": "REAL_DERIVED",
+      "travel_time_min": "REAL_DERIVED",
+      "vehicle_id": "SYNTHETIC_ASSUMPTION",
+      "capacity": "SYNTHETIC_ASSUMPTION",
+      "refrigerated": "AUTHORITATIVE_RULE_PLUS_SYNTHETIC_ASSUMPTION"
+    },
+    "events": {
+      "event_id": "SYNTHETIC_CALIBRATED",
+      "bank_id": "REAL_PUBLIC_IDENTIFIER_IN_SYNTHETIC_TABLE",
+      "event_type": "SYNTHETIC_CALIBRATED",
+      "timestamp": "SYNTHETIC_CALIBRATED",
+      "duration": "SYNTHETIC_CALIBRATED",
+      "severity": "SYNTHETIC_CALIBRATED",
+      "affected_units": "SYNTHETIC_CALIBRATED",
+      "outcome": "SYNTHETIC_CALIBRATED"
+    },
+    "bank_profile_features": {
+      "bank_id": "REAL_PUBLIC_IDENTIFIER",
+      "state": "REAL_PUBLIC",
+      "district": "REAL_PUBLIC",
+      "facility_tier": "SYNTHETIC_DERIVED_CALIBRATION_PROFILE",
+      "district_bank_count": "REAL_DERIVED_FROM_PUBLIC_BANK_NETWORK",
+      "state_bank_count": "REAL_DERIVED_FROM_PUBLIC_BANK_NETWORK",
+      "capacity_proxy": "SYNTHETIC_DERIVED_CALIBRATION_PROFILE",
+      "dengue_monsoon_multiplier": "SYNTHETIC_CALIBRATED_FROM_PUBLIC_LITERATURE",
+      "facility_demand_multiplier": "SYNTHETIC_CALIBRATED_FROM_PUBLIC_LITERATURE",
+      "discard_target": "SYNTHETIC_CALIBRATED_FROM_PUBLIC_LITERATURE",
+      "regional_calibration_source": "PROVENANCE_NOTE"
+    },
+    "prediction_targets": {
+      "bank_id": "REAL_PUBLIC_IDENTIFIER_IN_SYNTHETIC_TABLE",
+      "date": "SYNTHETIC_CALIBRATED",
+      "facility_tier": "SYNTHETIC_DERIVED_CALIBRATION_PROFILE",
+      "current_stock": "SYNTHETIC_CALIBRATED",
+      "expiring_48h": "AUTHORITATIVE_RULE_PLUS_SYNTHETIC_CALIBRATED",
+      "platelet_requests": "SYNTHETIC_CALIBRATED",
+      "platelet_issued": "SYNTHETIC_CALIBRATED",
+      "unfulfilled_requests": "SYNTHETIC_CALIBRATED",
+      "demand_next_24h": "SYNTHETIC_LABEL",
+      "demand_next_72h": "SYNTHETIC_LABEL",
+      "cold_chain_excursion_minutes": "SYNTHETIC_ASSUMPTION",
+      "stockout_risk_score": "SYNTHETIC_LABEL",
+      "wastage_risk_score": "SYNTHETIC_LABEL",
+      "transferable_surplus_units": "SYNTHETIC_LABEL",
+      "recommended_action": "SYNTHETIC_LABEL"
+    },
+    "redistribution_recommendations": {
+      "date": "SYNTHETIC_CALIBRATED",
+      "source_bank": "REAL_PUBLIC_IDENTIFIER_IN_SYNTHETIC_TABLE",
+      "destination_bank": "REAL_PUBLIC_IDENTIFIER_IN_SYNTHETIC_TABLE",
+      "recommended_units": "SYNTHETIC_LABEL",
+      "distance_km": "REAL_DERIVED",
+      "travel_time_min": "REAL_DERIVED",
+      "priority": "SYNTHETIC_LABEL",
+      "reason": "SYNTHETIC_LABEL"
+    },
+    "cold_chain_alerts": {
+      "alert_id": "SYNTHETIC_LABEL",
+      "bank_id": "REAL_PUBLIC_IDENTIFIER_IN_SYNTHETIC_TABLE",
+      "start_timestamp": "SYNTHETIC_ASSUMPTION",
+      "end_timestamp": "SYNTHETIC_ASSUMPTION",
+      "duration_min": "SYNTHETIC_LABEL",
+      "max_temperature": "SYNTHETIC_ASSUMPTION",
+      "agitation_off_minutes": "SYNTHETIC_ASSUMPTION",
+      "severity": "SYNTHETIC_LABEL"
+    },
+    "unit_expiry_risk_features": {
+      "unit_id": "SYNTHETIC_REPRESENTATIVE_UNIT_ID",
+      "inventory_id": "SYNTHETIC_CALIBRATED",
+      "bank_id": "REAL_PUBLIC_IDENTIFIER_IN_SYNTHETIC_TABLE",
+      "platelet_type": "AUTHORITATIVE_RULE_PLUS_SYNTHETIC_CALIBRATED",
+      "represented_units": "SYNTHETIC_CALIBRATED_SAMPLE_WEIGHT",
+      "collection_timestamp": "SYNTHETIC_CALIBRATED",
+      "expiry_timestamp": "AUTHORITATIVE_RULE_PLUS_SYNTHETIC_CALIBRATED",
+      "observation_timestamp": "SYNTHETIC_CALIBRATED",
+      "age_hours": "AUTHORITATIVE_RULE_PLUS_SYNTHETIC_DERIVED",
+      "remaining_shelf_life_hours": "AUTHORITATIVE_RULE_PLUS_SYNTHETIC_DERIVED",
+      "facility_tier": "SYNTHETIC_DERIVED_CALIBRATION_PROFILE",
+      "current_stock": "SYNTHETIC_CALIBRATED",
+      "expiring_48h": "AUTHORITATIVE_RULE_PLUS_SYNTHETIC_CALIBRATED",
+      "demand_next_24h": "SYNTHETIC_LABEL",
+      "demand_next_72h": "SYNTHETIC_LABEL",
+      "stockout_risk_score": "SYNTHETIC_LABEL",
+      "wastage_risk_score": "SYNTHETIC_LABEL",
+      "cumulative_excursion_minutes": "SYNTHETIC_ASSUMPTION",
+      "max_temperature_exposure": "SYNTHETIC_ASSUMPTION",
+      "agitation_off_minutes": "SYNTHETIC_ASSUMPTION",
+      "health_score": "SYNTHETIC_ASSUMPTION",
+      "status": "SYNTHETIC_ASSUMPTION",
+      "issue_probability": "SYNTHETIC_LABEL",
+      "expiry_risk_probability": "SYNTHETIC_LABEL_OPERATIONAL_UNUSED_BEFORE_EXPIRY",
+      "degradation_risk_score": "SYNTHETIC_LABEL_COLD_CHAIN_DEGRADATION_PROXY_NOT_CLINICAL_QC",
+      "shelf_life_loss_hours": "SYNTHETIC_LABEL_USABLE_WINDOW_LOSS_PROXY_NOT_CLINICAL_QC",
+      "effective_remaining_shelf_life_hours": "SYNTHETIC_LABEL_USABLE_WINDOW_PROXY_NOT_CLINICAL_QC",
+      "expiry_acceleration_factor": "SYNTHETIC_LABEL_USABLE_WINDOW_PROXY_NOT_CLINICAL_QC",
+      "combined_unit_risk_score": "SYNTHETIC_LABEL",
+      "risk_band": "SYNTHETIC_LABEL",
+      "label_will_expire_unused": "SYNTHETIC_LABEL",
+      "label_expiry_accelerated": "SYNTHETIC_LABEL_USABLE_WINDOW_PROXY_NOT_CLINICAL_QC",
+      "label_cold_chain_compromised": "SYNTHETIC_LABEL",
+      "unit_recommendation": "SYNTHETIC_LABEL"
+    }
+  },
+  "calibration_parameters": {
+    "platelet_storage_temperature_c": [
+      20,
+      24
+    ],
+    "platelet_incubator_set_point_c": 22,
+    "platelet_shelf_life_days": 5,
+    "continuous_agitation_required": true,
+    "baseline_target_platelet_discard_ratio": 0.17,
+    "facility_tier_discard_target_range": [
+      0.1,
+      0.3
+    ],
+    "monsoon_dengue_malaria_multiplier": 1.166,
+    "transport_road_factor_from_haversine": 1.28,
+    "transport_average_speed_kmph_range": [
+      32,
+      48
+    ],
+    "simulation_days": 30,
+    "inventory_demand_bank_coverage": "all banks in the SIH e-RaktKosh platelet source snapshot",
+    "cold_chain_bank_coverage": 120
+  },
+  "run": {
+    "run_date": "2026-08-21",
+    "random_seed": 20260821,
+    "input_source": "C:\\Users\\Harsh\\Downloads\\SIH\\SIH\\data\\processed\\platelet_blood_banks.csv",
+    "row_counts": {
+      "blood_banks": 4390,
+      "bank_profile_features": 4390,
+      "platelet_inventory": 395100,
+      "platelet_demand": 131700,
+      "cold_chain": 345600,
+      "equipment": 4390,
+      "transport": 13170,
+      "events": 220881,
+      "prediction_targets": 131700,
+      "redistribution_recommendations": 1815,
+      "cold_chain_alerts": 229,
+      "unit_expiry_risk_features": 358708
+    }
+  }
+}

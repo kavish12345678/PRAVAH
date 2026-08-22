@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -9,9 +9,14 @@ router = APIRouter(prefix="/api/risk", tags=["risk"])
 
 
 @router.get("")
-def list_risk_predictions(db: Session = Depends(get_db)):
+def list_risk_predictions(
+    limit: int = Query(default=100, ge=1, le=1000),
+    db: Session = Depends(get_db),
+):
     predictions = db.scalars(
-        select(RiskPrediction).order_by(RiskPrediction.created_at.desc())
+        select(RiskPrediction)
+        .order_by(RiskPrediction.risk_score.desc())
+        .limit(limit)
     ).all()
 
     return [
