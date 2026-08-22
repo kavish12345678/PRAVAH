@@ -3,7 +3,7 @@ import type { TranslationSchema } from '../types'
 export const en: TranslationSchema = {
   common: {
     appTitle: 'PRAVAH',
-    appSubtitle: 'Clinical Decision Flow',
+    appSubtitle: 'The Lifeline in Motion',
     tagline: 'Predict what matters. Move what saves lives.',
     searchPlaceholder: 'Search facilities, units, routes...',
     syncing: 'Syncing...',

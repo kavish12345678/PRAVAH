@@ -41,8 +41,8 @@ export function StitchWorkflowNav({
           <h1 className="font-serif text-2xl font-bold text-primary tracking-tight leading-none">
             PRAVAH
           </h1>
-          <p className="font-sans text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mt-1">
-            Clinical Decision Flow
+          <p className="text-[11px] text-[#7A1C28] font-bold italic tracking-wide mt-1">
+            The Lifeline in Motion
           </p>
         </div>
       </div>
