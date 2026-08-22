@@ -44,7 +44,7 @@ export function TopHeader({
         {/* Status indicator */}
         <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-emerald-200 bg-emerald-50 text-emerald-800 text-[11px] font-medium">
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-600" />
-          <span>{intelligence ? intelligence.engine.replace('PRAVAH ', '') : 'Operational'}</span>
+          <span>{intelligence?.engine ? intelligence.engine.replace('PRAVAH ', '') : 'Operational'}</span>
         </div>
 
         {/* Timestamp */}

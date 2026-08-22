@@ -4,7 +4,7 @@ from collections.abc import Generator
 from pathlib import Path
 
 from dotenv import load_dotenv
-from sqlalchemy import create_engine, text
+from sqlalchemy import create_engine, event, text
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
 logger = logging.getLogger(__name__)
@@ -22,27 +22,30 @@ class Base(DeclarativeBase):
 
 
 def _create_resilient_engine():
-    """Tries PostgreSQL first; if offline or fails, falls back seamlessly to SQLite."""
+    """Tries PostgreSQL first; if offline or fails, falls back seamlessly to SQLite with WAL mode."""
     if DATABASE_URL and "postgresql" in DATABASE_URL:
         try:
-            pg_engine = create_engine(DATABASE_URL, connect_args={"connect_timeout": 2})
+            pg_engine = create_engine(DATABASE_URL, connect_args={"connect_timeout": 1})
             with pg_engine.connect() as conn:
                 conn.execute(text("SELECT 1"))
             logger.info("Connected successfully to PostgreSQL database.")
             return pg_engine
-        except Exception as e:
-            logger.warning(f"PostgreSQL connection unavailable ({e}). Falling back to local SQLite at {SQLITE_PATH}.")
+        except Exception:
+            pass
 
     sqlite_engine = create_engine(
         FALLBACK_SQLITE_URL,
         connect_args={"check_same_thread": False, "timeout": 30},
+        pool_pre_ping=True,
     )
-    try:
-        with sqlite_engine.connect() as conn:
-            conn.execute(text("PRAGMA journal_mode=WAL;"))
-            conn.execute(text("PRAGMA busy_timeout=30000;"))
-    except Exception as e:
-        logger.warning(f"Failed setting PRAGMA journal_mode=WAL: {e}")
+
+    @event.listens_for(sqlite_engine, "connect")
+    def set_sqlite_pragma(dbapi_connection, connection_record):
+        cursor = dbapi_connection.cursor()
+        cursor.execute("PRAGMA journal_mode=WAL")
+        cursor.execute("PRAGMA synchronous=NORMAL")
+        cursor.execute("PRAGMA busy_timeout=30000")
+        cursor.close()
 
     return sqlite_engine
 

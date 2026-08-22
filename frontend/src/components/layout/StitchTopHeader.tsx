@@ -5,6 +5,7 @@ interface StitchTopHeaderProps {
   onRunOptimization: () => void
   lastSynced: string
   isScanning: boolean
+  hasError?: boolean
 }
 
 export function StitchTopHeader({
@@ -12,6 +13,7 @@ export function StitchTopHeader({
   onRunOptimization,
   lastSynced,
   isScanning,
+  hasError = false,
 }: StitchTopHeaderProps) {
   const [searchQuery, setSearchQuery] = useState('')
   const [isRefreshing, setIsRefreshing] = useState(false)
@@ -47,9 +49,17 @@ export function StitchTopHeader({
       <div className="flex items-center gap-3 sm:gap-5">
         {/* Dataset Status Indicator */}
         <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-surface-container-low border border-outline-variant/30 rounded-full text-xs font-sans">
-          <span className="w-2 h-2 rounded-full bg-secondary" />
-          <span className="text-[11px] font-bold text-on-surface tracking-wider uppercase">
-            Dataset Ready
+          <span
+            className={`w-2 h-2 rounded-full ${
+              hasError ? 'bg-error animate-pulse' : 'bg-secondary'
+            }`}
+          />
+          <span
+            className={`text-[11px] font-bold tracking-wider uppercase ${
+              hasError ? 'text-error' : 'text-on-surface'
+            }`}
+          >
+            {hasError ? 'Data Service Unavailable' : 'Dataset Ready'}
           </span>
           <span className="text-[10px] text-on-surface-variant hidden md:inline">
             · Synced {lastSynced}
@@ -63,41 +73,37 @@ export function StitchTopHeader({
           className="flex items-center gap-1.5 px-3.5 py-1.5 border border-outline-variant/40 rounded-full text-xs font-sans font-bold uppercase tracking-wider text-on-surface-variant hover:border-primary hover:text-primary transition-all cursor-pointer disabled:opacity-50"
           title="Fetch latest operational dataset values"
         >
-          <span className={`material-symbols-outlined text-[16px] ${isRefreshing ? 'animate-spin' : ''}`}>
+          <span
+            className={`material-symbols-outlined text-[16px] ${
+              isRefreshing ? 'animate-spin' : ''
+            }`}
+          >
             refresh
           </span>
-          <span className="hidden md:inline">Refresh Data</span>
+          <span>{isRefreshing ? 'Syncing...' : 'Sync Data'}</span>
         </button>
 
-        {/* Run Optimization Pipeline Action */}
+        {/* Action: Run Optimization Pipeline */}
         <button
           onClick={onRunOptimization}
           disabled={isScanning}
-          className="bg-primary-container text-white text-xs font-sans font-bold px-4 sm:px-5 py-2 rounded-full hover:bg-primary transition-colors cursor-pointer shadow-xs uppercase tracking-wider whitespace-nowrap flex items-center gap-2 disabled:opacity-50"
+          className="bg-primary hover:bg-primary-container text-white text-xs font-bold uppercase tracking-wider px-5 py-2.5 rounded-full transition-colors cursor-pointer flex items-center gap-2 shadow-xs disabled:opacity-50"
         >
-          <span className="material-symbols-outlined text-[18px]">
-            {isScanning ? 'sync' : 'bolt'}
+          <span className="material-symbols-outlined text-[16px]">
+            {isScanning ? 'sync' : 'auto_fix_high'}
           </span>
-          <span>{isScanning ? 'Running Models...' : 'Run Pipeline'}</span>
+          <span>{isScanning ? 'Running Simplex...' : 'Solve LP Network'}</span>
         </button>
 
-        {/* Notification Bell */}
-        <button
-          onClick={() => alert('Cold-chain telemetry & inventory synchronization active across 4,390 facilities.')}
-          className="relative text-on-surface-variant hover:text-primary transition-colors p-1.5 cursor-pointer"
-          title="System Notifications"
-        >
-          <span className="material-symbols-outlined text-[22px]">notifications</span>
-          <span className="absolute top-1 right-1 w-2 h-2 bg-primary-container rounded-full border border-surface" />
-        </button>
-
-        {/* User Profile Avatar */}
-        <div
-          onClick={() => alert('Logged in as: National Logistics Director · PRAVAH Blood Supply Intelligence')}
-          className="w-9 h-9 rounded-full bg-surface-container-highest border border-outline-variant overflow-hidden cursor-pointer flex items-center justify-center"
-          title="National Logistics Director"
-        >
-          <span className="font-serif font-bold text-xs text-primary">NL</span>
+        {/* User Identity Chip */}
+        <div className="flex items-center gap-2.5 pl-2 border-l border-outline-variant/30">
+          <div className="w-8 h-8 rounded-full bg-primary/10 text-primary border border-primary/20 flex items-center justify-center font-bold text-xs">
+            PL
+          </div>
+          <div className="hidden lg:block text-left">
+            <p className="text-xs font-bold text-on-surface leading-tight">National Hub</p>
+            <p className="text-[10px] text-on-surface-variant uppercase font-medium">Logistics Officer</p>
+          </div>
         </div>
       </div>
     </header>

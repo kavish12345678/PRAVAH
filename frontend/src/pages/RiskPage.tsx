@@ -97,17 +97,24 @@ export function RiskPage({ risks }: RiskPageProps) {
           const isMedium = r.risk_level === 'MEDIUM'
 
           // Clean human-readable reason
-          let reasonText = r.contributing_features || 'Approaching biological shelf-life boundary'
-          if (reasonText.startsWith('{') || reasonText.startsWith('[')) {
-            try {
-              const parsed = JSON.parse(reasonText)
-              if (Array.isArray(parsed)) {
-                reasonText = parsed.join(' · ')
-              } else if (typeof parsed === 'object') {
-                reasonText = Object.keys(parsed).join(' · ')
+          let reasonText = 'Approaching biological shelf-life boundary'
+          if (Array.isArray(r.contributing_features)) {
+            reasonText = r.contributing_features.join(' · ')
+          } else if (typeof r.contributing_features === 'string') {
+            const raw = r.contributing_features
+            if (raw.startsWith('{') || raw.startsWith('[')) {
+              try {
+                const parsed = JSON.parse(raw)
+                if (Array.isArray(parsed)) {
+                  reasonText = parsed.join(' · ')
+                } else if (typeof parsed === 'object') {
+                  reasonText = Object.keys(parsed).join(' · ')
+                }
+              } catch {
+                reasonText = raw
               }
-            } catch {
-              // fallback
+            } else {
+              reasonText = raw
             }
           }
 

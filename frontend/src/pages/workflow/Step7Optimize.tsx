@@ -6,7 +6,8 @@ interface Step7OptimizeProps {
 }
 
 export function Step7Optimize({ transfers, onNavigateToStep }: Step7OptimizeProps) {
-  const activeRoutes = transfers.slice(0, 4)
+  const activeRoutes = transfers.slice(0, 6)
+  const totalUnits = transfers.reduce((sum, t) => sum + (t.quantity || 0), 0)
 
   return (
     <div className="p-6 md:p-12 max-w-7xl mx-auto w-full space-y-10 select-none font-sans">
@@ -47,17 +48,17 @@ export function Step7Optimize({ transfers, onNavigateToStep }: Step7OptimizeProp
         </div>
         <div className="p-5 bg-f5f1ee rounded-2xl border border-outline-variant/15">
           <span className="text-xs font-bold text-on-surface-variant uppercase">Solved Routes</span>
-          <div className="text-2xl font-bold text-on-surface mt-1">745 Routes</div>
+          <div className="text-2xl font-bold text-on-surface mt-1">{transfers.length} Routes</div>
           <p className="text-[10px] text-on-surface-variant mt-0.5">Min-cost paths</p>
         </div>
         <div className="p-5 bg-f5f1ee rounded-2xl border border-outline-variant/15">
           <span className="text-xs font-bold text-on-surface-variant uppercase">Redistributed</span>
-          <div className="text-2xl font-bold text-on-surface mt-1">1,935 Units</div>
+          <div className="text-2xl font-bold text-on-surface mt-1">{totalUnits.toLocaleString()} Units</div>
           <p className="text-[10px] text-on-surface-variant mt-0.5">Zero stockout violations</p>
         </div>
         <div className="p-5 bg-f5f1ee rounded-2xl border border-outline-variant/15">
           <span className="text-xs font-bold text-on-surface-variant uppercase">Compute Time</span>
-          <div className="text-2xl font-bold text-primary mt-1">0.42 sec</div>
+          <div className="text-2xl font-bold text-primary mt-1">&lt; 0.50 sec</div>
           <p className="text-[10px] text-on-surface-variant mt-0.5">Real-time resolution</p>
         </div>
       </div>

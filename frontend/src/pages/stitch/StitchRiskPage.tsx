@@ -81,10 +81,14 @@ export function StitchRiskPage({ risks, featureImportance }: StitchRiskPageProps
             <div className="divide-y divide-outline-variant/15 font-sans">
               {risks.slice(0, 5).map((r) => {
                 let factors: string[] = []
-                try {
-                  factors = JSON.parse(r.contributing_features)
-                } catch {
-                  factors = [r.contributing_features]
+                if (Array.isArray(r.contributing_features)) {
+                  factors = r.contributing_features
+                } else if (typeof r.contributing_features === 'string') {
+                  try {
+                    factors = JSON.parse(r.contributing_features)
+                  } catch {
+                    factors = [r.contributing_features]
+                  }
                 }
 
                 return (
@@ -140,7 +144,8 @@ export function StitchRiskPage({ risks, featureImportance }: StitchRiskPageProps
 
           <div className="space-y-4 font-sans text-xs">
             {featList.slice(0, 5).map((f) => {
-              const pct = (f.importance_mean * 100).toFixed(1)
+              const val = f.importance_mean ?? f.importance ?? 0
+              const pct = (val * 100).toFixed(1)
               return (
                 <div key={f.feature} className="space-y-1.5">
                   <div className="flex justify-between font-semibold">
@@ -152,7 +157,7 @@ export function StitchRiskPage({ risks, featureImportance }: StitchRiskPageProps
                   <div className="h-2 w-full bg-surface-variant rounded-full overflow-hidden">
                     <div
                       className="h-full bg-primary-container rounded-full"
-                      style={{ width: `${Math.min(100, Math.max(10, f.importance_mean * 400))}%` }}
+                      style={{ width: `${Math.min(100, Math.max(10, val * 400))}%` }}
                     />
                   </div>
                 </div>

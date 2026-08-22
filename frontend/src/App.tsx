@@ -76,6 +76,7 @@ export default function App() {
           onRunOptimization={handleRunOptimization}
           lastSynced={lastSynced}
           isScanning={scanning}
+          hasError={!!error}
         />
 
         {/* Persistent Workflow Progress Ribbon */}
@@ -146,6 +147,7 @@ export default function App() {
               {currentStep === 'risk' && (
                 <Step4Risk
                   risks={data.risks}
+                  riskSummary={data.riskSummary}
                   selectedBank={selectedBank}
                   onNavigateToStep={navigateToStep}
                 />

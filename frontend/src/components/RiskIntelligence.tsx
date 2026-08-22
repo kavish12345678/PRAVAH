@@ -16,7 +16,9 @@ const levelStyles = {
   LOW: { ring: 'border-emerald-400/30', text: 'text-emerald-300', glow: 'cyan' as const, pulse: '#34d399' },
 }
 
-function parseFeatures(raw: string): string[] {
+function parseFeatures(raw?: string | string[]): string[] {
+  if (!raw) return []
+  if (Array.isArray(raw)) return raw
   try {
     const parsed = JSON.parse(raw)
     return Array.isArray(parsed) ? parsed : [raw]
@@ -117,7 +119,7 @@ export function RiskIntelligence({ risks }: RiskIntelligenceProps) {
               <div className="mt-4 grid gap-3 md:grid-cols-2">
                 <Detail label="Risk Score" value={selected.risk_score.toFixed(2)} />
                 <Detail label="Risk Level" value={selected.risk_level} />
-                <Detail label="Model Version" value={selected.model_version} />
+                <Detail label="Model Version" value={selected.model_version || 'expiry-risk-gbdt-v1'} />
                 <Detail label="Record ID" value={String(selected.id)} />
               </div>
               <div className="mt-4">

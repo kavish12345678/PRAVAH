@@ -217,7 +217,7 @@ export function StitchModelsPage({ metricsData, provenanceData }: StitchModelsPa
           <div className="space-y-2 p-4 bg-surface-container-low rounded-xl">
             <h4 className="font-bold text-on-surface text-sm">Blood Bank Network</h4>
             <ul className="list-disc list-inside space-y-1">
-              {provenanceData?.sources?.blood_bank_network?.map((s, idx) => (
+              {(provenanceData as any)?.sources?.blood_bank_network?.map((s: string, idx: number) => (
                 <li key={idx}>{s}</li>
               )) ?? (
                 <>
@@ -231,7 +231,7 @@ export function StitchModelsPage({ metricsData, provenanceData }: StitchModelsPa
           <div className="space-y-2 p-4 bg-surface-container-low rounded-xl">
             <h4 className="font-bold text-on-surface text-sm">Clinical &amp; Storage Guidelines</h4>
             <ul className="list-disc list-inside space-y-1">
-              {provenanceData?.sources?.constraints?.map((s, idx) => (
+              {(provenanceData as any)?.sources?.constraints?.map((s: string, idx: number) => (
                 <li key={idx}>{s}</li>
               )) ?? (
                 <>
@@ -245,7 +245,7 @@ export function StitchModelsPage({ metricsData, provenanceData }: StitchModelsPa
           <div className="space-y-2 p-4 bg-surface-container-low rounded-xl">
             <h4 className="font-bold text-on-surface text-sm">Equipment Specifications</h4>
             <ul className="list-disc list-inside space-y-1">
-              {provenanceData?.sources?.equipment?.map((s, idx) => (
+              {(provenanceData as any)?.sources?.equipment?.map((s: string, idx: number) => (
                 <li key={idx}>{s}</li>
               )) ?? (
                 <li>AIIMS public tenders for platelet incubator &amp; agitator purchases (22°C ± 2°C)</li>
@@ -256,7 +256,7 @@ export function StitchModelsPage({ metricsData, provenanceData }: StitchModelsPa
           <div className="space-y-2 p-4 bg-surface-container-low rounded-xl">
             <h4 className="font-bold text-on-surface text-sm">Regional Demand Calibration</h4>
             <ul className="list-disc list-inside space-y-1">
-              {provenanceData?.sources?.calibration?.map((s, idx) => (
+              {(provenanceData as any)?.sources?.calibration?.map((s: string, idx: number) => (
                 <li key={idx}>{s}</li>
               )) ?? (
                 <>

@@ -115,6 +115,19 @@ class DemandForecastModelService:
         pred_72 = int(np.maximum(0, np.round(self.artifact_72h["model"].predict(X)[0])))
         return pred_24, pred_72
 
+    def predict_horizons_batch(self, df: pd.DataFrame) -> tuple[np.ndarray, np.ndarray]:
+        """Batch compute 24h and 72h demand forecasts in vectorized calls."""
+        if self.artifact_24h is not None and not df.empty:
+            X = df[self.feature_cols].fillna(0)
+            p24 = np.maximum(1, np.round(self.artifact_24h["model"].predict(X)).astype(int))
+            p72 = (
+                np.maximum(p24, np.round(self.artifact_72h["model"].predict(X)).astype(int))
+                if self.artifact_72h is not None
+                else np.round(p24 * 2.8).astype(int)
+            )
+            return p24, p72
+        return np.full(len(df), 10), np.full(len(df), 25)
+
     def predict_from_contract_payload(
         self,
         bank_id: str | int,
@@ -269,6 +282,14 @@ class ExpiryRiskModelService:
             "recommendation": recommendation,
             "model_version": "expiry-risk-gbdt-v1",
         }
+
+    def score_batch(self, features_df: pd.DataFrame) -> np.ndarray:
+        """Batch score 5,000+ units in a single vectorized GBDT model call."""
+        if self.prob_model is not None and not features_df.empty:
+            X = features_df[self.feature_cols].fillna(0)
+            preds = self.prob_model.predict(X)
+            return np.clip(preds, 0.01, 0.999)
+        return np.full(len(features_df), 0.5)
 
     def predict_from_contract_payload(
         self,
@@ -498,6 +519,53 @@ class OptimizationService:
                         "vehicle": edge.get("vehicle", "Refrigerated Van"),
                         "refrigerated": edge.get("refrigerated", True),
                         "solver": "LP-HiGHS",
+                        "status": "PENDING",
+                    })
+
+        return recommendations
+
+    @staticmethod
+    def solve_greedy(
+        donors: dict[int | str, int],
+        recipients: dict[int | str, int],
+        transport_edges: list[dict[str, Any]],
+        max_travel_hours: float = 5.0,
+    ) -> list[dict[str, Any]]:
+        """Greedy nearest-feasible donor-recipient allocation fallback."""
+        if not donors or not recipients or not transport_edges:
+            return []
+
+        donor_surplus = dict(donors)
+        recipient_deficit = dict(recipients)
+        sorted_edges = sorted(transport_edges, key=lambda e: e.get("travel_time_min", 999))
+
+        recommendations = []
+        for edge in sorted_edges:
+            src = edge["source_bank"]
+            dst = edge["destination_bank"]
+            tt_hours = edge.get("travel_time_min", 0) / 60.0
+
+            if tt_hours > max_travel_hours:
+                continue
+
+            avail = donor_surplus.get(src, 0)
+            needed = recipient_deficit.get(dst, 0)
+            if avail > 0 and needed > 0:
+                units = min(avail, needed, int(edge.get("capacity", 50)))
+                if units > 0:
+                    donor_surplus[src] -= units
+                    recipient_deficit[dst] -= units
+                    recommendations.append({
+                        "source_bank": src,
+                        "destination_bank": dst,
+                        "component": edge.get("component", "Platelets"),
+                        "blood_group": edge.get("blood_group", "O+"),
+                        "quantity": int(units),
+                        "distance_km": round(float(edge.get("distance_km", 0.0)), 2),
+                        "travel_time_min": int(edge.get("travel_time_min", 0)),
+                        "vehicle": edge.get("vehicle", "Refrigerated Van"),
+                        "refrigerated": edge.get("refrigerated", True),
+                        "solver": "Greedy Feasible Allocation",
                         "status": "PENDING",
                     })
 

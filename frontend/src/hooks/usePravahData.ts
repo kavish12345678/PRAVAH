@@ -9,6 +9,7 @@ import type {
   ModelMetricsResponse,
   ProvenanceResponse,
   RiskItem,
+  RiskSummary,
   TransferItem,
   TransferStatusUpdate,
 } from '../types'
@@ -19,6 +20,7 @@ export interface PravahData {
   inventory: InventoryItem[]
   forecasts: ForecastItem[]
   risks: RiskItem[]
+  riskSummary: RiskSummary | null
   transfers: TransferItem[]
   auditLogs: AuditItem[]
   intelligence: IntelligenceStatus | null
@@ -41,6 +43,7 @@ export function usePravahData() {
     inventory: [],
     forecasts: [],
     risks: [],
+    riskSummary: null,
     transfers: [],
     auditLogs: [],
     intelligence: null,
@@ -62,6 +65,7 @@ export function usePravahData() {
         inventory,
         forecasts,
         risks,
+        riskSummary,
         transfers,
         auditLogs,
         intelligence,
@@ -72,6 +76,7 @@ export function usePravahData() {
         api.fetchInventory(),
         api.fetchForecasts(),
         api.fetchRisk(),
+        api.fetchRiskSummary(),
         api.fetchTransfers(),
         api.fetchAuditLogs(),
         api.fetchIntelligenceStatus(),
@@ -84,6 +89,7 @@ export function usePravahData() {
         inventory,
         forecasts,
         risks,
+        riskSummary,
         transfers,
         auditLogs,
         intelligence,
