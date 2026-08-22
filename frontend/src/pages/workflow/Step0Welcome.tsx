@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { LanguageDropdown } from '../../components/common/LanguageDropdown'
+import { SyringeSplashScreen } from '../../components/effects/SyringeSplashScreen'
 import { useLanguage } from '../../i18n/LanguageContext'
 
 interface Step0WelcomeProps {
@@ -25,6 +26,7 @@ interface StageData {
 
 export function Step0Welcome({ onEnterPravah }: Step0WelcomeProps) {
   const { t } = useLanguage()
+  const [showSplash, setShowSplash] = useState(true)
   const [activeStage, setActiveStage] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
   const [selectedStage, setSelectedStage] = useState<StageData | null>(null)
@@ -191,52 +193,67 @@ export function Step0Welcome({ onEnterPravah }: Step0WelcomeProps) {
   }, [])
 
   return (
-    <div className="h-screen w-screen overflow-hidden bg-[#FAF7F5] text-[#1F1B19] font-sans antialiased flex flex-col justify-between p-4 sm:p-5 lg:p-7 select-none relative">
-      {/* Background Animated Network Canvas */}
-      <canvas
-        ref={canvasRef}
-        className="absolute inset-0 pointer-events-none z-0 opacity-50"
-      />
+    <>
+      {/* Interactive Syringe Splash Screen */}
+      {showSplash && (
+        <SyringeSplashScreen onComplete={() => setShowSplash(false)} />
+      )}
 
-      {/* Subtle Ambient Vignette */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[850px] h-[450px] bg-gradient-to-r from-[#7A1C28]/4 via-[#9E2A38]/3 to-transparent rounded-full blur-3xl pointer-events-none z-0" />
+      <div className="h-screen w-screen overflow-hidden bg-[#FAF7F5] text-[#1F1B19] font-sans antialiased flex flex-col justify-between p-4 sm:p-5 lg:p-7 select-none relative">
+        {/* Background Animated Network Canvas */}
+        <canvas
+          ref={canvasRef}
+          className="absolute inset-0 pointer-events-none z-0 opacity-50"
+        />
 
-      {/* =========================================================================
-          1. TOP HEADER (PROMINENT PRAVAH BRANDING + LANGUAGE + ENTER CTA)
-          ========================================================================= */}
-      <header className="relative z-10 flex justify-between items-center px-2 sm:px-4 py-1.5 border-b border-[#E8E1DC]/70">
-        {/* Prominent PRAVAH Logo & Branding */}
-        <div className="flex items-center gap-3.5 sm:gap-4">
-          <img
-            src="/pravah-logo.png"
-            alt="PRAVAH Logo"
-            className="w-12 h-12 sm:w-14 sm:h-14 object-contain shrink-0 drop-shadow-sm transition-transform hover:scale-105"
-          />
-          <div>
-            <h1 className="font-serif text-2xl sm:text-[34px] font-extrabold tracking-tight text-[#1F1B19] leading-none">
-              PRAVAH
-            </h1>
-            <p className="text-xs sm:text-[13px] text-[#7A1C28] font-semibold italic tracking-wide mt-1">
-              The Lifeline in Motion
-            </p>
+        {/* Subtle Ambient Vignette */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[850px] h-[450px] bg-gradient-to-r from-[#7A1C28]/4 via-[#9E2A38]/3 to-transparent rounded-full blur-3xl pointer-events-none z-0" />
+
+        {/* =========================================================================
+            1. TOP HEADER (PROMINENT PRAVAH BRANDING + LANGUAGE + ENTER CTA)
+            ========================================================================= */}
+        <header className="relative z-10 flex justify-between items-center px-2 sm:px-4 py-1.5 border-b border-[#E8E1DC]/70">
+          {/* Prominent PRAVAH Logo & Branding */}
+          <div className="flex items-center gap-3.5 sm:gap-4">
+            <img
+              src="/pravah-logo.png"
+              alt="PRAVAH Logo"
+              className="w-12 h-12 sm:w-14 sm:h-14 object-contain shrink-0 drop-shadow-sm transition-transform hover:scale-105"
+            />
+            <div>
+              <h1 className="font-serif text-2xl sm:text-[34px] font-extrabold tracking-tight text-[#1F1B19] leading-none">
+                PRAVAH
+              </h1>
+              <p className="text-xs sm:text-[13px] text-[#7A1C28] font-semibold italic tracking-wide mt-1">
+                The Lifeline in Motion
+              </p>
+            </div>
           </div>
-        </div>
 
-        {/* Right CTA & Language Controls */}
-        <div className="flex items-center gap-3 sm:gap-4">
-          <LanguageDropdown />
+          {/* Right CTA & Language Controls */}
+          <div className="flex items-center gap-2.5 sm:gap-4">
+            <button
+              onClick={() => setShowSplash(true)}
+              className="hidden sm:flex items-center gap-1.5 text-xs font-mono font-semibold text-[#7A7471] hover:text-[#7A1C28] px-3 py-1.5 rounded-full border border-[#E8E1DC] bg-white/70 hover:bg-white transition-colors cursor-pointer"
+              title="Replay Intro Animation"
+            >
+              <span className="material-symbols-outlined text-[15px]">replay</span>
+              <span>Intro</span>
+            </button>
 
-          <button
-            onClick={onEnterPravah}
-            className="group relative bg-gradient-to-r from-[#7A1C28] to-[#9E2A38] hover:from-[#63141F] hover:to-[#7A1C28] text-white px-6 sm:px-8 py-3 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer shadow-md hover:shadow-lg shadow-[#7A1C28]/25 hover:scale-[1.03] flex items-center gap-2.5"
-          >
-            <span>ENTER PRAVAH</span>
-            <span className="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform">
-              arrow_forward
-            </span>
-          </button>
-        </div>
-      </header>
+            <LanguageDropdown />
+
+            <button
+              onClick={onEnterPravah}
+              className="group relative bg-gradient-to-r from-[#7A1C28] to-[#9E2A38] hover:from-[#63141F] hover:to-[#7A1C28] text-white px-6 sm:px-8 py-3 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer shadow-md hover:shadow-lg shadow-[#7A1C28]/25 hover:scale-[1.03] flex items-center gap-2.5"
+            >
+              <span>ENTER PRAVAH</span>
+              <span className="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform">
+                arrow_forward
+              </span>
+            </button>
+          </div>
+        </header>
 
       {/* =========================================================================
           2. MAIN HEADLINE & OUTCOME PROPOSITION
@@ -527,5 +544,6 @@ export function Step0Welcome({ onEnterPravah }: Step0WelcomeProps) {
         </div>
       )}
     </div>
+    </>
   )
 }
