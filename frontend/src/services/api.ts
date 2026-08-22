@@ -1,5 +1,9 @@
 import type {
   AuditItem,
+  CentreNetworkFacility,
+  CentrePressureData,
+  CentreProfile,
+  CentreSummary,
   DashboardSummary,
   ForecastItem,
   IntelligenceRunResult,
@@ -189,4 +193,103 @@ export function fetchDataStatus(): Promise<{
   files: Record<string, { available: boolean; records: number; path?: string }>
 }> {
   return request('/api/data-status')
+}
+
+// ==========================================
+// CENTRE WORKSPACE ENDPOINTS (200 KM RADIUS)
+// ==========================================
+
+export function loginCentre(centre_id: string, password: string): Promise<{
+  status: string
+  token: string
+  centre: CentreProfile
+}> {
+  return request('/api/centre/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ centre_id, password }),
+  })
+}
+
+export function fetchCentreProfile(centreId: number = 282724): Promise<CentreProfile> {
+  return request<CentreProfile>(`/api/centre/profile?centre_id=${centreId}`)
+}
+
+export function fetchCentreSummary(centreId: number = 282724, radiusKm: number = 200): Promise<CentreSummary> {
+  return request<CentreSummary>(`/api/centre/summary?centre_id=${centreId}&radius_km=${radiusKm}`)
+}
+
+export function fetchCentreNetwork(centreId: number = 282724, radiusKm: number = 200): Promise<CentreNetworkFacility[]> {
+  return request<CentreNetworkFacility[]>(`/api/centre/network?centre_id=${centreId}&radius_km=${radiusKm}`)
+}
+
+export function fetchCentreInventory(params?: {
+  centre_id?: number
+  radius_km?: number
+  blood_group?: string
+  component?: string
+  status?: string
+  limit?: number
+}): Promise<(InventoryItem & { distance_km: number; city: string; is_anchor: boolean })[]> {
+  const search = new URLSearchParams()
+  search.set('centre_id', String(params?.centre_id ?? 282724))
+  search.set('radius_km', String(params?.radius_km ?? 200))
+  if (params?.blood_group && params.blood_group !== 'All') search.set('blood_group', params.blood_group)
+  if (params?.component && params.component !== 'All') search.set('component', params.component)
+  if (params?.status && params.status !== 'All') search.set('status', params.status)
+  if (params?.limit) search.set('limit', String(params.limit))
+  return request(`/api/centre/inventory?${search.toString()}`)
+}
+
+export function fetchCentreForecast(centreId: number = 282724, radiusKm: number = 200): Promise<(ForecastItem & { distance_km: number; current_stock: number; balance_status: string; is_anchor: boolean })[]> {
+  return request(`/api/centre/forecast?centre_id=${centreId}&radius_km=${radiusKm}`)
+}
+
+export function fetchCentreRisk(params?: {
+  centre_id?: number
+  radius_km?: number
+  level?: string
+  limit?: number
+}): Promise<(RiskItem & { distance_km: number; is_anchor: boolean })[]> {
+  const search = new URLSearchParams()
+  search.set('centre_id', String(params?.centre_id ?? 282724))
+  search.set('radius_km', String(params?.radius_km ?? 200))
+  if (params?.level && params.level !== 'ALL') search.set('level', params.level)
+  if (params?.limit) search.set('limit', String(params.limit))
+  return request(`/api/centre/risk?${search.toString()}`)
+}
+
+export function fetchCentrePressure(centreId: number = 282724, radiusKm: number = 200): Promise<CentrePressureData> {
+  return request<CentrePressureData>(`/api/centre/pressure?centre_id=${centreId}&radius_km=${radiusKm}`)
+}
+
+export function runCentreOptimization(centreId: number = 282724, radiusKm: number = 200): Promise<{
+  status: string
+  solver: string
+  operational_radius_km: number
+  transfers_generated: number
+  total_units_optimized: number
+}> {
+  return request(`/api/centre/optimize?centre_id=${centreId}&radius_km=${radiusKm}`, {
+    method: 'POST',
+  })
+}
+
+export function fetchCentreTransfers(centreId: number = 282724, radiusKm: number = 200): Promise<(TransferItem & { distance_km: number; is_connected_to_anchor: boolean })[]> {
+  return request(`/api/centre/transfers?centre_id=${centreId}&radius_km=${radiusKm}`)
+}
+
+export function updateCentreTransferStatus(
+  id: number,
+  status: TransferStatusUpdate,
+): Promise<{ id: number; status: string; source_bank: string; destination_bank: string }> {
+  return request(`/api/centre/transfers/${id}/status`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status }),
+  })
+}
+
+export function fetchCentreAudit(centreId: number = 282724): Promise<AuditItem[]> {
+  return request<AuditItem[]>(`/api/centre/audit?centre_id=${centreId}`)
 }

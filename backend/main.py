@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import select, func
 from sqlalchemy.orm import Session
 
+from api.centre import router as centre_router
 from api.dashboard import router as dashboard_router
 from api.events import router as events_router
 from api.forecast import router as forecast_router
@@ -31,7 +32,7 @@ DATA_DIR = next((d for d in POSSIBLE_DATA_DIRS if d.exists()), PROJECT_ROOT / "d
 app = FastAPI(
     title="PRAVAH API",
     description="AI-Powered Blood Supply & Cold-Chain Intelligence",
-    version="1.2.0",
+    version="1.3.0",
 )
 
 app.add_middleware(
@@ -42,6 +43,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(centre_router)
 app.include_router(dashboard_router)
 app.include_router(inventory_router)
 app.include_router(forecast_router)

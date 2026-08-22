@@ -14,45 +14,39 @@ const ORDERED_STEPS: Array<{ id: PravahStep; label: string }> = [
   { id: 'pressure', label: 'PRESSURE' },
   { id: 'optimize', label: 'OPTIMIZE' },
   { id: 'transfers', label: 'TRANSFER' },
-  { id: 'approval', label: 'APPROVAL' },
-  { id: 'audit', label: 'AUDIT' },
+  { id: 'approval', label: 'AUTHORIZATION' },
 ]
 
 export function StitchWorkflowRibbon({
   currentStep,
   onSelectStep,
 }: StitchWorkflowRibbonProps) {
-  const currentIndex = ORDERED_STEPS.findIndex((s) => s.id === currentStep)
-
   if (currentStep === 'welcome' || currentStep === 'models') {
     return null
   }
 
   return (
-    <div className="w-full bg-surface-container-low/80 backdrop-blur-xs border-b border-outline-variant/15 px-6 md:px-12 py-2.5 overflow-x-auto select-none">
-      <div className="flex items-center gap-2 min-w-max">
+    <div className="w-full bg-[#FFFFFF] border-b border-[#EFE9E5] px-6 md:px-8 py-3 overflow-x-auto select-none">
+      <div className="flex items-center gap-3 min-w-max">
         {ORDERED_STEPS.map((step, idx) => {
           const isCurrent = step.id === currentStep
-          const isPassed = currentIndex !== -1 && idx < currentIndex
 
           return (
-            <div key={step.id} className="flex items-center gap-2">
+            <div key={step.id} className="flex items-center gap-3">
               <button
                 onClick={() => onSelectStep(step.id)}
-                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-sans font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-sans font-bold uppercase tracking-wider transition-all cursor-pointer ${
                   isCurrent
-                    ? 'bg-primary text-white shadow-xs'
-                    : isPassed
-                    ? 'bg-secondary/15 text-secondary hover:bg-secondary/25'
-                    : 'text-on-surface-variant/60 hover:text-on-surface'
+                    ? 'bg-[#7A1C28] text-white shadow-2xs'
+                    : 'text-[#6E6764] hover:text-[#1F1B19]'
                 }`}
               >
-                <span className="w-1.5 h-1.5 rounded-full bg-current" />
+                {isCurrent && <span className="w-1.5 h-1.5 rounded-full bg-white mr-0.5" />}
                 <span>{step.label}</span>
               </button>
 
               {idx < ORDERED_STEPS.length - 1 && (
-                <span className="material-symbols-outlined text-[14px] text-outline-variant/60">
+                <span className="material-symbols-outlined text-[14px] text-[#C2B9B3]">
                   chevron_right
                 </span>
               )}

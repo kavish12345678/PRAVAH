@@ -245,4 +245,67 @@ export type PravahStep =
   | 'audit'
   | 'models'
 
-export type TransferStatusUpdate = 'APPROVED' | 'REJECTED'
+export type TransferStatusUpdate = 'APPROVED' | 'REJECTED' | 'DISPATCHED' | 'COMPLETED'
+
+export type PravahMode = 'national' | 'centre'
+
+export interface CentreProfile {
+  id: number
+  code: string
+  name: string
+  city: string
+  latitude: number
+  longitude: number
+  capacity: number
+  status?: string
+  operational_radius_km: number
+  role?: string
+}
+
+export interface CentreSummary {
+  centre_name: string
+  centre_city: string
+  operational_radius_km: number
+  facilities_in_network: number
+  total_inventory: number
+  low_stock_batches: number
+  near_expiry_units: number
+  high_risk_units: number
+  potential_transfers: number
+}
+
+export interface CentreNetworkFacility {
+  id: number
+  name: string
+  city: string
+  latitude: number
+  longitude: number
+  distance_km: number
+  is_anchor: boolean
+  capacity: number
+  total_inventory_units: number
+  critical_risk_units: number
+  network_state: 'HEALTHY' | 'MODERATE' | 'CRITICAL'
+}
+
+export interface CentrePressureFacility {
+  bank_id: number
+  bank_name: string
+  city: string
+  distance_from_anchor_km: number
+  component: string
+  blood_group: string
+  current_stock: number
+  demand: number
+  surplus_units?: number
+  deficit_units?: number
+}
+
+export interface CentrePressureData {
+  anchor_centre: string
+  operational_radius_km: number
+  surplus_count: number
+  deficit_count: number
+  surplus_facilities: CentrePressureFacility[]
+  deficit_facilities: CentrePressureFacility[]
+}

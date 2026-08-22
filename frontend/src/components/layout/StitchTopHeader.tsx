@@ -1,108 +1,83 @@
 import { useState } from 'react'
 
 interface StitchTopHeaderProps {
-  onRefresh: () => Promise<void>
-  onRunOptimization: () => void
+  onRefresh?: () => Promise<void>
+  onRunOptimization?: () => void
+  onSwitchToCentre?: () => void
   lastSynced: string
-  isScanning: boolean
+  isScanning?: boolean
   hasError?: boolean
 }
 
 export function StitchTopHeader({
-  onRefresh,
-  onRunOptimization,
+  onSwitchToCentre,
   lastSynced,
-  isScanning,
   hasError = false,
 }: StitchTopHeaderProps) {
   const [searchQuery, setSearchQuery] = useState('')
-  const [isRefreshing, setIsRefreshing] = useState(false)
-
-  const handleRefreshClick = async () => {
-    setIsRefreshing(true)
-    try {
-      await onRefresh()
-    } finally {
-      setIsRefreshing(false)
-    }
-  }
 
   return (
-    <header className="flex justify-between items-center w-full px-6 md:px-12 h-20 bg-surface/90 backdrop-blur-md sticky top-0 z-30 border-b border-outline-variant/15 select-none">
-      {/* Left: Search input */}
-      <div className="flex items-center gap-4">
-        <div className="flex items-center gap-3 bg-surface-container-low px-4 py-2 rounded-full border border-outline-variant/20 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all">
-          <span className="material-symbols-outlined text-on-surface-variant text-[20px]">
-            search
-          </span>
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search facilities, units, routes..."
-            className="bg-transparent border-none focus:outline-hidden text-xs font-sans text-on-surface w-44 sm:w-64 placeholder-on-surface-variant/60"
-          />
-        </div>
+    <header className="flex justify-between items-center w-full px-6 md:px-10 h-20 bg-white border-b border-[#EFE9E5] select-none shadow-2xs sticky top-0 z-30">
+      {/* Left: Search Bar */}
+      <div className="flex items-center gap-3 bg-[#FAF7F5] px-4 py-2.5 rounded-full border border-[#E8E1DC] focus-within:border-[#7A1C28] focus-within:ring-1 focus-within:ring-[#7A1C28] transition-all w-64 sm:w-80">
+        <span className="material-symbols-outlined text-[#7A7471] text-[18px]">
+          search
+        </span>
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Search facilities, units, routes..."
+          className="bg-transparent border-none focus:outline-hidden text-xs font-sans text-[#1F1B19] w-full placeholder-[#8A8480]"
+        />
       </div>
 
-      {/* Right: Data status indicator, Last Synced, Refresh, Optimization Run, Avatar */}
-      <div className="flex items-center gap-3 sm:gap-5">
-        {/* Dataset Status Indicator */}
-        <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-surface-container-low border border-outline-variant/30 rounded-full text-xs font-sans">
+      {/* Right: Centre Workspace Switch, Dataset Ready Status, User Chip */}
+      <div className="flex items-center gap-3.5">
+        {/* Switch to Centre Workspace (200km) */}
+        {onSwitchToCentre && (
+          <button
+            onClick={onSwitchToCentre}
+            className="flex items-center gap-2 px-4 py-2 bg-[#FCECEE] hover:bg-[#F8DCE0] border border-[#F5D5D9] rounded-full text-xs font-sans font-bold text-[#7A1C28] transition-all cursor-pointer shadow-2xs"
+            title="Switch to Chennai Centre Workspace (200 km)"
+          >
+            <span className="material-symbols-outlined text-[16px]">domain</span>
+            <div className="text-left leading-none">
+              <span className="block text-[11px] uppercase tracking-wider font-bold">CENTRE WORKSPACE</span>
+              <span className="block text-[9px] font-semibold opacity-80">(200KM CHENNAI)</span>
+            </div>
+          </button>
+        )}
+
+        {/* Dataset Status Pill */}
+        <div className="hidden sm:flex items-center gap-2.5 px-4 py-2 bg-[#FAF7F5] border border-[#E8E1DC] rounded-full text-xs font-sans">
           <span
             className={`w-2 h-2 rounded-full ${
-              hasError ? 'bg-error animate-pulse' : 'bg-secondary'
+              hasError ? 'bg-[#DC2626] animate-pulse' : 'bg-[#16A34A]'
             }`}
           />
-          <span
-            className={`text-[11px] font-bold tracking-wider uppercase ${
-              hasError ? 'text-error' : 'text-on-surface'
-            }`}
-          >
-            {hasError ? 'Data Service Unavailable' : 'Dataset Ready'}
-          </span>
-          <span className="text-[10px] text-on-surface-variant hidden md:inline">
-            · Synced {lastSynced}
-          </span>
+          <div className="leading-tight">
+            <span
+              className={`text-[11px] font-bold tracking-wider uppercase block ${
+                hasError ? 'text-[#DC2626]' : 'text-[#1F1B19]'
+              }`}
+            >
+              {hasError ? 'Data Service Notice' : 'DATASET READY'}
+            </span>
+            <span className="text-[10px] text-[#7A7471] block">
+              Synced {lastSynced || '15:53:43'}
+            </span>
+          </div>
         </div>
 
-        {/* Refresh Data Button */}
-        <button
-          onClick={handleRefreshClick}
-          disabled={isRefreshing}
-          className="flex items-center gap-1.5 px-3.5 py-1.5 border border-outline-variant/40 rounded-full text-xs font-sans font-bold uppercase tracking-wider text-on-surface-variant hover:border-primary hover:text-primary transition-all cursor-pointer disabled:opacity-50"
-          title="Fetch latest operational dataset values"
-        >
-          <span
-            className={`material-symbols-outlined text-[16px] ${
-              isRefreshing ? 'animate-spin' : ''
-            }`}
-          >
-            refresh
-          </span>
-          <span>{isRefreshing ? 'Syncing...' : 'Sync Data'}</span>
-        </button>
-
-        {/* Action: Run Optimization Pipeline */}
-        <button
-          onClick={onRunOptimization}
-          disabled={isScanning}
-          className="bg-primary hover:bg-primary-container text-white text-xs font-bold uppercase tracking-wider px-5 py-2.5 rounded-full transition-colors cursor-pointer flex items-center gap-2 shadow-xs disabled:opacity-50"
-        >
-          <span className="material-symbols-outlined text-[16px]">
-            {isScanning ? 'sync' : 'auto_fix_high'}
-          </span>
-          <span>{isScanning ? 'Running Simplex...' : 'Solve LP Network'}</span>
-        </button>
-
         {/* User Identity Chip */}
-        <div className="flex items-center gap-2.5 pl-2 border-l border-outline-variant/30">
-          <div className="w-8 h-8 rounded-full bg-primary/10 text-primary border border-primary/20 flex items-center justify-center font-bold text-xs">
+        <div className="flex items-center gap-2.5 pl-2 border-l border-[#EFE9E5]">
+          <div className="w-8 h-8 rounded-full bg-[#FCECEE] text-[#7A1C28] border border-[#F5D5D9] flex items-center justify-center font-bold text-xs shrink-0">
             PL
           </div>
-          <div className="hidden lg:block text-left">
-            <p className="text-xs font-bold text-on-surface leading-tight">National Hub</p>
-            <p className="text-[10px] text-on-surface-variant uppercase font-medium">Logistics Officer</p>
+          <div className="hidden lg:block text-left leading-tight">
+            <p className="text-[12px] font-bold text-[#1F1B19]">National Hub</p>
+            <p className="text-[10px] text-[#7A7471] uppercase font-medium">Logistics Officer</p>
           </div>
         </div>
       </div>
