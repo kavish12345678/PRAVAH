@@ -235,11 +235,14 @@ export function Step0Welcome({ onEnterPravah }: Step0WelcomeProps) {
             </div>
           </div>
 
-          {/* Right CTA & Language Controls */}
-          <div className="flex items-center gap-2.5 sm:gap-4">
+          {/* Right Controls: Replay Intro & Language Selection */}
+          <div className="flex items-center gap-3 sm:gap-4">
             <button
-              onClick={() => setShowSplash(true)}
-              className="hidden sm:flex items-center gap-1.5 text-xs font-mono font-semibold text-[#7A7471] hover:text-[#7A1C28] px-3 py-1.5 rounded-full border border-[#E8E1DC] bg-white/70 hover:bg-white transition-colors cursor-pointer"
+              onClick={() => {
+                setActiveStage(0)
+                setShowSplash(true)
+              }}
+              className="flex items-center gap-1.5 text-xs font-mono font-semibold text-[#7A7471] hover:text-[#7A1C28] px-3.5 py-1.5 rounded-full border border-[#E8E1DC] bg-white/80 hover:bg-white transition-all cursor-pointer shadow-2xs"
               title="Replay Intro Animation"
             >
               <span className="material-symbols-outlined text-[15px]">replay</span>
@@ -247,16 +250,6 @@ export function Step0Welcome({ onEnterPravah }: Step0WelcomeProps) {
             </button>
 
             <LanguageDropdown />
-
-            <button
-              onClick={onEnterPravah}
-              className="group relative bg-gradient-to-r from-[#7A1C28] to-[#9E2A38] hover:from-[#63141F] hover:to-[#7A1C28] text-white px-6 sm:px-8 py-3 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer shadow-md hover:shadow-lg shadow-[#7A1C28]/25 hover:scale-[1.03] flex items-center gap-2.5"
-            >
-              <span>ENTER PRAVAH</span>
-              <span className="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform">
-                arrow_forward
-              </span>
-            </button>
           </div>
         </header>
 
@@ -443,41 +436,41 @@ export function Step0Welcome({ onEnterPravah }: Step0WelcomeProps) {
       </section>
 
       {/* =========================================================================
-          4. OUTCOME PIPELINE SUMMARY STRIP
+          4. BOTTOM BAR WITH CENTER ENTER BUTTON & SIGNATURE STATEMENT
           ========================================================================= */}
-      <section className="relative z-10 w-full max-w-4xl mx-auto my-auto text-center">
-        <div className="py-2.5 px-5 bg-white/90 backdrop-blur-xs rounded-full border border-[#E8E1DC] shadow-2xs inline-flex items-center justify-center gap-2 sm:gap-3 text-xs sm:text-[13px] font-semibold text-[#1F1B19] flex-wrap">
-          <span className="text-[#7A1C28] font-bold">See the Supply</span>
-          <span className="text-[#D5CBC5]">→</span>
-          <span>Predict the Need</span>
-          <span className="text-[#D5CBC5]">→</span>
-          <span>Find the Best Route</span>
-          <span className="text-[#D5CBC5]">→</span>
-          <span className="text-[#16A34A] font-bold">Save Time & Lives</span>
-        </div>
-      </section>
-
-      {/* =========================================================================
-          5. BOTTOM SIGNATURE TAKEAWAY & SECONDARY CTA
-          ========================================================================= */}
-      <footer className="relative z-10 flex flex-col sm:flex-row justify-between items-center gap-3 pt-2 pb-1 border-t border-[#E8E1DC]/70 text-xs">
-        {/* Signature Statement: Right Blood. Right Place. Right Time. */}
-        <div className="font-serif text-sm sm:text-base text-[#1F1B19] tracking-tight">
+      <footer className="relative z-10 grid grid-cols-1 sm:grid-cols-3 items-center gap-3 pt-3 pb-1 border-t border-[#E8E1DC]/70">
+        {/* Left: Signature Statement */}
+        <div className="font-serif text-sm sm:text-base text-[#1F1B19] tracking-tight text-center sm:text-left">
           <span>Right Blood. </span>
           <span className="text-[#7A1C28] font-bold">Right Place.</span>
           <span> Right Time.</span>
         </div>
 
-        {/* Enter CTA Secondary */}
-        <button
-          onClick={onEnterPravah}
-          className="text-xs font-bold uppercase tracking-wider text-[#7A1C28] hover:text-[#63141F] transition-colors cursor-pointer flex items-center gap-1.5 group"
-        >
-          <span>Explore Live Decision Flow</span>
-          <span className="material-symbols-outlined text-[16px] group-hover:translate-x-1 transition-transform">
-            arrow_forward
-          </span>
-        </button>
+        {/* Center: Prominent ENTER PRAVAH Button */}
+        <div className="flex justify-center">
+          <button
+            onClick={onEnterPravah}
+            className="group relative bg-gradient-to-r from-[#7A1C28] to-[#9E2A38] hover:from-[#63141F] hover:to-[#7A1C28] text-white px-8 sm:px-10 py-3 sm:py-3.5 rounded-full text-xs sm:text-sm font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer shadow-lg hover:shadow-xl shadow-[#7A1C28]/25 hover:scale-[1.04] flex items-center gap-2.5"
+          >
+            <span>ENTER PRAVAH</span>
+            <span className="material-symbols-outlined text-[18px] sm:text-[20px] group-hover:translate-x-1.5 transition-transform">
+              arrow_forward
+            </span>
+          </button>
+        </div>
+
+        {/* Right: Secondary Action / Quick Explore */}
+        <div className="flex justify-center sm:justify-end">
+          <button
+            onClick={onEnterPravah}
+            className="text-xs font-bold uppercase tracking-wider text-[#7A1C28] hover:text-[#63141F] transition-colors cursor-pointer flex items-center gap-1.5 group"
+          >
+            <span>Explore Live Decision Flow</span>
+            <span className="material-symbols-outlined text-[16px] group-hover:translate-x-1 transition-transform">
+              arrow_forward
+            </span>
+          </button>
+        </div>
       </footer>
 
       {/* =========================================================================
