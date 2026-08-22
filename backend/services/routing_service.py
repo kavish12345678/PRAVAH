@@ -38,15 +38,15 @@ def _generate_road_following_geometry(
     d_km = haversine_distance(src_lat, src_lon, dst_lat, dst_lon)
 
     # Road winding factor based on actual urban/highway network topology
-    winding_factor = 1.32 if d_km < 15.0 else (1.22 if d_km < 80.0 else 1.16)
+    winding_factor = 1.35 if d_km < 10.0 else (1.25 if d_km < 60.0 else 1.18)
     road_dist_km = round(max(0.5, d_km * winding_factor), 2)
 
-    # Average speed: 25 km/h urban, 55 km/h regional highway
-    avg_speed_kmh = 24.0 if d_km < 15.0 else (48.0 if d_km < 80.0 else 62.0)
-    duration_min = round(max(2.0, (road_dist_km / avg_speed_kmh) * 60.0 + 4.0), 1)
+    # Average speed: 22 km/h urban, 48 km/h regional highway
+    avg_speed_kmh = 22.0 if d_km < 10.0 else (45.0 if d_km < 60.0 else 60.0)
+    duration_min = round(max(3.0, (road_dist_km / avg_speed_kmh) * 60.0 + 3.0), 1)
 
-    # Generate 15 to 45 realistic road segment nodes following highway curvature
-    num_points = min(45, max(12, int(d_km * 2.5)))
+    # Generate 25 to 60 realistic road segment nodes following urban arterial road grid
+    num_points = min(60, max(25, int(d_km * 4.5)))
     coords: List[List[float]] = []
 
     dx = dst_lon - src_lon
@@ -56,7 +56,7 @@ def _generate_road_following_geometry(
     perp_y = dx / dist
 
     curve_sign = -1.0 if is_alt else 1.0
-    max_lateral = min(0.045, max(0.004, dist * 0.14)) * curve_sign
+    max_lateral = min(0.035, max(0.003, dist * 0.12)) * curve_sign
 
     for i in range(num_points + 1):
         t = i / float(num_points)
@@ -67,7 +67,7 @@ def _generate_road_following_geometry(
         # Apply multi-harmonic road winding (mimicking turns, junctions, bypasses)
         sin_bend = math.sin(t * math.pi) * max_lateral
         harmonic1 = math.sin(t * 3.0 * math.pi) * (max_lateral * 0.35)
-        harmonic2 = math.cos(t * 5.0 * math.pi) * (max_lateral * 0.15)
+        harmonic2 = math.cos(t * 6.0 * math.pi) * (max_lateral * 0.15)
 
         total_lat_offset = (sin_bend + harmonic1 + harmonic2) * (1.0 - math.pow(2.0 * t - 1.0, 4))
         curved_lon = round(bx + total_lat_offset * perp_x, 6)
@@ -106,7 +106,7 @@ def get_road_route(
 
     # 1. Attempt OSRM live road routing engine
     osrm_url = (
-        f"http://router.project-osrm.org/route/v1/driving/"
+        f"https://router.project-osrm.org/route/v1/driving/"
         f"{source_lng:.6f},{source_lat:.6f};{destination_lng:.6f},{destination_lat:.6f}"
         f"?overview=full&geometries=geojson&alternatives={'true' if request_alternatives else 'false'}"
     )
@@ -116,7 +116,7 @@ def get_road_route(
             osrm_url,
             headers={"User-Agent": "PRAVAH-Clinical-Logistics/1.3.0 (Blood-Supply-Network)"},
         )
-        with urllib.request.urlopen(req, timeout=2.5) as response:
+        with urllib.request.urlopen(req, timeout=3.0) as response:
             if response.status == 200:
                 data = json.loads(response.read().decode("utf-8"))
                 if data.get("code") == "Ok" and data.get("routes"):

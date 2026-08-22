@@ -52,12 +52,12 @@
   --color-outline: #8c7070;
   --color-outline-variant: #e0bfbf;
 
-  --font-serif: 'Noto Serif', serif;
-  --font-sans: 'Manrope', sans-serif;
-  --font-display-lg: 'Noto Serif', serif;
-  --font-display-md: 'Noto Serif', serif;
-  --font-headline-lg: 'Noto Serif', serif;
-  --font-headline-lg-mobile: 'Noto Serif', serif;
+  --font-serif: 'Noto Serif', 'Noto Sans Devanagari', 'Noto Sans Tamil', 'Noto Sans Telugu', 'Noto Sans Bengali', serif;
+  --font-sans: 'Manrope', 'Noto Sans Devanagari', 'Noto Sans Tamil', 'Noto Sans Telugu', 'Noto Sans Bengali', system-ui, -apple-system, sans-serif;
+  --font-display-lg: 'Noto Serif', 'Noto Sans Devanagari', 'Noto Sans Tamil', 'Noto Sans Telugu', 'Noto Sans Bengali', serif;
+  --font-display-md: 'Noto Serif', 'Noto Sans Devanagari', 'Noto Sans Tamil', 'Noto Sans Telugu', 'Noto Sans Bengali', serif;
+  --font-headline-lg: 'Noto Serif', 'Noto Sans Devanagari', 'Noto Sans Tamil', 'Noto Sans Telugu', 'Noto Sans Bengali', serif;
+  --font-headline-lg-mobile: 'Noto Serif', 'Noto Sans Devanagari', 'Noto Sans Tamil', 'Noto Sans Telugu', 'Noto Sans Bengali', serif;
   --font-kpi-value: 'Manrope', sans-serif;
   --font-body-lg: 'Manrope', sans-serif;
   --font-body-md: 'Manrope', sans-serif;
@@ -165,5 +165,270 @@
   clip-path: polygon(0 79%, 10% 74%, 20% 59%, 30% 64%, 40% 39%, 50% 49%, 60% 19%, 70% 29%, 80% 14%, 90% 24%, 100% 4%, 100% 6%, 90% 26%, 80% 16%, 70% 31%, 60% 21%, 50% 51%, 40% 41%, 30% 66%, 20% 61%, 10% 76%, 0 81%);
   background-color: #a31e33;
 }
+
+/* =========================================================================
+   PRAVAH CLINICAL BLOOD-FLOW ANIMATIONS & MICRO-INTERACTIONS
+   ========================================================================= */
+
+/* 1. Global Page Transition */
+@keyframes pravahPageFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-pravah-page {
+  animation: pravahPageFadeIn 320ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* 2. Headline Drawing Accent */
+@keyframes pravahHeaderLine {
+  from {
+    width: 0;
+  }
+  to {
+    width: 88px;
+  }
+}
+
+.pravah-header-accent {
+  position: relative;
+}
+
+.pravah-header-accent::after {
+  content: '';
+  display: block;
+  height: 3px;
+  background: #7A1C28;
+  border-radius: 2px;
+  margin-top: 10px;
+  animation: pravahHeaderLine 500ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* 3. Card Hover & Lift with Burgundy Glow */
+.pravah-card-hover {
+  position: relative;
+  transition: transform 260ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 260ms cubic-bezier(0.16, 1, 0.3, 1), border-color 260ms ease;
+}
+
+.pravah-card-hover:hover {
+  transform: translateY(-3px);
+  border-color: rgba(122, 28, 40, 0.28);
+  box-shadow: 0 10px 25px -4px rgba(122, 28, 40, 0.08), 0 4px 10px -2px rgba(0, 0, 0, 0.04);
+}
+
+/* 4. Ambient Background Margin Circulation */
+@keyframes pravahAmbientDrift {
+  0% {
+    transform: translateY(0) scale(0.9);
+    opacity: 0.04;
+  }
+  50% {
+    opacity: 0.09;
+  }
+  100% {
+    transform: translateY(-35px) scale(1.1);
+    opacity: 0.04;
+  }
+}
+
+/* Full-Screen Soft Light-Red Flash Transition */
+@keyframes pravahScreenFlash {
+  0% {
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  45% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* 5. Click Ripple */
+@keyframes pravahRipple {
+  0% {
+    transform: translate(-50%, -50%) scale(0.1);
+    opacity: 0.45;
+  }
+  60% {
+    opacity: 0.25;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(3.2);
+    opacity: 0;
+  }
+}
+
+/* 6. Signature Blood-Flow Hover Particle & Cell Animation */
+@keyframes pravahFlowParticle {
+  0% {
+    left: -20%;
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.85;
+  }
+  80% {
+    opacity: 0.85;
+  }
+  100% {
+    left: 105%;
+    opacity: 0;
+  }
+}
+
+@keyframes pravahCellMove {
+  0% {
+    left: 0%;
+    opacity: 0;
+    transform: translateY(-50%) scale(0.6);
+  }
+  15% {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+  }
+  85% {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+  }
+  100% {
+    left: 100%;
+    opacity: 0;
+    transform: translateY(-50%) scale(0.6);
+  }
+}
+
+.animate-pravah-flow-particle {
+  animation: pravahFlowParticle 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.animate-pravah-cell-move {
+  animation: pravahCellMove 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.pravah-flow-track {
+  background: linear-gradient(90deg, transparent 0%, rgba(122, 28, 40, 0.25) 50%, transparent 100%);
+  background-size: 200% 100%;
+  animation: pravahVascularPulse 4s ease infinite;
+}
+
+/* 7. Primary Button Lift & Clinical Ripple Target */
+.pravah-btn-primary {
+  transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 200ms cubic-bezier(0.16, 1, 0.3, 1), background-color 200ms ease;
+}
+
+.pravah-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(122, 28, 40, 0.28);
+}
+
+.pravah-btn-primary:active {
+  transform: translateY(0);
+}
+
+/* 8. Deficit Soft Pulse Once */
+@keyframes pravahDeficitPulseOnce {
+  0% {
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 5px rgba(220, 38, 38, 0.12);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0);
+  }
+}
+
+.animate-deficit-pulse {
+  animation: pravahDeficitPulseOnce 700ms ease-out forwards;
+}
+
+/* 9. Surplus Soft Flow Once */
+@keyframes pravahSurplusFlowOnce {
+  0% {
+    border-color: rgba(22, 163, 74, 0.6);
+  }
+  100% {
+    border-color: rgba(232, 225, 220, 1);
+  }
+}
+
+.animate-surplus-glow {
+  animation: pravahSurplusFlowOnce 800ms ease-out forwards;
+}
+
+/* 10. Checkmark Draw SVG Animation */
+@keyframes pravahCheckmarkDraw {
+  0% {
+    stroke-dashoffset: 28;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+.animate-draw-check {
+  stroke-dasharray: 28;
+  stroke-dashoffset: 28;
+  animation: pravahCheckmarkDraw 500ms ease-out forwards;
+}
+
+/* 11. Staggered List Appearance & Table Row Hover */
+.pravah-table-row {
+  border-left: 3px solid transparent;
+  transition: background-color 200ms ease, border-left-color 200ms ease;
+}
+
+.pravah-table-row:hover {
+  background-color: #FDF8F8;
+  border-left-color: #7A1C28;
+}
+
+@keyframes pravahStaggerItem {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.pravah-stagger-1 { animation: pravahStaggerItem 280ms cubic-bezier(0.16, 1, 0.3, 1) 40ms forwards; }
+.pravah-stagger-2 { animation: pravahStaggerItem 280ms cubic-bezier(0.16, 1, 0.3, 1) 80ms forwards; }
+.pravah-stagger-3 { animation: pravahStaggerItem 280ms cubic-bezier(0.16, 1, 0.3, 1) 120ms forwards; }
+.pravah-stagger-4 { animation: pravahStaggerItem 280ms cubic-bezier(0.16, 1, 0.3, 1) 160ms forwards; }
+.pravah-stagger-5 { animation: pravahStaggerItem 280ms cubic-bezier(0.16, 1, 0.3, 1) 200ms forwards; }
+
+/* 12. Accessibility: Honor Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .animate-pravah-page,
+  .pravah-header-accent::after,
+  .pravah-card-hover,
+  .pravah-btn-primary,
+  .animate-deficit-pulse,
+  .animate-surplus-glow,
+  .animate-draw-check,
+  .pravah-stagger-1,
+  .pravah-stagger-2,
+  .pravah-stagger-3,
+  .pravah-stagger-4,
+  .pravah-stagger-5 {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
+}
+
 
 

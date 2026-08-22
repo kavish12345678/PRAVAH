@@ -1,9 +1,13 @@
 import { useState } from 'react'
 import { CentreTopHeader } from './components/centre/CentreTopHeader'
 import { CentreWorkflowNav } from './components/centre/CentreWorkflowNav'
+import { DonorMobilisationModal } from './components/centre/DonorMobilisationModal'
+import { FullScreenFlash, triggerFlash } from './components/effects/FullScreenFlash'
+import { PageTransition } from './components/effects/PageTransition'
 import { StitchTopHeader } from './components/layout/StitchTopHeader'
 import { StitchWorkflowNav } from './components/layout/StitchWorkflowNav'
 import { StitchWorkflowRibbon } from './components/layout/StitchWorkflowRibbon'
+import { LanguageSelectModal } from './components/common/LanguageSelectModal'
 import { useCentreData } from './hooks/useCentreData'
 import { usePravahData } from './hooks/usePravahData'
 import { CentreLoginScreen } from './pages/centre/CentreLoginScreen'
@@ -29,14 +33,17 @@ import { Step7Optimize } from './pages/workflow/Step7Optimize'
 import { Step8Transfers } from './pages/workflow/Step8Transfers'
 import { Step9Approval } from './pages/workflow/Step9Approval'
 import { Step10Audit } from './pages/workflow/Step10Audit'
-import type { PravahMode, PravahStep } from './types'
+import type { MultiStopConsolidationCandidate, PravahMode, PravahStep } from './types'
 
 export function App() {
   // Operating Mode: 'national' (General National Dashboard) vs 'centre' (Chennai RGH + 200km Network) vs 'centre-login'
   const [appMode, setAppMode] = useState<PravahMode | 'centre-login'>('centre')
   const [currentStep, setCurrentStep] = useState<PravahStep>('overview')
+  const [previousStep, setPreviousStep] = useState<PravahStep | null>(null)
   const [selectedBank, setSelectedBank] = useState<string | null>(null)
   const [selectedTransferId, setSelectedTransferId] = useState<number | null>(null)
+  const [selectedConsolidationCandidate, setSelectedConsolidationCandidate] = useState<MultiStopConsolidationCandidate | null>(null)
+  const [isDonorModalOpen, setIsDonorModalOpen] = useState(false)
 
   // National Dataset Hook
   const {
@@ -69,9 +76,9 @@ export function App() {
   const handleRunNationalOptimization = async () => {
     try {
       await runNationalOptimization()
-      setCurrentStep('optimize')
+      handleStepTransition('optimize')
     } catch {
-      setCurrentStep('optimize')
+      handleStepTransition('optimize')
     }
   }
 
@@ -79,14 +86,20 @@ export function App() {
   const handleRunCentreOptimization = async () => {
     try {
       await optimizeCentre()
-      setCurrentStep('optimize')
+      handleStepTransition('optimize')
     } catch {
-      setCurrentStep('optimize')
+      handleStepTransition('optimize')
     }
   }
 
-  const navigateToStep = (step: string) => {
+  const handleStepTransition = (step: string | PravahStep) => {
+    triggerFlash()
+    setPreviousStep(currentStep)
     setCurrentStep(step as PravahStep)
+  }
+
+  const navigateToStep = (step: string) => {
+    handleStepTransition(step)
   }
 
   // =========================================================================
@@ -97,11 +110,11 @@ export function App() {
       <CentreLoginScreen
         onLoginSuccess={() => {
           setAppMode('centre')
-          setCurrentStep('overview')
+          handleStepTransition('overview')
         }}
         onSwitchToNational={() => {
           setAppMode('national')
-          setCurrentStep('overview')
+          handleStepTransition('overview')
         }}
       />
     )
@@ -113,7 +126,7 @@ export function App() {
   if (currentStep === 'welcome') {
     return (
       <Step0Welcome
-        onEnterPravah={() => setCurrentStep('overview')}
+        onEnterPravah={() => handleStepTransition('overview')}
       />
     )
   }
@@ -127,11 +140,12 @@ export function App() {
         {/* Centre Step Navigation Sidebar */}
         <CentreWorkflowNav
           currentStep={currentStep}
-          onSelectStep={setCurrentStep}
+          onSelectStep={handleStepTransition}
           onSwitchToNational={() => {
             setAppMode('national')
-            setCurrentStep('overview')
+            handleStepTransition('overview')
           }}
+          onOpenDonorMobilisation={() => setIsDonorModalOpen(true)}
           facilityCount={centreData.summary?.facilities_in_network ?? centreData.network.length}
         />
 
@@ -142,7 +156,7 @@ export function App() {
             onRunOptimization={handleRunCentreOptimization}
             onSwitchMode={() => {
               setAppMode('national')
-              setCurrentStep('overview')
+              handleStepTransition('overview')
             }}
             lastSynced={centreLastSynced}
             isOptimizing={centreOptimizing}
@@ -153,7 +167,7 @@ export function App() {
           {/* Workflow Progress Ribbon */}
           <StitchWorkflowRibbon
             currentStep={currentStep}
-            onSelectStep={setCurrentStep}
+            onSelectStep={handleStepTransition}
           />
 
           {/* Main Centre Step Content */}
@@ -184,7 +198,7 @@ export function App() {
                 </p>
               </div>
             ) : (
-              <>
+              <PageTransition key={currentStep}>
                 {currentStep === 'overview' && (
                   <Step1CentreOverview
                     summary={centreData.summary}
@@ -221,6 +235,7 @@ export function App() {
                 {currentStep === 'cold-chain' && (
                   <Step5CentreColdChain
                     coldChain={centreData.coldChain}
+                    isFromExpiryRisk={previousStep === 'risk'}
                     onNavigateToStep={navigateToStep}
                   />
                 )}
@@ -246,6 +261,7 @@ export function App() {
                   <Step8CentreTransfers
                     transfers={centreData.transfers}
                     onSelectTransfer={setSelectedTransferId}
+                    onSelectConsolidationCandidate={setSelectedConsolidationCandidate}
                     onNavigateToStep={navigateToStep}
                   />
                 )}
@@ -254,6 +270,7 @@ export function App() {
                   <Step9CentreApproval
                     transfers={centreData.transfers}
                     selectedTransferId={selectedTransferId}
+                    selectedConsolidationCandidate={selectedConsolidationCandidate}
                     onUpdateStatus={updateCentreTransferStatus}
                     onNavigateToStep={navigateToStep}
                   />
@@ -265,10 +282,19 @@ export function App() {
                     onNavigateToStep={navigateToStep}
                   />
                 )}
-              </>
+              </PageTransition>
             )}
           </main>
         </div>
+
+        {/* Emergency Donor Mobilisation Modal */}
+        <DonorMobilisationModal
+          isOpen={isDonorModalOpen}
+          onClose={() => setIsDonorModalOpen(false)}
+        />
+
+        {/* Full-Screen Soft Light-Red Flash Transition */}
+        <FullScreenFlash />
       </div>
     )
   }
@@ -338,6 +364,7 @@ export function App() {
               {currentStep === 'overview' && (
                 <Step1Overview
                   summary={nationalData.summary}
+                  nationalSummary={nationalData.nationalSummary}
                   inventory={nationalData.inventory}
                   forecasts={nationalData.forecasts}
                   selectedBank={selectedBank}
@@ -430,6 +457,12 @@ export function App() {
           )}
         </main>
       </div>
+
+      {/* Full-Screen Soft Light-Red Flash Transition */}
+      <FullScreenFlash />
+
+      {/* First-Visit Multilingual Selection Modal */}
+      <LanguageSelectModal />
     </div>
   )
 }

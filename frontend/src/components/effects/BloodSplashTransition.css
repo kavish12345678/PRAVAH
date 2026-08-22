@@ -1,0 +1,200 @@
+/* PRAVAH Signature Blood-Flow Splash Transition Styles */
+
+.pravah-splash-container {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  overflow: hidden;
+  user-select: none;
+}
+
+.pravah-splash-origin {
+  position: absolute;
+  width: 0;
+  height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 1. Main Organic Splash SVG */
+.pravah-splash-svg {
+  width: min(85vw, 680px);
+  height: min(85vw, 680px);
+  position: absolute;
+  transform: translate(-50%, -50%);
+  transform-origin: center center;
+  will-change: transform, opacity;
+}
+
+@keyframes pravahBloodSplash {
+  0% {
+    transform: translate(-50%, -50%) scale(0.08) rotate(-10deg);
+    opacity: 0.1;
+  }
+  15% {
+    transform: translate(-50%, -50%) scale(0.55) rotate(-3deg);
+    opacity: 0.96;
+  }
+  45% {
+    transform: translate(-50%, -50%) scale(1.15) rotate(4deg);
+    opacity: 0.90;
+  }
+  70% {
+    transform: translate(-50%, -50%) scale(1.35) rotate(1deg);
+    opacity: 0.70;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.65) rotate(-2deg);
+    opacity: 0;
+  }
+}
+
+.animate-blood-splash {
+  animation: pravahBloodSplash 850ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Fluid Organic Morphing */
+@keyframes veilMorph {
+  0% {
+    transform: scale(0.9) rotate(0deg);
+  }
+  50% {
+    transform: scale(1.08) rotate(12deg);
+  }
+  100% {
+    transform: scale(1.15) rotate(-8deg);
+  }
+}
+
+.animate-veil-morph {
+  transform-origin: center center;
+  animation: veilMorph 850ms ease-out forwards;
+}
+
+@keyframes coreMorph {
+  0% {
+    transform: scale(0.92) rotate(0deg);
+  }
+  50% {
+    transform: scale(1.05) rotate(-8deg);
+  }
+  100% {
+    transform: scale(1.1) rotate(5deg);
+  }
+}
+
+.animate-core-morph {
+  transform-origin: center center;
+  animation: coreMorph 850ms ease-out forwards;
+}
+
+/* 2. Dispersed Blood Droplets */
+.pravah-splash-droplet {
+  position: absolute;
+  width: var(--size, 14px);
+  height: var(--size, 14px);
+  background: radial-gradient(circle at 35% 35%, #A32435, #7A1C28 75%, #500D16);
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(122, 28, 40, 0.7);
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  will-change: transform, opacity;
+}
+
+@keyframes dropletBurst {
+  0% {
+    transform: translate(-50%, -50%) scale(0.1);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  60% {
+    transform: translate(calc(-50% + var(--target-x) * 0.85), calc(-50% + var(--target-y) * 0.85)) scale(1.1);
+    opacity: 0.95;
+  }
+  100% {
+    transform: translate(calc(-50% + var(--target-x)), calc(-50% + var(--target-y))) scale(0.35);
+    opacity: 0;
+  }
+}
+
+.animate-droplet-burst {
+  animation: dropletBurst 850ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: var(--delay, 0ms);
+}
+
+/* 3. Central Brief Clinical Flow Badge */
+.pravah-splash-text {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  color: #FFFFFF;
+  pointer-events: none;
+  z-index: 10;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+  will-change: transform, opacity;
+}
+
+.pravah-splash-brand {
+  font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+  font-weight: 900;
+  font-size: 20px;
+  letter-spacing: 0.25em;
+  color: #FFFFFF;
+  line-height: 1;
+}
+
+.pravah-splash-subtitle {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: #FCECEE;
+  margin-top: 5px;
+  text-transform: uppercase;
+}
+
+@keyframes splashText {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.7);
+  }
+  25% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  65% {
+    opacity: 0.95;
+    transform: translate(-50%, -50%) scale(1.05);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.25);
+  }
+}
+
+.animate-splash-text {
+  animation: splashText 750ms ease-out forwards;
+  animation-delay: 80ms;
+}
+
+/* Reduced Motion Mode */
+@media (prefers-reduced-motion: reduce) {
+  .animate-blood-splash,
+  .animate-veil-morph,
+  .animate-core-morph,
+  .animate-droplet-burst,
+  .animate-splash-text {
+    animation: simpleFade 200ms ease-out forwards !important;
+  }
+
+  @keyframes simpleFade {
+    0% { opacity: 0.8; }
+    100% { opacity: 0; }
+  }
+}

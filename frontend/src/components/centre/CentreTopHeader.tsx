@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { LanguageDropdown } from '../common/LanguageDropdown'
+import { useLanguage } from '../../i18n/LanguageContext'
 
 interface CentreTopHeaderProps {
   onRefresh: () => Promise<void>
@@ -6,7 +8,7 @@ interface CentreTopHeaderProps {
   onSwitchMode: () => void
   lastSynced: string
   isOptimizing: boolean
-  facilityCount: number
+  facilityCount?: number
   hasError?: boolean
 }
 
@@ -15,8 +17,8 @@ export function CentreTopHeader({
   onRunOptimization,
   lastSynced,
   isOptimizing,
-  facilityCount,
 }: CentreTopHeaderProps) {
+  const { t } = useLanguage()
   const [isRefreshing, setIsRefreshing] = useState(false)
 
   const handleRefreshClick = async () => {
@@ -32,8 +34,10 @@ export function CentreTopHeader({
     <header className="flex justify-between items-center w-full px-6 md:px-8 py-3.5 bg-white border-b border-[#EFE9E5] select-none shadow-2xs">
       {/* Left: Centre Context */}
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-full bg-[#FCECEE] text-[#7A1C28] flex items-center justify-center font-bold text-xs shrink-0 border border-[#F5D5D9]">
-          CR
+        <div className="w-9 h-9 rounded-full bg-[#FCECEE] text-[#7A1C28] flex items-center justify-center font-bold text-xs shrink-0 border border-[#F5D5D9]">
+          <span className="material-symbols-outlined text-[19px] text-[#7A1C28]">
+            domain
+          </span>
         </div>
         <div>
           <h2 className="text-[13px] font-bold text-[#1F1B19] leading-tight">
@@ -41,80 +45,55 @@ export function CentreTopHeader({
           </h2>
           <div className="flex items-center gap-1.5 mt-0.5">
             <span className="text-[10px] text-[#7A7471]">
-              Anchor Centre ID: CHN-RGH-001
+              {t('common.primaryHub')} · CHN-RGH-001
             </span>
-            <span className="px-1.5 py-0.2 bg-[#FCECEE] text-[#7A1C28] text-[9px] font-bold rounded-sm uppercase tracking-wider">
-              Primary Hub
+            <span className="px-1.5 py-0.2 bg-[#FCECEE] text-[#7A1C28] text-[9px] font-bold rounded-sm uppercase tracking-wider font-mono">
+              {t('common.active')}
             </span>
           </div>
         </div>
       </div>
 
-      {/* Middle: 3 Status Pill Cards */}
-      <div className="hidden lg:flex items-center gap-3">
-        {/* Pill 1: Facilities */}
-        <div className="flex items-center gap-2.5 px-3.5 py-2 bg-white rounded-xl border border-[#E8E1DC] shadow-2xs">
-          <span className="material-symbols-outlined text-[18px] text-[#5A5451]">
-            domain
-          </span>
-          <div className="leading-tight">
-            <span className="text-[13px] font-bold text-[#1F1B19] block">
-              {facilityCount > 0 ? facilityCount : 149}
-            </span>
-            <span className="text-[9px] text-[#7A7471] block">Facilities Connected</span>
-          </div>
-        </div>
-
-        {/* Pill 2: Service Radius */}
-        <div className="flex items-center gap-2.5 px-3.5 py-2 bg-white rounded-xl border border-[#E8E1DC] shadow-2xs">
-          <span className="material-symbols-outlined text-[18px] text-[#5A5451]">
-            location_on
-          </span>
-          <div className="leading-tight">
-            <span className="text-[13px] font-bold text-[#1F1B19] block">200 km</span>
-            <span className="text-[9px] text-[#7A7471] block">Service Radius</span>
-          </div>
-        </div>
-
-        {/* Pill 3: Sync Status */}
+      {/* Right: Sync Status, Language Dropdown, Solve 200km CTA & User Chip */}
+      <div className="flex items-center gap-3">
+        {/* Sync Status Button */}
         <button
           onClick={handleRefreshClick}
           disabled={isRefreshing}
-          className="flex items-center gap-2.5 px-3.5 py-2 bg-white hover:bg-[#FAF7F5] rounded-xl border border-[#E8E1DC] shadow-2xs text-left cursor-pointer transition-colors"
+          className="flex items-center gap-2 px-3 py-1.5 bg-[#FAF7F5] hover:bg-[#F2ECE8] rounded-full border border-[#E8E1DC] shadow-2xs text-left cursor-pointer transition-colors"
           title="Click to sync data"
         >
           <span
-            className={`material-symbols-outlined text-[18px] text-[#5A5451] ${
+            className={`material-symbols-outlined text-[16px] text-[#5A5451] ${
               isRefreshing ? 'animate-spin' : ''
             }`}
           >
             sync
           </span>
-          <div className="leading-tight">
-            <span className="text-[13px] font-bold text-[#1F1B19] block">
-              {isRefreshing ? 'Syncing...' : 'Synced'}
+          <div className="leading-tight flex items-center gap-1.5">
+            <span className="text-[11px] font-bold text-[#1F1B19]">
+              {isRefreshing ? t('common.syncing') : t('common.synced')}
             </span>
-            <span className="text-[9px] text-[#7A7471] block">
+            <span className="text-[9.5px] text-[#7A7471] font-mono">
               {lastSynced || '15:46:02'}
             </span>
           </div>
         </button>
-      </div>
 
-      {/* Right: Solve 200km Network CTA & User Chip */}
-      <div className="flex items-center gap-4">
+        {/* Multilingual Language Selector */}
+        <LanguageDropdown />
+
         {/* Primary Action: SOLVE 200KM NETWORK */}
         <button
           onClick={onRunOptimization}
           disabled={isOptimizing}
-          className="bg-[#7A1C28] hover:bg-[#63141F] text-white text-[11px] font-bold uppercase tracking-wider px-5 py-2.5 rounded-xl transition-all cursor-pointer flex items-center gap-2 shadow-xs disabled:opacity-50"
+          className="bg-[#7A1C28] hover:bg-[#63141F] text-white text-[11px] font-bold uppercase tracking-wider px-4 py-2 rounded-xl transition-all cursor-pointer flex items-center gap-2 shadow-xs disabled:opacity-50"
         >
           <span className="material-symbols-outlined text-[16px]">
             {isOptimizing ? 'sync' : 'tune'}
           </span>
           <div className="text-left leading-tight">
-            <span className="block">{isOptimizing ? 'SOLVING...' : 'SOLVE 200KM'}</span>
-            <span className="block text-[9px] opacity-90">NETWORK</span>
+            <span className="block font-mono">{isOptimizing ? t('common.loading') : t('centre.solve200km')}</span>
           </div>
         </button>
 

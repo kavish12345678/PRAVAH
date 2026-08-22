@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { LanguageDropdown } from '../common/LanguageDropdown'
+import { useLanguage } from '../../i18n/LanguageContext'
 
 interface StitchTopHeaderProps {
   onRefresh?: () => Promise<void>
@@ -14,6 +16,7 @@ export function StitchTopHeader({
   lastSynced,
   hasError = false,
 }: StitchTopHeaderProps) {
+  const { t } = useLanguage()
   const [searchQuery, setSearchQuery] = useState('')
 
   return (
@@ -27,13 +30,16 @@ export function StitchTopHeader({
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search facilities, units, routes..."
+          placeholder={t('common.searchPlaceholder')}
           className="bg-transparent border-none focus:outline-hidden text-xs font-sans text-[#1F1B19] w-full placeholder-[#8A8480]"
         />
       </div>
 
-      {/* Right: Centre Workspace Switch, Dataset Ready Status, User Chip */}
+      {/* Right: Language Dropdown, Centre Workspace Switch, Dataset Ready Status, User Chip */}
       <div className="flex items-center gap-3.5">
+        {/* Language Dropdown */}
+        <LanguageDropdown />
+
         {/* Switch to Centre Workspace (200km) */}
         {onSwitchToCentre && (
           <button
@@ -43,7 +49,7 @@ export function StitchTopHeader({
           >
             <span className="material-symbols-outlined text-[16px]">domain</span>
             <div className="text-left leading-none">
-              <span className="block text-[11px] uppercase tracking-wider font-bold">CENTRE WORKSPACE</span>
+              <span className="block text-[11px] uppercase tracking-wider font-bold">{t('navigation.centreWorkspace')}</span>
               <span className="block text-[9px] font-semibold opacity-80">(200KM CHENNAI)</span>
             </div>
           </button>
@@ -62,10 +68,10 @@ export function StitchTopHeader({
                 hasError ? 'text-[#DC2626]' : 'text-[#1F1B19]'
               }`}
             >
-              {hasError ? 'Data Service Notice' : 'DATASET READY'}
+              {hasError ? t('common.error') : t('common.ready')}
             </span>
             <span className="text-[10px] text-[#7A7471] block">
-              Synced {lastSynced || '15:53:43'}
+              {t('common.synced')} {lastSynced || '15:53:43'}
             </span>
           </div>
         </div>

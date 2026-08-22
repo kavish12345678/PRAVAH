@@ -9,11 +9,13 @@ from sqlalchemy.orm import Session
 
 from api.centre import router as centre_router
 from api.dashboard import router as dashboard_router
+from api.donor_mobilisation import router as donor_mobilisation_router
 from api.events import router as events_router
 from api.forecast import router as forecast_router
 from api.intelligence import router as intelligence_router
 from api.inventory import router as inventory_router
 from api.ml import router as ml_router
+from api.national import router as national_router
 from api.risk import router as risk_router
 from api.routes import router as routes_router
 from api.transfer import router as transfer_router
@@ -45,7 +47,9 @@ app.add_middleware(
 )
 
 app.include_router(centre_router)
+app.include_router(donor_mobilisation_router)
 app.include_router(dashboard_router)
+app.include_router(national_router)
 app.include_router(inventory_router)
 app.include_router(forecast_router)
 app.include_router(risk_router)

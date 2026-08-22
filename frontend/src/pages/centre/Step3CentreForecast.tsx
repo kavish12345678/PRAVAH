@@ -1,4 +1,8 @@
 import { useMemo, useState } from 'react'
+import { Rolling7dDemandSparkline } from '../../components/charts/Rolling7dDemandSparkline'
+import { AnimatedNumber } from '../../components/effects/AnimatedNumber'
+import { BloodFlowHover } from '../../components/effects/BloodFlowHover'
+import { MagneticButton } from '../../components/effects/MagneticButton'
 import type { ForecastItem } from '../../types'
 
 interface Step3CentreForecastProps {
@@ -153,83 +157,90 @@ export function Step3CentreForecast({
           </div>
         </div>
 
-        <button
+        {/* Primary Action Button with Magnetic Hover */}
+        <MagneticButton
           onClick={() => onNavigateToStep('risk')}
           className="bg-[#7A1C28] hover:bg-[#63141F] text-white px-8 py-4 rounded-full text-xs font-bold uppercase tracking-wider transition-all cursor-pointer shadow-md hover:shadow-lg flex items-center gap-2.5 self-start lg:self-auto shrink-0"
         >
           <span>Step 04 · Inspect Expiry Risk</span>
-          <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
-        </button>
+          <span className="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
+        </MagneticButton>
       </section>
 
-      {/* 2. Top Summary KPI Cards (5 Cards) */}
+      {/* 2. Top Summary KPI Cards (5 Cards) with BloodFlowHover and AnimatedNumber */}
       <section className="grid grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-5">
         {/* Card 1: Facilities Monitored */}
-        <div className="p-5 bg-white rounded-3xl border border-[#E8E1DC] shadow-2xs space-y-1.5 flex flex-col justify-between">
+        <BloodFlowHover flowColor="burgundy" className="p-5 bg-white rounded-3xl border border-[#E8E1DC] shadow-2xs space-y-1.5 flex flex-col justify-between">
           <span className="text-[11px] font-bold text-[#7A7471] uppercase tracking-wider">
             FACILITIES MONITORED
           </span>
           <div>
-            <div className="text-3xl lg:text-4xl font-bold text-[#1F1B19] font-mono">
-              {totalMonitoredFacilities}
+            <div className="text-3xl lg:text-4xl font-bold text-[#1F1B19] font-mono group-hover:scale-[1.02] transition-transform origin-left">
+              <AnimatedNumber value={totalMonitoredFacilities} />
             </div>
             <p className="text-[11px] text-[#7A7471] mt-0.5">Within 200 km of Chennai RGH</p>
           </div>
-        </div>
+        </BloodFlowHover>
 
         {/* Card 2: Projected Deficits */}
-        <div className="p-5 bg-white rounded-3xl border border-[#E8E1DC] shadow-2xs space-y-1.5 flex flex-col justify-between">
+        <BloodFlowHover flowColor="burgundy" className="p-5 bg-white rounded-3xl border border-[#E8E1DC] shadow-2xs space-y-1.5 flex flex-col justify-between">
           <span className="text-[11px] font-bold text-[#DC2626] uppercase tracking-wider flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-[#DC2626]" />
             <span>PROJECTED DEFICITS</span>
           </span>
           <div>
-            <div className="text-3xl lg:text-4xl font-bold text-[#DC2626] font-mono">
-              {deficitCount}
+            <div className="text-3xl lg:text-4xl font-bold text-[#DC2626] font-mono group-hover:scale-[1.02] transition-transform origin-left">
+              <AnimatedNumber value={deficitCount} />
             </div>
             <p className="text-[11px] text-[#7A7471] mt-0.5">Impending stockout pressure</p>
           </div>
-        </div>
+        </BloodFlowHover>
 
         {/* Card 3: Projected Surplus */}
-        <div className="p-5 bg-white rounded-3xl border border-[#E8E1DC] shadow-2xs space-y-1.5 flex flex-col justify-between">
+        <BloodFlowHover flowColor="green" className="p-5 bg-white rounded-3xl border border-[#E8E1DC] shadow-2xs space-y-1.5 flex flex-col justify-between">
           <span className="text-[11px] font-bold text-[#16A34A] uppercase tracking-wider flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-[#16A34A]" />
             <span>PROJECTED SURPLUS</span>
           </span>
           <div>
-            <div className="text-3xl lg:text-4xl font-bold text-[#16A34A] font-mono">
-              {surplusCount}
+            <div className="text-3xl lg:text-4xl font-bold text-[#16A34A] font-mono group-hover:scale-[1.02] transition-transform origin-left">
+              <AnimatedNumber value={surplusCount} />
             </div>
             <p className="text-[11px] text-[#7A7471] mt-0.5">Usable excess reserves</p>
           </div>
-        </div>
+        </BloodFlowHover>
 
         {/* Card 4: 24h Aggregate Demand */}
-        <div className="p-5 bg-white rounded-3xl border border-[#E8E1DC] shadow-2xs space-y-1.5 flex flex-col justify-between">
+        <BloodFlowHover flowColor="burgundy" className="p-5 bg-white rounded-3xl border border-[#E8E1DC] shadow-2xs space-y-1.5 flex flex-col justify-between">
           <span className="text-[11px] font-bold text-[#7A1C28] uppercase tracking-wider">
             24H DEMAND FORECAST
           </span>
           <div>
-            <div className="text-3xl lg:text-4xl font-bold text-[#7A1C28] font-mono">
-              {totalDemand24h.toLocaleString()} <span className="text-sm font-sans font-bold text-[#5A5451]">Units</span>
+            <div className="flex items-baseline gap-1.5 font-mono group-hover:scale-[1.02] transition-transform origin-left">
+              <span className="text-2xl sm:text-3xl lg:text-[30px] font-bold text-[#7A1C28] leading-none">
+                <AnimatedNumber value={totalDemand24h} />
+              </span>
+              <span className="text-xs font-bold text-[#7A7471] uppercase font-sans">Units</span>
             </div>
             <p className="text-[11px] text-[#7A7471] mt-0.5">Near-term network requirement</p>
           </div>
-        </div>
+        </BloodFlowHover>
 
         {/* Card 5: 72h Aggregate Demand */}
-        <div className="p-5 bg-white rounded-3xl border border-[#E8E1DC] shadow-2xs space-y-1.5 flex flex-col justify-between col-span-2 lg:col-span-1">
+        <BloodFlowHover flowColor="burgundy" className="p-5 bg-white rounded-3xl border border-[#E8E1DC] shadow-2xs space-y-1.5 flex flex-col justify-between col-span-2 lg:col-span-1">
           <span className="text-[11px] font-bold text-[#7A7471] uppercase tracking-wider">
             72H DEMAND FORECAST
           </span>
           <div>
-            <div className="text-3xl lg:text-4xl font-bold text-[#1F1B19] font-mono">
-              {totalDemand72h.toLocaleString()} <span className="text-sm font-sans font-bold text-[#5A5451]">Units</span>
+            <div className="flex items-baseline gap-1.5 font-mono group-hover:scale-[1.02] transition-transform origin-left">
+              <span className="text-2xl sm:text-3xl lg:text-[30px] font-bold text-[#1F1B19] leading-none">
+                <AnimatedNumber value={totalDemand72h} />
+              </span>
+              <span className="text-xs font-bold text-[#7A7471] uppercase font-sans">Units</span>
             </div>
             <p className="text-[11px] text-[#7A7471] mt-0.5">Extended 3-day requirement</p>
           </div>
-        </div>
+        </BloodFlowHover>
       </section>
 
       {/* 3. Filter & Horizon Control Bar */}
@@ -468,36 +479,51 @@ export function Step3CentreForecast({
                     </div>
                   </div>
 
-                  {/* Expandable Breakdown Drawer */}
+                  {/* Expandable Breakdown Drawer with 7-Day Rolling Graph */}
                   {isExpanded && (
-                    <div className="mt-4 pt-4 border-t border-[#E8E1DC] grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs bg-[#FAF7F5] p-4 rounded-2xl">
-                      <div className="space-y-1">
-                        <span className="font-bold text-[#1F1B19] block">24-Hour Trajectory:</span>
-                        <div className="text-[#5A5451] space-y-0.5">
-                          <div>Expected Demand: <strong className="font-mono text-[#1F1B19]">{fc.forecast_24h ?? fc.predicted_demand} Units</strong></div>
-                          <div>Projected Balance: <strong className="font-mono text-[#1F1B19]">{fc.projected_balance_24h ?? fc.projected_balance} Units</strong></div>
-                          <div>Classification: <strong className="font-mono text-[#1F1B19]">{fc.balance_status_24h ?? fc.balance_status}</strong></div>
+                    <div className="mt-4 pt-4 border-t border-[#E8E1DC] grid grid-cols-1 lg:grid-cols-12 gap-5 text-xs bg-[#FAF7F5] p-4 sm:p-5 rounded-2xl items-start">
+                      {/* Left: 24h & 72h Trajectory Breakdown */}
+                      <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="space-y-1.5 p-3.5 bg-white rounded-xl border border-[#E8E1DC]">
+                          <span className="font-bold text-[#1F1B19] block text-xs">24-Hour Trajectory:</span>
+                          <div className="text-[#5A5451] space-y-1">
+                            <div>Expected Demand: <strong className="font-mono text-[#1F1B19]">{fc.forecast_24h ?? fc.predicted_demand} Units</strong></div>
+                            <div>Projected Balance: <strong className="font-mono text-[#1F1B19]">{fc.projected_balance_24h ?? fc.projected_balance} Units</strong></div>
+                            <div>Classification: <strong className="font-mono text-[#1F1B19]">{fc.balance_status_24h ?? fc.balance_status}</strong></div>
+                          </div>
+                        </div>
+
+                        <div className="space-y-1.5 p-3.5 bg-white rounded-xl border border-[#E8E1DC]">
+                          <span className="font-bold text-[#1F1B19] block text-xs">72-Hour Trajectory:</span>
+                          <div className="text-[#5A5451] space-y-1">
+                            <div>Expected Demand: <strong className="font-mono text-[#1F1B19]">{fc.forecast_72h ?? Math.round((fc.predicted_demand || 10) * 2.8)} Units</strong></div>
+                            <div>Projected Balance: <strong className="font-mono text-[#1F1B19]">{fc.projected_balance_72h ?? (fc.current_stock ?? 0) - Math.round((fc.predicted_demand || 10) * 2.8)} Units</strong></div>
+                            <div>Classification: <strong className="font-mono text-[#1F1B19]">{fc.balance_status_72h ?? 'BALANCED'}</strong></div>
+                          </div>
+                        </div>
+
+                        <div className="sm:col-span-2 space-y-1 p-3 bg-white rounded-xl border border-[#E8E1DC]">
+                          <span className="font-bold text-[#1F1B19] block text-[11px] uppercase tracking-wider">Clinical Next Steps:</span>
+                          <p className="text-[#5A5451] leading-relaxed text-[11px]">
+                            {isDeficit
+                              ? 'Flagged for recipient replenishment in Step 07 LP Optimization solver.'
+                              : isSurplus
+                              ? 'Available as potential donor candidate subject to Step 04 Expiry Risk & Step 05 Cold Chain verification.'
+                              : 'Stable reserve buffer. No immediate inter-facility transfer required.'}
+                          </p>
                         </div>
                       </div>
 
-                      <div className="space-y-1">
-                        <span className="font-bold text-[#1F1B19] block">72-Hour Trajectory:</span>
-                        <div className="text-[#5A5451] space-y-0.5">
-                          <div>Expected Demand: <strong className="font-mono text-[#1F1B19]">{fc.forecast_72h ?? Math.round((fc.predicted_demand || 10) * 2.8)} Units</strong></div>
-                          <div>Projected Balance: <strong className="font-mono text-[#1F1B19]">{fc.projected_balance_72h ?? (fc.current_stock ?? 0) - Math.round((fc.predicted_demand || 10) * 2.8)} Units</strong></div>
-                          <div>Classification: <strong className="font-mono text-[#1F1B19]">{fc.balance_status_72h ?? 'BALANCED'}</strong></div>
-                        </div>
-                      </div>
-
-                      <div className="space-y-1">
-                        <span className="font-bold text-[#1F1B19] block">Clinical Next Steps:</span>
-                        <p className="text-[#5A5451] leading-relaxed">
-                          {isDeficit
-                            ? 'Flagged for recipient replenishment in Step 07 LP Optimization solver.'
-                            : isSurplus
-                            ? 'Available as potential donor candidate subject to Step 04 Expiry Risk & Step 05 Cold Chain verification.'
-                            : 'Stable reserve buffer. No immediate inter-facility transfer required.'}
-                        </p>
+                      {/* Right: Dedicated 7-Day Rolling Demand Sparkline Graph */}
+                      <div className="lg:col-span-5">
+                        <Rolling7dDemandSparkline
+                          history={fc.rolling_7d_history}
+                          forecast24h={fc.forecast_24h ?? fc.predicted_demand ?? 10}
+                          forecast72h={fc.forecast_72h}
+                          bankName={fc.bank_name}
+                          component={fc.component}
+                          bloodGroup={fc.blood_group}
+                        />
                       </div>
                     </div>
                   )}

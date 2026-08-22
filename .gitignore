@@ -6,6 +6,10 @@ node_modules/
 .DS_Store
 # Local database
 backend/pravah.db
+backend/pravah.db-shm
+backend/pravah.db-wal
+*.db-shm
+*.db-wal
 
 # Frontend build output
 frontend/dist/

@@ -1,17 +1,24 @@
 import type {
   AuditItem,
   CentreColdChainData,
+  CentreConsolidationData,
   CentreHealthData,
   CentreNetworkFacility,
   CentrePressureData,
   CentreProfile,
   CentreSummary,
   DashboardSummary,
+  DonorBroadcastPayload,
+  DonorBroadcastResponse,
+  DonorMobilisationConfig,
   ForecastItem,
   IntelligenceRunResult,
   IntelligenceStatus,
   InventoryItem,
   ModelMetricsResponse,
+  NationalColdChainResponse,
+  NationalFacilitiesResponse,
+  NationalSummary,
   ProvenanceResponse,
   RiskItem,
   RiskSummary,
@@ -72,6 +79,44 @@ export function fetchSummary(): Promise<DashboardSummary> {
   return request<DashboardSummary>('/api/dashboard/summary')
 }
 export const fetchDashboardSummary = fetchSummary
+
+export function fetchNationalSummary(): Promise<NationalSummary> {
+  return request<NationalSummary>('/api/national/summary')
+}
+
+export function fetchNationalFacilities(params?: {
+  search?: string
+  region?: string
+  state?: string
+  status?: string
+  page?: number
+  page_size?: number
+}): Promise<NationalFacilitiesResponse> {
+  const search = new URLSearchParams()
+  if (params?.search) search.set('search', params.search)
+  if (params?.region) search.set('region', params.region)
+  if (params?.state) search.set('state', params.state)
+  if (params?.status) search.set('status', params.status)
+  if (params?.page) search.set('page', String(params.page))
+  if (params?.page_size) search.set('page_size', String(params.page_size))
+  const qs = search.toString()
+  return request<NationalFacilitiesResponse>(`/api/national/facilities${qs ? `?${qs}` : ''}`)
+}
+
+export function fetchNationalColdChain(params?: {
+  search?: string
+  filter_type?: string
+  page?: number
+  page_size?: number
+}): Promise<NationalColdChainResponse> {
+  const search = new URLSearchParams()
+  if (params?.search) search.set('search', params.search)
+  if (params?.filter_type) search.set('filter_type', params.filter_type)
+  if (params?.page) search.set('page', String(params.page))
+  if (params?.page_size) search.set('page_size', String(params.page_size))
+  const qs = search.toString()
+  return request<NationalColdChainResponse>(`/api/national/cold-chain${qs ? `?${qs}` : ''}`)
+}
 
 export function fetchInventory(params?: {
   bank_name?: string
@@ -331,6 +376,10 @@ export function fetchCentreAudit(centreId: number = 282724, limit: number = 50):
   return request<AuditItem[]>(`/api/centre/audit?centre_id=${centreId}&limit=${limit}`)
 }
 
+export function fetchCentreConsolidation(centreId: number = 282724): Promise<CentreConsolidationData> {
+  return request<CentreConsolidationData>(`/api/centre/consolidation?centre_id=${centreId}`)
+}
+
 export interface RoadRouteResponse {
   status: string
   provider: string
@@ -340,7 +389,7 @@ export interface RoadRouteResponse {
   duration_minutes: number
   geometry: {
     type: string
-    coordinates: [number, number][]
+    coordinates: [number, number][] // [lon, lat]
   }
   alternatives?: {
     distance_km: number
@@ -352,15 +401,117 @@ export interface RoadRouteResponse {
   }[]
 }
 
-export function fetchRoadRoute(
+const _CLIENT_ROUTE_CACHE = new Map<string, RoadRouteResponse>()
+
+export async function fetchRoadRoute(
   sourceLat: number,
   sourceLng: number,
   destLat: number,
   destLng: number,
   alternatives: boolean = true,
 ): Promise<RoadRouteResponse> {
-  return request<RoadRouteResponse>(
+  // 1. Validate coordinates
+  if (
+    typeof sourceLat !== 'number' ||
+    typeof sourceLng !== 'number' ||
+    typeof destLat !== 'number' ||
+    typeof destLng !== 'number' ||
+    isNaN(sourceLat) ||
+    isNaN(sourceLng) ||
+    isNaN(destLat) ||
+    isNaN(destLng) ||
+    sourceLat < -90 || sourceLat > 90 ||
+    destLat < -90 || destLat > 90 ||
+    sourceLng < -180 || sourceLng > 180 ||
+    destLng < -180 || destLng > 180 ||
+    (sourceLat === 0 && sourceLng === 0) ||
+    (destLat === 0 && destLng === 0)
+  ) {
+    throw new Error('Invalid geographic coordinates for road routing')
+  }
+
+  const cacheKey = `${sourceLat.toFixed(5)},${sourceLng.toFixed(5)}->${destLat.toFixed(5)},${destLng.toFixed(5)}?alt=${alternatives}`
+  if (_CLIENT_ROUTE_CACHE.has(cacheKey)) {
+    return _CLIENT_ROUTE_CACHE.get(cacheKey)!
+  }
+
+  // 2. Primary: Real OSRM driving route service (OSRM expects: longitude,latitude)
+  const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${sourceLng.toFixed(6)},${sourceLat.toFixed(6)};${destLng.toFixed(6)},${destLat.toFixed(6)}?overview=full&geometries=geojson&steps=true&alternatives=${alternatives ? 'true' : 'false'}`
+
+  try {
+    const osrmRes = await fetch(osrmUrl, { method: 'GET' })
+    if (osrmRes.ok) {
+      const osrmData = await osrmRes.json()
+      if (osrmData.code === 'Ok' && Array.isArray(osrmData.routes) && osrmData.routes.length > 0) {
+        const primary = osrmData.routes[0]
+        const distKm = Number((Number(primary.distance) / 1000.0).toFixed(2))
+        const durMin = Number((Number(primary.duration) / 60.0).toFixed(1))
+
+        const alts: RoadRouteResponse['alternatives'] = []
+        if (Array.isArray(osrmData.routes) && osrmData.routes.length > 1) {
+          for (const altRoute of osrmData.routes.slice(1, 3)) {
+            alts.push({
+              distance_km: Number((Number(altRoute.distance) / 1000.0).toFixed(2)),
+              duration_minutes: Number((Number(altRoute.duration) / 60.0).toFixed(1)),
+              geometry: altRoute.geometry,
+            })
+          }
+        }
+
+        const result: RoadRouteResponse = {
+          status: 'OK',
+          provider: 'OSRM (OpenStreetMap Road Network)',
+          source: { latitude: sourceLat, longitude: sourceLng },
+          destination: { latitude: destLat, longitude: destLng },
+          distance_km: distKm,
+          duration_minutes: durMin,
+          geometry: primary.geometry,
+          alternatives: alts,
+        }
+
+        if (import.meta.env.DEV) {
+          console.log('[PRAVAH Road Routing (OSRM)]', {
+            source: { lat: sourceLat, lng: sourceLng },
+            destination: { lat: destLat, lng: destLng },
+            distance_km: distKm,
+            duration_minutes: durMin,
+            geometryPoints: primary.geometry?.coordinates?.length ?? 0,
+            alternativesCount: alts.length,
+          })
+        }
+
+        _CLIENT_ROUTE_CACHE.set(cacheKey, result)
+        return result
+      }
+    }
+  } catch (osrmErr) {
+    if (import.meta.env.DEV) {
+      console.warn('[PRAVAH Routing] Direct OSRM request failed, falling back to backend route proxy:', osrmErr)
+    }
+  }
+
+  // 3. Fallback: Backend Road Routing Proxy
+  const backendResult = await request<RoadRouteResponse>(
     `/api/routes/road?source_lat=${sourceLat}&source_lng=${sourceLng}&destination_lat=${destLat}&destination_lng=${destLng}&alternatives=${alternatives}`,
   )
+
+  _CLIENT_ROUTE_CACHE.set(cacheKey, backendResult)
+  return backendResult
+}
+
+// ----------------------------------------------------
+// DONOR MOBILISATION APIs
+// ----------------------------------------------------
+
+export function fetchDonorMobilisationConfig(): Promise<DonorMobilisationConfig> {
+  return request<DonorMobilisationConfig>('/api/centre/donor-mobilisation/config')
+}
+
+export function dispatchDonorBroadcast(payload: DonorBroadcastPayload): Promise<DonorBroadcastResponse> {
+  return request<DonorBroadcastResponse>('/api/centre/donor-mobilisation/broadcast', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
 }
 

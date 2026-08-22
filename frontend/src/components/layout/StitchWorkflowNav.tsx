@@ -1,4 +1,5 @@
 import type { PravahStep } from '../../types'
+import { useLanguage } from '../../i18n/LanguageContext'
 
 interface StitchWorkflowNavProps {
   currentStep: PravahStep
@@ -7,35 +8,43 @@ interface StitchWorkflowNavProps {
   bloodBankCount?: number
 }
 
-const WORKFLOW_STEPS: Array<{ id: PravahStep; number: string; label: string; icon: string }> = [
-  { id: 'overview', number: '01', label: 'FLOW', icon: 'hub' },
-  { id: 'inventory', number: '02', label: 'INVENTORY', icon: 'inventory_2' },
-  { id: 'forecast', number: '03', label: 'FORECAST', icon: 'analytics' },
-  { id: 'risk', number: '04', label: 'RISK', icon: 'warning' },
-  { id: 'cold-chain', number: '05', label: 'COLD CHAIN', icon: 'ac_unit' },
-  { id: 'pressure', number: '06', label: 'PRESSURE', icon: 'balance' },
-  { id: 'optimize', number: '07', label: 'OPTIMIZE', icon: 'alt_route' },
-  { id: 'transfers', number: '08', label: 'TRANSFERS', icon: 'local_shipping' },
-  { id: 'approval', number: '09', label: 'APPROVAL', icon: 'check_circle' },
-  { id: 'audit', number: '10', label: 'AUDIT', icon: 'fact_check' },
-]
-
 export function StitchWorkflowNav({
   currentStep,
   onSelectStep,
   onOpenWelcome,
   bloodBankCount = 4390,
 }: StitchWorkflowNavProps) {
+  const { t } = useLanguage()
+
+  const workflowSteps: Array<{ id: PravahStep; label: string; icon: string }> = [
+    { id: 'overview', label: t('navigation.flow'), icon: 'hub' },
+    { id: 'inventory', label: t('navigation.inventory'), icon: 'inventory_2' },
+    { id: 'forecast', label: t('navigation.forecast'), icon: 'analytics' },
+    { id: 'risk', label: t('navigation.risk'), icon: 'warning' },
+    { id: 'cold-chain', label: t('navigation.coldChain'), icon: 'ac_unit' },
+    { id: 'pressure', label: t('navigation.pressure'), icon: 'balance' },
+    { id: 'optimize', label: t('navigation.optimize'), icon: 'alt_route' },
+    { id: 'transfers', label: t('navigation.transfers'), icon: 'local_shipping' },
+    { id: 'approval', label: t('navigation.approval'), icon: 'check_circle' },
+    { id: 'audit', label: t('navigation.audit'), icon: 'fact_check' },
+  ]
   return (
     <aside className="hidden md:flex flex-col h-screen w-72 bg-surface-container-low border-r border-outline-variant/15 p-6 pt-8 fixed left-0 top-0 z-40 select-none overflow-y-auto">
       {/* Brand Header */}
-      <div className="mb-6 cursor-pointer" onClick={onOpenWelcome}>
-        <h1 className="font-serif text-2xl font-bold text-primary tracking-tight">
-          PRAVAH
-        </h1>
-        <p className="font-sans text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mt-0.5">
-          Clinical Decision Flow
-        </p>
+      <div className="mb-6 cursor-pointer flex items-center gap-3" onClick={onOpenWelcome}>
+        <img
+          src="/pravah-logo.png"
+          alt="PRAVAH Logo"
+          className="w-11 h-11 object-contain shrink-0 drop-shadow-xs"
+        />
+        <div>
+          <h1 className="font-serif text-2xl font-bold text-primary tracking-tight leading-none">
+            PRAVAH
+          </h1>
+          <p className="font-sans text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mt-1">
+            Clinical Decision Flow
+          </p>
+        </div>
       </div>
 
       {/* Dataset Status Pill */}
@@ -44,18 +53,13 @@ export function StitchWorkflowNav({
         <div>
           <p className="font-sans text-[11px] font-bold text-on-surface">PRAVAH Dataset</p>
           <p className="font-sans text-[10px] text-on-surface-variant">
-            {bloodBankCount.toLocaleString()} Facilities Active
+            {t('common.facilitiesConnected', { count: bloodBankCount })}
           </p>
         </div>
       </div>
 
-      {/* Numbered Operational Workflow List */}
-      <div className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest px-2 mb-2">
-        Operational Journey
-      </div>
-
       <nav className="flex-1 flex flex-col gap-0.5">
-        {WORKFLOW_STEPS.map((step) => {
+        {workflowSteps.map((step) => {
           const isActive = currentStep === step.id
 
           return (
@@ -68,9 +72,6 @@ export function StitchWorkflowNav({
                   : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
               }`}
             >
-              <span className={`text-[11px] font-mono font-bold ${isActive ? 'text-primary' : 'text-on-surface-variant/60'}`}>
-                {step.number}
-              </span>
               <span
                 className={`material-symbols-outlined text-[18px] ${
                   isActive ? 'fill text-primary' : 'text-on-surface-variant'

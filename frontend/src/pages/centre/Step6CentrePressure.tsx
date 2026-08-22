@@ -39,7 +39,7 @@ export function Step6CentrePressure({
           onClick={() => onNavigateToStep('optimize')}
           className="bg-[#7A1C28] hover:bg-[#63141F] text-white px-8 py-4 rounded-full text-xs font-bold uppercase tracking-wider transition-all cursor-pointer shadow-md hover:shadow-lg flex items-center gap-2.5 self-start lg:self-auto shrink-0"
         >
-          <span>Step 07 · Solve LP Optimization</span>
+          <span>Step 07 · Route Optimization Model</span>
           <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
         </button>
       </section>

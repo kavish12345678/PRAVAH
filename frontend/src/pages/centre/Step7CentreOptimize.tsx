@@ -1,4 +1,5 @@
 import type { TransferItem } from '../../types'
+import { useLanguage } from '../../i18n/LanguageContext'
 
 interface Step7CentreOptimizeProps {
   transfers: (TransferItem & {
@@ -22,6 +23,7 @@ export function Step7CentreOptimize({
   optimizationMessage,
   onNavigateToStep,
 }: Step7CentreOptimizeProps) {
+  const { t } = useLanguage()
   const activeRoutes = transfers.slice(0, 8)
   const totalUnits = transfers.reduce((sum, t) => sum + (t.quantity || 0), 0)
 
@@ -35,16 +37,16 @@ export function Step7CentreOptimize({
               Step 07 of 10
             </span>
             <span className="text-xs text-[#7A7471] font-bold uppercase tracking-wider">
-              HiGHS Linear Programming Solver
+              {t('optimization.title')}
             </span>
           </div>
 
-          <h1 className="font-serif text-4xl sm:text-5xl lg:text-[52px] font-bold text-[#7A1C28] leading-[1.06] tracking-tight">
-            Solve 200 km Min-Cost LP Redistribution
+          <h1 className="font-serif text-3xl sm:text-4xl lg:text-[42px] font-bold text-[#7A1C28] leading-tight tracking-tight sm:whitespace-nowrap">
+            {t('optimization.title')}
           </h1>
 
           <p className="text-base sm:text-lg text-[#5A5451] leading-relaxed max-w-[800px]">
-            Mathematical network flow solver computing globally optimal dispatch routes minimizing transit time and cold-chain exposure across the <strong className="text-[#1F1B19] font-bold">200 km regional network</strong> around Chennai RGH.
+            {t('optimization.subtitle')} · <strong className="text-[#1F1B19] font-bold">{t('centre.radiusService')}</strong>.
           </p>
         </div>
 
@@ -57,14 +59,14 @@ export function Step7CentreOptimize({
             <span className="material-symbols-outlined text-[18px]">
               {isOptimizing ? 'sync' : 'tune'}
             </span>
-            <span>{isOptimizing ? 'Solving LP Network...' : 'Re-Run LP Solver'}</span>
+            <span>{isOptimizing ? t('common.loading') : t('optimization.reRunSolver')}</span>
           </button>
 
           <button
             onClick={() => onNavigateToStep('transfers')}
             className="bg-white hover:bg-[#F2ECE8] text-[#7A1C28] border border-[#E8E1DC] px-8 py-4 rounded-full text-xs font-bold uppercase tracking-wider transition-all cursor-pointer shadow-xs flex items-center gap-2.5"
           >
-            <span>Step 08 · View Routes Map</span>
+            <span>{t('navigation.redistribution')}</span>
             <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
           </button>
         </div>

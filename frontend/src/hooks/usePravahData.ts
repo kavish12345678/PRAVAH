@@ -7,6 +7,7 @@ import type {
   IntelligenceStatus,
   InventoryItem,
   ModelMetricsResponse,
+  NationalSummary,
   ProvenanceResponse,
   RiskItem,
   RiskSummary,
@@ -16,6 +17,7 @@ import type {
 
 export interface PravahData {
   summary: DashboardSummary | null
+  nationalSummary: NationalSummary | null
   inventory: InventoryItem[]
   forecasts: ForecastItem[]
   risks: RiskItem[]
@@ -39,6 +41,7 @@ const SCAN_STEPS = [
 export function usePravahData() {
   const [data, setData] = useState<PravahData>({
     summary: null,
+    nationalSummary: null,
     inventory: [],
     forecasts: [],
     risks: [],
@@ -62,6 +65,7 @@ export function usePravahData() {
     try {
       const [
         summary,
+        nationalSummary,
         inventory,
         forecasts,
         risks,
@@ -73,6 +77,7 @@ export function usePravahData() {
         provenance,
       ] = await Promise.all([
         api.fetchDashboardSummary(),
+        api.fetchNationalSummary().catch(() => null),
         api.fetchInventory(),
         api.fetchForecasts(),
         api.fetchRisk(),
@@ -86,6 +91,7 @@ export function usePravahData() {
 
       setData({
         summary,
+        nationalSummary,
         inventory,
         forecasts,
         risks,

@@ -11,6 +11,95 @@ export interface DashboardSummary {
   last_updated?: string
 }
 
+export interface NationalFacilityItem {
+  id: number
+  facility_id: string
+  name: string
+  city: string
+  state: string
+  region: 'NORTH' | 'SOUTH' | 'EAST' | 'WEST' | 'CENTRAL' | string
+  latitude: number
+  longitude: number
+  capacity: number
+  stock: number
+  demand: number
+  balance: number
+  batches: number
+  near_expiry_units: number
+  classification: 'SURPLUS' | 'DEFICIT' | 'SHORTAGE' | 'NEAR_EXPIRY' | 'LOW_STOCK' | 'HEALTHY' | 'BALANCED' | string
+  status: string
+  risk_score: number
+}
+
+export interface NationalSummary {
+  status: string
+  scope: string
+  total_facilities: number
+  total_inventory: number
+  total_batches: number
+  low_stock_batches: number
+  near_expiry_batches: number
+  high_risk_units: number
+  active_transfers: number
+  total_demand: number
+  inventory_by_blood_group: Record<string, number>
+  inventory_by_component: Record<string, number>
+  risk_breakdown: Record<string, number>
+  states_covered: number
+}
+
+export interface NationalFacilitiesResponse {
+  total_facilities: number
+  page: number
+  page_size: number
+  total_pages: number
+  facilities: NationalFacilityItem[]
+}
+
+export interface NationalColdChainRecord {
+  type: 'ALERT' | 'EQUIPMENT'
+  id: string
+  bank_id: number
+  facility_name: string
+  city: string
+  state: string
+  region: string
+  title: string
+  subtitle: string
+  temperature: number
+  duration_min?: number
+  agitation_off_minutes?: number
+  severity?: string
+  status_label: string
+  is_alert: boolean
+  health_pct?: number
+  timestamp?: string
+}
+
+export interface NationalColdChainResponse {
+  status: string
+  mean_temperature: number
+  target_temperature: number
+  min_allowed: number
+  max_allowed: number
+  facilities_monitored: number
+  total_alerts_count: number
+  total_equipment_count: number
+  average_equipment_health: number
+  total_items: number
+  page: number
+  page_size: number
+  total_pages: number
+  records: NationalColdChainRecord[]
+  telemetry_curve: {
+    time: string
+    temp: number
+    agitation: boolean
+    is_excursion?: boolean
+    alert_id?: string
+  }[]
+}
+
 export interface InventoryItem {
   id: number
   bank_id?: number
@@ -49,6 +138,16 @@ export interface ForecastItem {
   confidence_upper?: number
   historical_avg?: number
   model_version?: string
+  rolling_7d_history?: {
+    date: string
+    day: string
+    demand: number
+    routine?: number
+    emergency?: number
+  }[]
+  rolling_7d_mean?: number
+  rolling_7d_min?: number
+  rolling_7d_max?: number
 }
 
 export interface RiskFeatures {
@@ -88,18 +187,26 @@ export interface RiskDistribution {
 export interface RiskSummary {
   total_units_analyzed?: number
   active_units_monitored?: number
+  critical_attention_required?: number
+  high_risk_units?: number
+  medium_risk_units?: number
+  low_risk_units?: number
   distribution?: RiskDistribution
   mean_risk_score?: number
   critical_wastage_count?: number
   model_name?: string
   features_analyzed?: number
-  bands?: {
-    CRITICAL: RiskBandInfo
-    HIGH: RiskBandInfo
-    MODERATE: RiskBandInfo
-    LOW_MEDIUM: RiskBandInfo
-    LOW: RiskBandInfo
-  }
+  average_risk_score?: number
+  bands?:
+    | {
+        CRITICAL: RiskBandInfo
+        HIGH: RiskBandInfo
+        MODERATE: RiskBandInfo
+        LOW_MEDIUM: RiskBandInfo
+        LOW: RiskBandInfo
+      }
+    | RiskBandInfo[]
+    | any
 }
 
 export interface FeatureImportanceItem {
@@ -116,14 +223,18 @@ export interface RiskItem {
   unit_id?: string
   bank_name?: string
   bank_id?: number
+  city?: string
   blood_group?: string
   component?: string
   quantity?: number
   expiry_date?: string
   risk_score: number
+  predicted_risk_score?: number
   risk_level: 'CRITICAL' | 'HIGH' | 'MODERATE' | 'LOW_MEDIUM' | 'LOW' | string
+  remaining_shelf_life_hours?: number
   features?: RiskFeatures
   contributing_features?: string[] | string
+  contributing_factors?: string[]
   explanation?: string
   recommended_action?: string
   model_version?: string
@@ -133,11 +244,11 @@ export interface RiskItem {
 export interface TransferItem {
   id: number
   source_bank_id?: number
-  destination_bank_id?: number
   source_bank: string
   source_city?: string
   source_lat?: number
   source_lon?: number
+  destination_bank_id?: number
   destination_bank: string
   destination_city?: string
   destination_lat?: number
@@ -145,8 +256,8 @@ export interface TransferItem {
   component: string
   blood_group: string
   quantity: number
-  route: string | null
-  vehicle: string | null
+  route: string
+  vehicle?: string
   distance_km?: number
   travel_time_min?: number
   is_connected_to_anchor?: boolean
@@ -154,7 +265,7 @@ export interface TransferItem {
   urgency_level?: 'CRITICAL' | 'HIGH' | 'MODERATE' | string
   recommendation_reason?: string
   clinical_impact?: string
-  status: 'PENDING' | 'APPROVED' | 'REJECTED' | string
+  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'DISPATCHED' | 'COMPLETED' | string
   created_at?: string
 }
 
@@ -164,8 +275,8 @@ export interface AuditItem {
   action: string
   user: string
   recommendation_id?: number
-  source_bank: string
-  destination_bank: string
+  source_bank?: string
+  destination_bank?: string
   quantity?: number
   status?: string
   approval_status?: string
@@ -359,6 +470,18 @@ export interface CentreSummary {
     low_stock: number
     near_expiry: number
     critical_risk: number
+    capacity?: number
+    capacity_utilization_pct?: number
+    blood_group_breakdown?: {
+      blood_group: string
+      units: number
+      batches: number
+    }[]
+    component_breakdown?: {
+      component: string
+      units: number
+      batches: number
+    }[]
   }
 }
 
@@ -437,4 +560,165 @@ export interface CentrePressureData {
   deficit_count: number
   surplus_facilities: CentrePressureFacility[]
   deficit_facilities: CentrePressureFacility[]
+}
+
+// ----------------------------------------------------
+// MULTI-STOP CONSOLIDATION TYPES
+// ----------------------------------------------------
+
+export interface MultiStopLeg {
+  leg_number: number
+  source_name: string
+  destination_name: string
+  source_lat: number
+  source_lon: number
+  destination_lat: number
+  destination_lon: number
+  distance_km: number
+  duration_min: number
+  geometry: {
+    type: string
+    coordinates: [number, number][]
+  }
+}
+
+export interface MultiStopStop {
+  stop_number: number
+  bank_id: number
+  name: string
+  city: string
+  latitude: number
+  longitude: number
+  quantity: number
+  blood_group: string
+  component: string
+  urgency: string
+  leg_distance_km: number
+  leg_duration_min: number
+  cumulative_distance_km: number
+  cumulative_duration_min: number
+}
+
+export interface MultiStopConsolidationCandidate {
+  id: string
+  option_name: string
+  is_recommended: boolean
+  consolidation_score: number
+  title: string
+  vehicle: string
+  vehicle_capacity: number
+  total_units: number
+  blood_group: string
+  component: string
+  stops: MultiStopStop[]
+  multi_stop_plan: {
+    total_distance_km: number
+    total_duration_min: number
+    trips: number
+    stops_count: number
+    geometry: {
+      type: string
+      coordinates: [number, number][]
+    }
+  }
+  direct_plan: {
+    total_distance_km: number
+    total_duration_min: number
+    trips: number
+    vehicles: number
+    destinations_served: number
+    legs: {
+      destination_name: string
+      latitude?: number
+      longitude?: number
+      distance_km: number
+      duration_min: number
+      geometry?: {
+        type: string
+        coordinates: [number, number][]
+      }
+    }[]
+  }
+  savings: {
+    saved_distance_km: number
+    saved_duration_min: number
+    fewer_trips: number
+    is_beneficial: boolean
+  }
+  clinical_rationale: string[]
+}
+
+export interface CentreConsolidationData {
+  status: string
+  anchor: {
+    id: number
+    name: string
+    city: string
+    latitude: number
+    longitude: number
+  }
+  candidates: MultiStopConsolidationCandidate[]
+}
+
+export interface PremadeTemplate {
+  id: string
+  title: string
+  badge: 'CRITICAL' | 'URGENT' | 'STANDARD'
+  text: string
+}
+
+export interface DonorItem {
+  id: string
+  name: string
+  blood_group: string
+  distance_km: number
+  area: string
+  phone: string
+  last_donated: string
+  status: string
+}
+
+export interface DonorMobilisationConfig {
+  status: string
+  bot_id: string
+  bot_name: string
+  bot_username: string
+  centre_id: string
+  centre_name: string
+  service_radius_km: number
+  registered_donors_in_radius: number
+  total_active_bot_subscribers: number
+  subscribed_chat_ids: number[]
+  sample_nearby_donors: DonorItem[]
+  premade_templates: PremadeTemplate[]
+}
+
+export interface DonorBroadcastPayload {
+  centre_id?: string
+  centre_name?: string
+  blood_group: string
+  units_needed: number
+  urgency: string
+  radius_km: number
+  hospital_address?: string
+  hospital_contact?: string
+  custom_note?: string
+  template_id?: string
+}
+
+export interface DonorBroadcastResponse {
+  success: boolean
+  message: string
+  centre_id: string
+  centre_name: string
+  blood_group: string
+  units_needed: number
+  radius_km: number
+  recipients_nearby_count: number
+  telegram_subscribers_delivered?: number
+  broadcast_timestamp: string
+  telegram_delivery_status: 'delivered' | 'simulated' | 'simulated_local' | 'error'
+  telegram_bot?: string
+  telegram_error?: string | null
+  formatted_message: string
 }

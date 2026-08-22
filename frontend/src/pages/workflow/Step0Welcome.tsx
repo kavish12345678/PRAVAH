@@ -1,63 +1,76 @@
 import { useState } from 'react'
+import { LanguageDropdown } from '../../components/common/LanguageDropdown'
+import { useLanguage } from '../../i18n/LanguageContext'
 
 interface Step0WelcomeProps {
   onEnterPravah: () => void
 }
 
-const SCREENS = [
-  {
-    step: '01 DATA',
-    title: 'Operational Baseline',
-    desc: 'Ingests blood bank inventory, demand records, temperature logs, and equipment status across 4,390 facilities.',
-    icon: 'database',
-    metrics: '43,329 Units · 4,390 Facilities',
-  },
-  {
-    step: '02 INTELLIGENCE',
-    title: 'Predictive ML Inference',
-    desc: 'GBDT models forecast 24h/72h demand and evaluate unit-level expiry risk, while Isolation Forest detects thermal excursions.',
-    icon: 'psychology',
-    metrics: 'R² = 0.7634 · ROC-AUC = 0.9999',
-  },
-  {
-    step: '03 DECISION',
-    title: 'Surplus & Deficit Matching',
-    desc: 'HiGHS Linear Programming engine matches surplus hubs with deficit trauma centers to prevent both stockouts and spoilage.',
-    icon: 'alt_route',
-    metrics: '745 Solved Routes · Zero Wastage Target',
-  },
-  {
-    step: '04 ACTION',
-    title: 'Human Authorization & Audit',
-    desc: 'Clinical directors review routing recommendations, authorize dispatches, and log all decisions into a permanent audit trail.',
-    icon: 'fact_check',
-    metrics: '1-Click Authorization · Real-time Audit',
-  },
-]
-
 export function Step0Welcome({ onEnterPravah }: Step0WelcomeProps) {
+  const { t } = useLanguage()
   const [activeScreen, setActiveScreen] = useState(0)
+
+  const screens = [
+    {
+      step: '01 DATA',
+      title: 'Operational Baseline',
+      desc: 'Ingests blood bank inventory, demand records, temperature logs, and equipment status across 4,390 facilities.',
+      icon: 'database',
+      metrics: '43,329 Units · 4,390 Facilities',
+    },
+    {
+      step: '02 INTELLIGENCE',
+      title: 'Predictive ML Inference',
+      desc: 'GBDT models forecast 24h/72h demand and evaluate unit-level expiry risk, while Isolation Forest detects thermal excursions.',
+      icon: 'psychology',
+      metrics: 'R² = 0.7634 · ROC-AUC = 0.9999',
+    },
+    {
+      step: '03 DECISION',
+      title: 'Surplus & Deficit Matching',
+      desc: 'HiGHS Linear Programming engine matches surplus hubs with deficit trauma centers to prevent both stockouts and spoilage.',
+      icon: 'alt_route',
+      metrics: '745 Solved Routes · Zero Wastage Target',
+    },
+    {
+      step: '04 ACTION',
+      title: 'Human Authorization & Audit',
+      desc: 'Clinical directors review routing recommendations, authorize dispatches, and log all decisions into a permanent audit trail.',
+      icon: 'fact_check',
+      metrics: '1-Click Authorization · Real-time Audit',
+    },
+  ]
 
   return (
     <div className="min-h-screen bg-[#FBF7F4] text-[#1f1b19] font-sans antialiased flex flex-col justify-between p-6 md:p-16 max-w-6xl mx-auto selection:bg-primary-container selection:text-white select-none">
       {/* Top Header */}
       <header className="flex justify-between items-center border-b border-outline-variant/15 pb-6">
-        <div>
-          <h1 className="font-serif text-3xl md:text-4xl font-bold text-primary tracking-tight">
-            PRAVAH
-          </h1>
-          <p className="text-xs font-bold text-on-surface-variant uppercase tracking-widest mt-1">
-            Predict · Protect · Move
-          </p>
+        <div className="flex items-center gap-3.5">
+          <img
+            src="/pravah-logo.png"
+            alt="PRAVAH Logo"
+            className="w-12 h-12 object-contain shrink-0 drop-shadow-sm"
+          />
+          <div>
+            <h1 className="font-serif text-3xl md:text-4xl font-bold text-primary tracking-tight leading-none">
+              PRAVAH
+            </h1>
+            <p className="text-xs font-bold text-on-surface-variant uppercase tracking-widest mt-1">
+              {t('common.tagline')}
+            </p>
+          </div>
         </div>
 
-        <button
-          onClick={onEnterPravah}
-          className="bg-primary-container text-white px-7 py-3 rounded-full font-sans text-xs font-bold uppercase tracking-wider hover:bg-primary transition-colors cursor-pointer shadow-md flex items-center gap-2"
-        >
-          <span>Enter PRAVAH</span>
-          <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
-        </button>
+        <div className="flex items-center gap-4">
+          <LanguageDropdown />
+          <button
+            onClick={onEnterPravah}
+            className="bg-primary-container text-white px-7 py-3 rounded-full font-sans text-xs font-bold uppercase tracking-wider hover:bg-primary transition-colors cursor-pointer shadow-md flex items-center gap-2"
+          >
+            <span>{t('common.continue')}</span>
+            <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+          </button>
+        </div>
       </header>
 
       {/* Hero Headline */}
@@ -75,7 +88,7 @@ export function Step0Welcome({ onEnterPravah }: Step0WelcomeProps) {
 
       {/* 4 Sequenced Stage Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 py-6">
-        {SCREENS.map((s, idx) => {
+        {screens.map((s, idx) => {
           const isSelected = activeScreen === idx
 
           return (

@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { LanguageDropdown } from '../../components/common/LanguageDropdown'
+import { useLanguage } from '../../i18n/LanguageContext'
 
 interface CentreLoginScreenProps {
   onLoginSuccess: () => void
@@ -9,6 +11,7 @@ export function CentreLoginScreen({
   onLoginSuccess,
   onSwitchToNational,
 }: CentreLoginScreenProps) {
+  const { t } = useLanguage()
   const [centreCode, setCentreCode] = useState('CHN-RGH-001')
   const [password, setPassword] = useState('pravah2026')
   const [isLoading, setIsLoading] = useState(false)
@@ -34,28 +37,38 @@ export function CentreLoginScreen({
       {/* Top Navbar */}
       <header className="px-6 md:px-12 h-20 flex justify-between items-center border-b border-outline-variant/15">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white font-bold text-xs">
-            P
-          </div>
+          <img
+            src="/pravah-logo.png"
+            alt="PRAVAH Logo"
+            className="w-9 h-9 object-contain shrink-0"
+          />
           <div>
             <h1 className="text-sm font-bold tracking-wider uppercase text-on-surface">PRAVAH</h1>
-            <p className="text-[10px] text-on-surface-variant">Clinical Decision Flow</p>
+            <p className="text-[10px] text-on-surface-variant">{t('common.appSubtitle')}</p>
           </div>
         </div>
 
-        <button
-          onClick={onSwitchToNational}
-          className="text-xs font-bold uppercase tracking-wider text-on-surface-variant hover:text-primary transition-colors cursor-pointer flex items-center gap-1.5"
-        >
-          <span>National Overview</span>
-          <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
-        </button>
+        <div className="flex items-center gap-4">
+          <LanguageDropdown />
+          <button
+            onClick={onSwitchToNational}
+            className="text-xs font-bold uppercase tracking-wider text-on-surface-variant hover:text-primary transition-colors cursor-pointer flex items-center gap-1.5"
+          >
+            <span>{t('navigation.nationalMode')}</span>
+            <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+          </button>
+        </div>
       </header>
 
       {/* Main Login Card */}
       <main className="flex-1 flex items-center justify-center p-6">
         <div className="w-full max-w-md bg-white p-8 md:p-10 rounded-3xl border border-outline-variant/20 shadow-lg space-y-8">
           <div className="text-center space-y-2">
+            <img
+              src="/pravah-logo.png"
+              alt="PRAVAH Logo"
+              className="w-20 h-20 mx-auto object-contain drop-shadow-md mb-3"
+            />
             <span className="px-3 py-1 bg-primary/10 text-primary text-[11px] font-bold rounded-full uppercase tracking-wider">
               Centre Workspace Access
             </span>
