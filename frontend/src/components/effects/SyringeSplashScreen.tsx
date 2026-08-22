@@ -157,10 +157,10 @@ export function SyringeSplashScreen({ onComplete }: SyringeSplashScreenProps) {
           alt="PRAVAH"
           className="w-16 h-16 mx-auto object-contain drop-shadow-md mb-3"
         />
-        <h1 className="font-serif text-5xl sm:text-6xl font-extrabold mb-2 tracking-tight text-[#1b1b1c]">
+        <h1 className="font-serif text-5xl sm:text-6xl font-extrabold mb-2 tracking-tight text-white drop-shadow-md">
           PRAVAH
         </h1>
-        <p className="font-serif text-xl sm:text-2xl italic text-[#574241] font-semibold">
+        <p className="font-serif text-xl sm:text-2xl italic text-white/90 font-semibold drop-shadow-sm">
           The Lifeline in Motion
         </p>
       </div>
